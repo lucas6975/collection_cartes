@@ -1,0 +1,10 @@
+{
+  "id": "phishing",
+  "nom": "Phishing",
+  "categorie": "menace",
+  "rarete": "commune",
+  "description": "Un e-mail ou un message se fait passer pour une source de confiance afin de voler des identifiants ou faire exécuter une action.",
+  "aRetenir": "Vérifier l'expéditeur réel et l'URL avant de cliquer ; en cas de doute, signaler plutôt que supprimer.",
+  "sources": ["https://cyber.gouv.fr/hameconnage"],
+  "tags": ["social-engineering", "email"]
+}
