@@ -37,7 +37,15 @@ function load(): DbState {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as DbState;
-      if (parsed.version === VERSION) return parsed;
+      if (
+        parsed.version === VERSION &&
+        Array.isArray(parsed.cards) &&
+        Array.isArray(parsed.users) &&
+        parsed.progress &&
+        typeof parsed.progress === 'object'
+      ) {
+        return parsed;
+      }
     }
   } catch {
     // Stockage indisponible (navigation privée, quota) : on repart des données de démo.
