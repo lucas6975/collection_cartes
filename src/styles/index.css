@@ -1,0 +1,96 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/manrope';
+
+@theme {
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Manrope Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-navy-950: #0b2347;
+  --color-navy-900: #102f5a;
+  --color-navy: #153e75;
+  --color-blue: #2563a6;
+  --color-blue-light: #eaf2fa;
+  --color-sun: #f5c542;
+  --color-sun-light: #ffd966;
+  --color-sun-dark: #c99a17;
+  --color-canvas: #f5f7fa;
+  --color-ink: #0f1d33;
+  --color-muted: #64748b;
+  --color-line: #e3e8ef;
+  --color-success: #22a06b;
+  --color-danger: #dc4444;
+
+  /* Familles de cartes : teintes posées sur la base bleue */
+  --color-cat-incendie: #d9542b;
+  --color-cat-epi: #2563a6;
+  --color-cat-risques: #b7791f;
+  --color-cat-postures: #13896f;
+  --color-cat-organisation: #6a4fb3;
+
+  --shadow-soft: 0 1px 2px rgb(16 47 90 / 0.05), 0 4px 16px -4px rgb(16 47 90 / 0.08);
+  --shadow-lift: 0 2px 4px rgb(16 47 90 / 0.06), 0 16px 40px -12px rgb(16 47 90 / 0.25);
+
+  --animate-shimmer: shimmer 3.5s linear infinite;
+  --animate-glow: glow 3s ease-in-out infinite;
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes glow {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-line bg-white shadow-soft;
+  }
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
