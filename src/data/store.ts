@@ -1,61 +1,59 @@
-// Couche d'accès aux données.
+// Sauvegarde de la partie, sans compte.
 //
-// `GameBackend` décrit ce dont l'interface a besoin. L'implémentation actuelle (`LocalBackend`)
-// enregistre tout dans le navigateur : c'est le mode démo de l'aperçu GitHub Pages. Une
-// implémentation Supabase pourra la remplacer sans toucher aux pages (voir docs/ARCHITECTURE.md).
+// Chaque navigateur reçoit un identifiant aléatoire à sa première visite, et sa collection est
+// enregistrée dans le stockage local de ce navigateur (localStorage). La personne retrouve donc
+// sa collection à chaque visite, sur le même appareil et le même navigateur.
 
 import { useSyncExternalStore } from 'react';
+import { CARDS } from '../content/cards';
 import { ouvrirPack, progressionVide, type PackResult } from '../domain/packs';
-import type { Card, Progress, User } from '../domain/types';
-import { seedDatabase } from './seed';
+import type { Progress } from '../domain/types';
 
-export interface DbState {
+export interface SavedGame {
   version: number;
-  cards: Card[];
-  users: User[];
-  progress: Record<string, Progress>;
-  sessionUserId: string | null;
+  progress: Progress;
 }
 
-export interface GameBackend {
-  getState(): DbState;
-  subscribe(listener: () => void): () => void;
-  login(userId: string): void;
-  logout(): void;
-  /** Ouvre le pack du jour (un seul par jour). */
-  openDailyPack(): PackResult;
-  /** Pack supplémentaire, réservé à la démonstration. */
-  openBonusPack(): PackResult;
-  resetDemo(): void;
+const KEY = 'vigie-partie';
+const VERSION = 3;
+
+function nouvelIdentifiant(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
 
-const KEY = 'vigie-db';
-const VERSION = 2;
+function estValide(g: unknown): g is SavedGame {
+  const p = (g as SavedGame | null)?.progress;
+  return (
+    (g as SavedGame | null)?.version === VERSION &&
+    typeof p?.userId === 'string' &&
+    Array.isArray(p.cards) &&
+    Array.isArray(p.packs)
+  );
+}
 
-function load(): DbState {
+function load(): SavedGame {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as DbState;
-      if (
-        parsed.version === VERSION &&
-        Array.isArray(parsed.cards) &&
-        Array.isArray(parsed.users) &&
-        parsed.progress &&
-        typeof parsed.progress === 'object'
-      ) {
-        return parsed;
-      }
+      const parsed: unknown = JSON.parse(raw);
+      if (estValide(parsed)) return parsed;
     }
   } catch {
-    // Stockage indisponible (navigation privée, quota) : on repart des données de démo.
+    // Stockage indisponible (navigation privée stricte) : la partie vit le temps de la visite.
   }
-  return { version: VERSION, ...seedDatabase(), sessionUserId: null };
+  return { version: VERSION, progress: progressionVide(nouvelIdentifiant()) };
 }
 
-class LocalBackend implements GameBackend {
-  private state: DbState = load();
+class Game {
+  private state: SavedGame = load();
   private listeners = new Set<() => void>();
+
+  constructor() {
+    this.save();
+    // Demande au navigateur de ne pas effacer ces données pour libérer de la place.
+    navigator.storage?.persist?.().catch(() => undefined);
+  }
 
   getState = () => this.state;
 
@@ -64,57 +62,27 @@ class LocalBackend implements GameBackend {
     return () => this.listeners.delete(l);
   };
 
-  private commit(next: DbState) {
-    this.state = next;
+  private save() {
     try {
-      localStorage.setItem(KEY, JSON.stringify(next));
+      localStorage.setItem(KEY, JSON.stringify(this.state));
     } catch {
-      // Persistance impossible : l'état reste en mémoire pour la session.
+      // Persistance impossible : la partie reste en mémoire pour la visite.
     }
+  }
+
+  /** Ouvre le pack du jour (un seul par jour, renouvelé à minuit). */
+  openDailyPack = (): PackResult => {
+    const res = ouvrirPack(CARDS, this.state.progress, new Date());
+    this.state = { ...this.state, progress: res.progress };
+    this.save();
     this.listeners.forEach((l) => l());
-  }
-
-  private me(): User {
-    const u = this.state.users.find((x) => x.id === this.state.sessionUserId);
-    if (!u || !u.actif) throw new Error('Non connecté');
-    return u;
-  }
-
-  private open(bonus: boolean): PackResult {
-    const u = this.me();
-    const p = this.state.progress[u.id] ?? progressionVide(u.id);
-    const res = ouvrirPack(this.state.cards, p, new Date(), bonus);
-    this.commit({ ...this.state, progress: { ...this.state.progress, [u.id]: res.progress } });
     return res;
-  }
-
-  login = (userId: string) => {
-    const u = this.state.users.find((x) => x.id === userId);
-    if (!u?.actif) throw new Error('Compte inactif');
-    this.commit({ ...this.state, sessionUserId: userId });
-  };
-
-  logout = () => this.commit({ ...this.state, sessionUserId: null });
-
-  openDailyPack = () => this.open(false);
-
-  openBonusPack = () => this.open(true);
-
-  resetDemo = () => {
-    const session = this.state.sessionUserId;
-    this.commit({ version: VERSION, ...seedDatabase(), sessionUserId: session });
   };
 }
 
-export const backend: GameBackend = new LocalBackend();
+export const game = new Game();
 
-export function useDb(): DbState {
-  return useSyncExternalStore(backend.subscribe, backend.getState);
-}
-
-export function useSession() {
-  const db = useDb();
-  const user = db.users.find((u) => u.id === db.sessionUserId) ?? null;
-  const progress = user ? (db.progress[user.id] ?? progressionVide(user.id)) : null;
-  return { db, user, progress, cards: db.cards };
+export function useGame() {
+  const state = useSyncExternalStore(game.subscribe, game.getState);
+  return { progress: state.progress, cards: CARDS };
 }

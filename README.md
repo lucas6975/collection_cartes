@@ -8,10 +8,21 @@ Au verso de chaque carte : Ulysse, notre mascotte.
 
 ## Le jeu
 
-- **Accueil** : le pack du jour à ouvrir, un résumé de ma collection, les participants actifs.
-- **Pack du jour** : un seul par jour (il se renouvelle à minuit), 5 cartes, la dernière au moins peu commune. Animation d’ouverture, puis on retourne les cartes une à une.
+- **Pas de compte** : on ouvre le site et on joue. Chaque personne part de zéro.
+- **Pack du jour** : un seul par jour (renouvelé à minuit), 5 cartes, la dernière au moins peu commune. Animation d’ouverture, puis on retourne les cartes une à une.
 - **Ma collection** : 30 cartes en 5 familles (incendie, EPI, risques, gestes et postures, procédures). Les cartes manquantes montrent leur verso ; les doublons sont comptés (×2, ×3…). Filtres, tri et recherche.
-- **Participants actifs** : collaborateurs ayant ouvert un pack ces 7 derniers jours, classés par nombre de cartes, avec leur série de jours consécutifs.
+
+### Où est enregistrée la collection ?
+
+Dans le navigateur de chaque personne (stockage local), sans compte ni serveur. On retrouve sa
+collection en revenant **sur le même appareil et le même navigateur**. En revanche :
+
+- changer de téléphone, de navigateur, ou utiliser la navigation privée repart de zéro ;
+- effacer les données du site dans les réglages du navigateur efface la collection ;
+- sur iPhone, Safari peut effacer les données d’un site non visité pendant 7 jours : ajouter le site à l’écran d’accueil (Partager › Sur l’écran d’accueil) évite ce cas.
+
+Un classement entre collègues ou une collection retrouvable sur plusieurs appareils demandera un
+serveur (voir `docs/ARCHITECTURE.md`) : ce sera la seconde étape si le jeu prend.
 
 ### Raretés
 
@@ -45,8 +56,8 @@ npm install
 npm run dev
 ```
 
-Choisissez **Camille Martin** sur l’écran de connexion : son pack du jour l’attend. Le bouton
-« Pack bonus (démo) » permet d’ouvrir des packs supplémentaires pour tester.
+Le site s’ouvre directement sur le pack du jour. Pour repartir de zéro en développement, videz le
+stockage local du site (clé `vigie-partie`).
 
 ## Scripts
 
@@ -65,15 +76,12 @@ Choisissez **Camille Martin** sur l’écran de connexion : son pack du jour l�
 src/
   domain/packs.ts   règles des packs (tirage, pack du jour, doublons, séries), testées
   content/          les 30 cartes et leurs sources
-  data/             accès aux données (mode démo local) et données de démonstration
+  data/store.ts     sauvegarde de la partie dans le navigateur
   components/       carte, verso à la mascotte, pack, animation d’ouverture
-  pages/            connexion, accueil, collection
+  pages/            accueil (pack du jour), collection
 public/mascotte.webp  Ulysse
-supabase/           schéma PostgreSQL et tirage côté serveur pour la production
+supabase/           schéma serveur prêt pour la seconde étape (comptes, classement)
 ```
-
-En mode démo (l’aperçu GitHub Pages), tout est enregistré dans le navigateur. Pour un usage
-réel, le tirage doit se faire sur le serveur : voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Aperçu GitHub Pages
 

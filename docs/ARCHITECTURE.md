@@ -1,54 +1,39 @@
 # Architecture
 
-## Vue d’ensemble
+## Aujourd’hui : sans compte, sans serveur
 
-Application React (Vite, TypeScript, Tailwind CSS, Motion). Les règles du jeu sont dans
-`src/domain/packs.ts`, sous forme de fonctions pures et testées. Les pages passent par la couche
-de données `src/data/store.ts`.
+Application React (Vite, TypeScript, Tailwind CSS, Motion) publiée sur GitHub Pages.
 
-```
-Pages ──► GameBackend ──► règles des packs (packs.ts)
-             │
-             ├─ LocalBackend    (actuel)  : navigateur, mode démo, GitHub Pages
-             └─ SupabaseBackend (à écrire) : fonctions de supabase/migrations
-```
+- `src/domain/packs.ts` : règles du jeu (tirage, pack du jour, doublons, séries), fonctions pures testées.
+- `src/data/store.ts` : la partie de chaque personne est enregistrée dans `localStorage` (clé
+  `vigie-partie`), avec un identifiant aléatoire créé à la première visite. Le site demande au
+  navigateur de conserver ces données (`navigator.storage.persist()`).
+- Le contenu du pack du jour dépend de cet identifiant et de la date : recharger la page ne
+  permet pas de retirer un autre pack.
 
-## Mode démo et production
+Limites, acceptables pour tester l’intérêt du jeu :
 
-|                | Mode démo (actuel)           | Production (Supabase)                        |
-| -------------- | ---------------------------- | -------------------------------------------- |
-| Connexion      | Choix d’un profil            | Supabase Auth (invitation par e-mail ou SSO) |
-| Stockage       | `localStorage` du navigateur | PostgreSQL                                   |
-| Tirage du pack | Dans le navigateur           | Fonction `open_daily_pack()` côté serveur    |
-| Anti-triche    | Non garanti                  | Collections non modifiables par les clients  |
+- la collection est liée à un appareil et un navigateur ;
+- une personne qui modifie les données de son navigateur, ou la date de son téléphone, peut
+  tricher : rien n’est vérifié par un serveur ;
+- pas de classement entre collègues.
 
-En mode démo, le contenu du pack du jour dépend du collaborateur et de la date : recharger la
-page ne permet pas de retirer un autre pack. Mais les données restant dans le navigateur, ce
-mode **ne protège pas contre la triche**.
+## Seconde étape : comptes et classement (Supabase)
 
-## Production : schéma Supabase
+Si le jeu prend, `supabase/migrations/20261109000000_schema.sql` fournit la base :
 
-`supabase/migrations/20261109000000_schema.sql` :
+- comptes (`profiles`), cartes, ouvertures de packs, collections, avec sécurité par ligne (RLS) ;
+- tirage côté serveur (`open_daily_pack()`), un seul pack par jour garanti par la base ;
+- `active_participants()` pour afficher les participants actifs.
 
-- `profiles`, `cards`, `pack_openings`, `user_cards` avec sécurité par ligne (RLS) ;
-- aucune politique d’écriture sur les collections : seule `open_daily_pack()` (security definer) peut ajouter des cartes ;
-- un seul pack par jour garanti par une contrainte d’unicité `(user_id, jour)`, jour calculé à l’heure de Paris ;
-- `active_participants()` renvoie uniquement prénom, nom, service, nombre de cartes et série.
-
-Les scénarios de `supabase/tests/10_comportement.sql` vérifient ces règles (`npm run test:db`).
-
-### Brancher Supabase
-
-1. Créer un projet Supabase, appliquer la migration puis `supabase/seed.sql`.
-2. Implémenter `SupabaseBackend` (interface `GameBackend`) avec `@supabase/supabase-js` :
-   lecture de `cards` et `user_cards`, appel RPC `open_daily_pack` et `active_participants`.
-3. Créer les comptes par invitation, en renseignant `prenom`, `nom`, `service`, `equipe` dans les
-   métadonnées : le trigger `handle_new_user` crée le profil.
-4. Retirer le bouton « Pack bonus (démo) ».
+Ce schéma est testé sur PostgreSQL (`npm run test:db`, scénarios dans `supabase/tests/`).
+Pour le brancher : créer un projet Supabase, appliquer la migration et `supabase/seed.sql`,
+puis remplacer la sauvegarde locale de `src/data/store.ts` par des appels à Supabase. Une
+connexion par lien e-mail évite d’avoir à gérer des mots de passe.
 
 ## Design
 
-Jetons dans `src/styles/index.css` : bleu `#153E75` / `#2563A6`, jaune `#F5C542` (avec
-parcimonie), familles de cartes en couleurs validées pour le daltonisme. Le verso des cartes et le
+Jetons dans `src/styles/index.css` : bleu `#153E75` / `#2563A6`, jaune `#F5C542` avec
+parcimonie, familles de cartes en couleurs validées pour le daltonisme. Le verso des cartes et le
 pack utilisent les bandes de signalisation noir et jaune et la mascotte Ulysse
 (`public/mascotte.webp`).

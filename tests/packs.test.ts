@@ -11,7 +11,6 @@ import {
   serie,
   tirerPack,
 } from '../src/domain/packs';
-import { seedDatabase } from '../src/data/seed';
 
 const now = new Date(2026, 10, 9, 10, 0);
 const RANG = { commune: 1, 'peu-commune': 2, rare: 3, epique: 4, legendaire: 5 } as const;
@@ -81,13 +80,5 @@ describe('pack du jour', () => {
     p = ouvrirPack(CARDS, p, now).progress;
     expect(serie(p, now)).toBe(5);
     expect(serie(p, new Date(2026, 10, 12, 9))).toBe(0);
-  });
-});
-
-describe('données de démonstration', () => {
-  it('le compte de démonstration n’a pas encore ouvert son pack du jour', () => {
-    const db = seedDatabase(now);
-    expect(packDuJourOuvert(db.progress['u-camille'], now)).toBe(false);
-    expect(db.progress['u-camille'].cards.length).toBeGreaterThan(0);
   });
 });

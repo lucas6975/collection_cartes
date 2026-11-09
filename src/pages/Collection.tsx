@@ -7,7 +7,7 @@ import { GameCard } from '../components/cards/GameCard';
 import { Icon } from '../components/ui/Icon';
 import { Chip, PageHeader, ProgressBar, Ring, cx } from '../components/ui/primitives';
 import { CATEGORIES, RARITIES, RARITY_BY_ID } from '../content/categories';
-import { useSession } from '../data/store';
+import { useGame } from '../data/store';
 import type { Card, CategoryId, Rarity } from '../domain/types';
 
 type Sort = 'numero' | 'date' | 'rarete';
@@ -15,7 +15,7 @@ type Sort = 'numero' | 'date' | 'rarete';
 const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 export function Collection() {
-  const { progress, cards } = useSession();
+  const { progress, cards } = useGame();
   const [params, setParams] = useSearchParams();
   const cat = (params.get('cat') as CategoryId | null) ?? null;
   const [rarete, setRarete] = useState<Rarity | ''>('');
@@ -23,7 +23,6 @@ export function Collection() {
   const [query, setQuery] = useState('');
   const [missingOnly, setMissingOnly] = useState(false);
   const [detail, setDetail] = useState<Card | null>(null);
-  if (!progress) return null;
 
   const owned = new Map(progress.cards.map((c) => [c.cardId, c]));
   const total = cards.length;

@@ -1,9 +1,9 @@
-import { GalleryVerticalEnd, House, LogOut } from 'lucide-react';
+import { GalleryVerticalEnd, House, Layers } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { NavLink, useLocation, useNavigate, useOutlet } from 'react-router';
-import { backend, useSession } from '../../data/store';
+import { NavLink, useLocation, useOutlet } from 'react-router';
+import { useGame } from '../../data/store';
 import { Logo } from '../cards/Logo';
-import { Avatar, cx } from '../ui/primitives';
+import { cx } from '../ui/primitives';
 
 const NAV = [
   { to: '/', label: 'Accueil', icon: House, end: true },
@@ -11,17 +11,10 @@ const NAV = [
 ];
 
 export function AppShell() {
-  const { user, progress, cards } = useSession();
+  const { progress, cards } = useGame();
   const location = useLocation();
-  const navigate = useNavigate();
   // On fige l'élément de route pour que la page sortante garde son contenu pendant la transition.
   const outlet = useOutlet();
-  if (!user || !progress) return null;
-
-  const logout = () => {
-    backend.logout();
-    navigate('/connexion');
-  };
 
   return (
     <div className="min-h-dvh">
@@ -31,9 +24,7 @@ export function AppShell() {
             <Logo size={34} />
             <div className="leading-tight">
               <p className="font-display text-[17px] font-extrabold text-navy">Vigie</p>
-              <p className="hidden text-[11px] text-muted sm:block">
-                {progress.cards.length}/{cards.length} cartes collectionnées
-              </p>
+              <p className="hidden text-[11px] text-muted sm:block">Sécurité au travail</p>
             </div>
           </NavLink>
 
@@ -70,23 +61,14 @@ export function AppShell() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2 sm:ml-2">
-            <div className="hidden text-right md:block">
-              <p className="text-sm font-semibold text-navy-950">
-                {user.prenom} {user.nom}
-              </p>
-              <p className="text-xs text-muted">{user.service}</p>
-            </div>
-            <Avatar user={user} size={36} />
-            <button
-              onClick={logout}
-              className="grid size-10 place-items-center rounded-full text-muted hover:bg-canvas hover:text-navy"
-              aria-label="Se déconnecter"
-              title="Se déconnecter"
-            >
-              <LogOut size={18} />
-            </button>
-          </div>
+          <NavLink
+            to="/collection"
+            className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-sun/20 px-3 py-1.5 text-sm font-bold text-navy-950 sm:ml-2"
+            title="Cartes collectionnées"
+          >
+            <Layers size={15} />
+            {progress.cards.length}/{cards.length}
+          </NavLink>
         </div>
 
         {/* Onglets mobiles, sous l'en-tête */}
