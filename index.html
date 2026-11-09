@@ -6,10 +6,12 @@
     <meta name="theme-color" content="#153E75" />
     <meta
       name="description"
-      content="Vigie : un pack de cartes sécurité à ouvrir chaque jour, à collectionner en équipe."
+      content="Team Ulysse : un pack de cartes sécurité à ouvrir chaque jour, à collectionner en équipe."
     />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <title>Vigie · Sécurité au travail</title>
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Team Ulysse" />
+    <title>Team Ulysse · Sécurité au travail</title>
     <style>
       /* Écran affiché tant que l'application n'a pas démarré : jamais de page blanche. */
       #boot {
@@ -61,7 +63,7 @@
     <div id="root">
       <div id="boot">
         <div class="spin" id="boot-spin"></div>
-        <p id="boot-msg">Chargement de Vigie…</p>
+        <p id="boot-msg">Chargement…</p>
         <button id="boot-retry" hidden onclick="location.reload()">Recharger la page</button>
       </div>
     </div>
@@ -74,7 +76,7 @@
           if (!boot) return; // l'application a démarré
           document.getElementById('boot-spin').hidden = true;
           document.getElementById('boot-msg').textContent =
-            'Vigie n’a pas pu démarrer. Rechargez la page ; si le problème persiste, mettez à jour votre navigateur.' +
+            'Le site n’a pas pu démarrer. Rechargez la page ; si le problème persiste, mettez à jour votre navigateur.' +
             (detail ? ' (' + detail + ')' : '');
           document.getElementById('boot-retry').hidden = false;
         }

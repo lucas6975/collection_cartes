@@ -2,7 +2,6 @@ import { GalleryVerticalEnd, House, Layers } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { NavLink, useLocation, useOutlet } from 'react-router';
 import { useGame } from '../../data/store';
-import { Logo } from '../cards/Logo';
 import { cx } from '../ui/primitives';
 
 const NAV = [
@@ -21,9 +20,15 @@ export function AppShell() {
       <header className="sticky top-0 z-30 border-b border-line bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex h-16 max-w-[1180px] items-center gap-4 px-4 sm:px-6">
           <NavLink to="/" className="flex items-center gap-2.5">
-            <Logo size={34} />
+            <img
+              src={`${import.meta.env.BASE_URL}ulysse-avatar.webp`}
+              alt="Ulysse"
+              width={42}
+              height={42}
+              className="size-[42px] rounded-full bg-navy object-cover ring-2 ring-sun"
+            />
             <div className="leading-tight">
-              <p className="font-display text-[17px] font-extrabold text-navy">Vigie</p>
+              <p className="font-display text-[17px] font-extrabold text-navy">Team Ulysse</p>
               <p className="hidden text-[11px] text-muted sm:block">Sécurité au travail</p>
             </div>
           </NavLink>
