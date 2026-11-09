@@ -1,33 +1,26 @@
-import { ArrowRight, Info, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Info } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Navigate, useNavigate } from 'react-router';
-import { GameCard } from '../components/cards/GameCard';
-import { Logo } from '../components/cards/Rewards';
+import { CardBack } from '../components/cards/CardBack';
+import { CardFace } from '../components/cards/GameCard';
+import { Logo } from '../components/cards/Logo';
+import { PackArt } from '../components/cards/Pack';
 import { Avatar } from '../components/ui/primitives';
+import { DEMO_USER_ID } from '../data/seed';
 import { backend, useSession } from '../data/store';
-import { DEMO_ADMIN_ID, DEMO_USER_ID } from '../data/seed';
-import { niveauDepuisXp } from '../domain/engine';
-
-const SHOWCASE = ['extincteur-co2', 'protection-collective', 'evacuation'];
 
 export function Login() {
-  const { db, user } = useSession();
+  const { db, user, cards } = useSession();
   const navigate = useNavigate();
-  if (user) return <Navigate to={user.role === 'admin' ? '/admin' : '/'} replace />;
+  if (user) return <Navigate to="/" replace />;
 
-  const total = db.catalog.cards.filter((c) => c.publie).length;
-  const showcase = SHOWCASE.map((id) => db.catalog.cards.find((c) => c.id === id)).filter(
-    (c) => !!c,
-  );
-  const featured = [DEMO_USER_ID, DEMO_ADMIN_ID]
-    .map((id) => db.users.find((u) => u.id === id)!)
-    .filter(Boolean);
-  const others = db.users.filter((u) => u.actif && !featured.includes(u)).slice(0, 6);
+  const demo = db.users.find((u) => u.id === DEMO_USER_ID)!;
+  const others = db.users.filter((u) => u.actif && u.id !== DEMO_USER_ID).slice(0, 8);
+  const vitrine = cards.find((c) => c.rarete === 'legendaire') ?? cards[0];
 
   const login = (id: string) => {
     backend.login(id);
-    const u = db.users.find((x) => x.id === id);
-    navigate(u?.role === 'admin' ? '/admin' : '/');
+    navigate('/');
   };
 
   return (
@@ -44,7 +37,6 @@ export function Login() {
             backgroundSize: '22px 22px',
           }}
         />
-        <div className="absolute -right-40 -top-40 size-[520px] rounded-full bg-sun/10 blur-3xl" />
         <div className="relative flex h-full flex-col justify-between p-12">
           <div className="flex items-center gap-3">
             <Logo size={40} />
@@ -53,39 +45,44 @@ export function Login() {
             </span>
           </div>
 
-          <div className="relative mx-auto h-[380px] w-full max-w-[520px]">
-            {showcase.map((c, i) => (
-              <motion.div
-                key={c.id}
-                className="absolute left-1/2 top-1/2"
-                initial={{ opacity: 0, y: 60, rotate: 0, x: '-50%' }}
-                animate={{
-                  opacity: 1,
-                  y: '-50%',
-                  rotate: (i - 1) * 11,
-                  x: `calc(-50% + ${(i - 1) * 150}px)`,
-                }}
-                transition={{ delay: 0.15 + i * 0.12, type: 'spring', stiffness: 120, damping: 16 }}
-                style={{ zIndex: i === 1 ? 2 : 1 }}
-              >
-                <GameCard
-                  card={c}
-                  total={total}
-                  size="md"
-                  tilt={false}
-                  className={i === 1 ? 'scale-110' : ''}
-                />
-              </motion.div>
-            ))}
+          <div className="relative mx-auto h-[400px] w-full max-w-[520px]">
+            <motion.div
+              className="absolute left-1/2 top-1/2 w-[180px]"
+              initial={{ opacity: 0, x: '-50%', y: '-40%', rotate: 0 }}
+              animate={{ opacity: 1, x: 'calc(-50% - 150px)', y: '-50%', rotate: -12 }}
+              transition={{ delay: 0.3, type: 'spring', stiffness: 110, damping: 16 }}
+            >
+              <div className="aspect-[5/7]">
+                <CardBack size="md" />
+              </div>
+            </motion.div>
+            <motion.div
+              className="absolute left-1/2 top-1/2 w-[180px]"
+              initial={{ opacity: 0, x: '-50%', y: '-40%', rotate: 0 }}
+              animate={{ opacity: 1, x: 'calc(-50% + 150px)', y: '-50%', rotate: 12 }}
+              transition={{ delay: 0.4, type: 'spring', stiffness: 110, damping: 16 }}
+            >
+              <div className="aspect-[5/7]">
+                <CardFace card={vitrine} total={cards.length} size="md" />
+              </div>
+            </motion.div>
+            <motion.div
+              className="absolute left-1/2 top-1/2 z-10 w-[220px]"
+              initial={{ opacity: 0, x: '-50%', y: '-30%' }}
+              animate={{ opacity: 1, x: '-50%', y: '-50%' }}
+              transition={{ delay: 0.15, type: 'spring', stiffness: 120, damping: 16 }}
+            >
+              <PackArt />
+            </motion.div>
           </div>
 
           <div>
             <h1 className="max-w-md text-4xl font-extrabold leading-[1.1] text-white">
-              La sécurité au travail, <span className="text-sun">une carte à la fois.</span>
+              Un pack par jour, <span className="text-sun">cinq règles de sécurité.</span>
             </h1>
             <p className="mt-4 max-w-md text-[15px] leading-relaxed text-white/70">
-              Relevez des défis, explorez des situations réelles et complétez votre collection en
-              apprenant les règles qui protègent chaque jour.
+              Ouvrez votre pack chaque jour, découvrez des cartes plus ou moins rares et complétez
+              la collection avec toute l’équipe.
             </p>
           </div>
         </div>
@@ -100,43 +97,24 @@ export function Login() {
           </div>
           <p className="eyebrow">Bienvenue</p>
           <h2 className="mt-2 text-3xl font-extrabold text-navy-950">Se connecter</h2>
-          <p className="mt-2 text-[15px] text-muted">
-            Choisissez un profil de démonstration pour découvrir la plateforme.
-          </p>
+          <p className="mt-2 text-[15px] text-muted">Choisissez un profil de démonstration.</p>
 
-          <div className="mt-8 space-y-3">
-            {featured.map((u) => {
-              const lvl = niveauDepuisXp(db.progress[u.id]?.xp ?? 0);
-              return (
-                <button
-                  key={u.id}
-                  onClick={() => login(u.id)}
-                  className="group flex w-full items-center gap-4 rounded-2xl border border-line bg-white p-4 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:border-blue/40 hover:shadow-lift"
-                >
-                  <Avatar user={u} size={48} />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-navy-950">
-                      {u.prenom} {u.nom}
-                    </p>
-                    <p className="text-sm text-muted">
-                      {u.role === 'admin' ? (
-                        <span className="inline-flex items-center gap-1">
-                          <ShieldCheck size={14} className="text-blue" /> Responsable QSE ·
-                          Administratrice
-                        </span>
-                      ) : (
-                        `${u.service} · Niveau ${lvl.niveau}`
-                      )}
-                    </p>
-                  </div>
-                  <ArrowRight
-                    size={18}
-                    className="text-muted transition-transform group-hover:translate-x-1 group-hover:text-navy"
-                  />
-                </button>
-              );
-            })}
-          </div>
+          <button
+            onClick={() => login(demo.id)}
+            className="group mt-8 flex w-full items-center gap-4 rounded-2xl border border-line bg-white p-4 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:border-blue/40 hover:shadow-lift"
+          >
+            <Avatar user={demo} size={48} />
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-navy-950">
+                {demo.prenom} {demo.nom}
+              </p>
+              <p className="text-sm text-muted">{demo.service} · son pack du jour l’attend</p>
+            </div>
+            <ArrowRight
+              size={18}
+              className="text-muted transition-transform group-hover:translate-x-1 group-hover:text-navy"
+            />
+          </button>
 
           <p className="eyebrow mt-8">Autres collaborateurs</p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -156,8 +134,8 @@ export function Login() {
             <Info size={18} className="mt-0.5 shrink-0" />
             <p>
               <strong>Mode démonstration.</strong> Les données sont enregistrées dans ce navigateur.
-              En production, la connexion passe par un compte sécurisé et la progression est
-              sauvegardée sur le serveur.
+              En production, la connexion passe par un compte sécurisé et le tirage des packs est
+              fait sur le serveur.
             </p>
           </div>
         </div>

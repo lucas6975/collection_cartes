@@ -1,8 +1,8 @@
 import type { Card } from '../domain/types';
 import { A_VERIFIER, SRC, codeTravail, norme } from './sources';
 
-type CardInput = Omit<Card, 'verification' | 'publie'>;
-const card = (c: CardInput): Card => ({ ...c, verification: A_VERIFIER, publie: true });
+type CardInput = Omit<Card, 'verification'>;
+const card = (c: CardInput): Card => ({ ...c, verification: A_VERIFIER });
 
 export const CARDS: Card[] = [
   // ───────────── Sécurité incendie ─────────────
@@ -21,7 +21,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Éloigner les combustibles des sources de chaleur, c’est déjà prévenir l’incendie.',
     nature: 'recommandation',
     sources: [SRC.inrsIncendie],
-    obtention: { type: 'maitrise', seuil: 1 },
   }),
   card({
     id: 'alarme-incendie',
@@ -39,7 +38,6 @@ export const CARDS: Card[] = [
       'Dès que l’alarme retentit, on évacue : on n’attend pas de savoir si c’est un exercice.',
     nature: 'obligation',
     sources: [codeTravail('R4227-34'), SRC.inrsIncendie],
-    obtention: { type: 'maitrise', seuil: 3 },
   }),
   card({
     id: 'classes-de-feu',
@@ -57,7 +55,6 @@ export const CARDS: Card[] = [
       'Avant d’utiliser un extincteur, lire son étiquette : classes de feu et usage électrique.',
     nature: 'norme',
     sources: [norme('NF EN 2 (classification des feux)'), SRC.inrsIncendie],
-    obtention: { type: 'maitrise', seuil: 5 },
   }),
   card({
     id: 'extincteur-co2',
@@ -75,7 +72,6 @@ export const CARDS: Card[] = [
       'Tenir l’extincteur CO2 par la poignée, jamais par le diffuseur, et ne pas l’utiliser sur une personne.',
     nature: 'recommandation',
     sources: [SRC.inrsIncendie],
-    obtention: { type: 'parcours', parcoursId: 'p-incendie' },
   }),
   card({
     id: 'evacuation',
@@ -93,7 +89,6 @@ export const CARDS: Card[] = [
       'Au point de rassemblement, on se signale et on ne retourne jamais chercher un objet.',
     nature: 'obligation',
     sources: [codeTravail('R4227-37 à R4227-39'), SRC.inrsIncendie],
-    obtention: { type: 'scenario', scenarioId: 's-incendie' },
   }),
   card({
     id: 'serre-file',
@@ -110,7 +105,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Connaître les guide-files et serre-files de sa zone, et suivre leurs consignes.',
     nature: 'recommandation',
     sources: [SRC.inrsIncendie],
-    obtention: { type: 'collection' },
   }),
 
   // ───────────── EPI ─────────────
@@ -130,7 +124,6 @@ export const CARDS: Card[] = [
       'Un casque se règle à sa tête, se porte jugulaire attachée si nécessaire et se remplace après un choc.',
     nature: 'norme',
     sources: [norme('EN 397 (casques de protection pour l’industrie)'), SRC.inrsEpi],
-    obtention: { type: 'maitrise', seuil: 1 },
   }),
   card({
     id: 'lunettes',
@@ -147,7 +140,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Choisir la protection oculaire selon le risque, pas selon le confort.',
     nature: 'norme',
     sources: [norme('EN 166 (protection individuelle de l’œil)'), SRC.inrsEpi],
-    obtention: { type: 'maitrise', seuil: 3 },
   }),
   card({
     id: 'protection-auditive',
@@ -164,7 +156,6 @@ export const CARDS: Card[] = [
       'Dans une zone bruyante, on porte ses protections en permanence : les retirer quelques minutes suffit à réduire fortement leur efficacité.',
     nature: 'obligation',
     sources: [codeTravail('R4431-2 et R4434-7'), SRC.inrsBruit],
-    obtention: { type: 'maitrise', seuil: 5 },
   }),
   card({
     id: 'gants',
@@ -181,7 +172,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Vérifier que le gant correspond au risque et l’inspecter avant chaque utilisation.',
     nature: 'norme',
     sources: [norme('EN 388 (risques mécaniques), EN ISO 374 (risques chimiques)'), SRC.inrsEpi],
-    obtention: { type: 'parcours', parcoursId: 'p-epi' },
   }),
   card({
     id: 'chaussures',
@@ -199,7 +189,6 @@ export const CARDS: Card[] = [
       'Des chaussures de sécurité abîmées ou déformées ne protègent plus : on les remplace.',
     nature: 'norme',
     sources: [norme('EN ISO 20345 (chaussures de sécurité)'), SRC.inrsEpi],
-    obtention: { type: 'scenario', scenarioId: 's-epi' },
   }),
   card({
     id: 'protection-collective',
@@ -217,7 +206,6 @@ export const CARDS: Card[] = [
       'L’EPI est le dernier rempart : il complète les protections collectives, il ne les remplace pas.',
     nature: 'obligation',
     sources: [codeTravail('L4121-2 et R4323-95'), SRC.inrsEpi],
-    obtention: { type: 'collection' },
   }),
 
   // ───────────── Prévention des risques ─────────────
@@ -237,7 +225,6 @@ export const CARDS: Card[] = [
       'Sans habilitation, on n’ouvre pas une armoire électrique et on ne répare pas un câble : on signale.',
     nature: 'obligation',
     sources: [codeTravail('R4544-9'), norme('NF C 18-510'), SRC.inrsElectrique],
-    obtention: { type: 'maitrise', seuil: 1 },
   }),
   card({
     id: 'pictogrammes-chimiques',
@@ -254,7 +241,6 @@ export const CARDS: Card[] = [
       'On lit l’étiquette avant d’utiliser un produit, et on ne le transvase jamais dans un contenant alimentaire.',
     nature: 'obligation',
     sources: [SRC.clp, SRC.inrsChimique],
-    obtention: { type: 'maitrise', seuil: 3 },
   }),
   card({
     id: 'fds',
@@ -271,7 +257,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Savoir où sont rangées les FDS des produits utilisés dans son service.',
     nature: 'obligation',
     sources: [SRC.reach, SRC.inrsChimique],
-    obtention: { type: 'maitrise', seuil: 5 },
   }),
   card({
     id: 'chute-hauteur',
@@ -289,7 +274,6 @@ export const CARDS: Card[] = [
       'Pour travailler en hauteur, on utilise un équipement adapté (plateforme individuelle roulante), jamais une chaise.',
     nature: 'obligation',
     sources: [codeTravail('R4323-63'), SRC.inrsChutesHauteur],
-    obtention: { type: 'parcours', parcoursId: 'p-risques' },
   }),
   card({
     id: 'consignation',
@@ -306,7 +290,6 @@ export const CARDS: Card[] = [
     aRetenir: 'On ne neutralise jamais un protecteur ou un dispositif de sécurité d’une machine.',
     nature: 'recommandation',
     sources: [SRC.inrsMachines],
-    obtention: { type: 'scenario', scenarioId: 's-risques' },
   }),
   card({
     id: 'duerp',
@@ -322,7 +305,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Signaler un risque nouveau permet de mettre à jour l’évaluation des risques.',
     nature: 'obligation',
     sources: [codeTravail('R4121-1 et R4121-2'), SRC.inrsEvaluation],
-    obtention: { type: 'collection' },
   }),
 
   // ───────────── Gestes et postures ─────────────
@@ -341,7 +323,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Régler son siège d’abord, puis la hauteur et la distance de l’écran.',
     nature: 'recommandation',
     sources: [SRC.inrsEcran],
-    obtention: { type: 'maitrise', seuil: 1 },
   }),
   card({
     id: 'varier-postures',
@@ -357,7 +338,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Bouger régulièrement fait partie du travail bien fait.',
     nature: 'recommandation',
     sources: [SRC.inrsTms],
-    obtention: { type: 'maitrise', seuil: 3 },
   }),
   card({
     id: 'gestes-port-charge',
@@ -375,7 +355,6 @@ export const CARDS: Card[] = [
       'Si la charge est trop lourde ou encombrante, on demande de l’aide ou une aide mécanique.',
     nature: 'recommandation',
     sources: [SRC.inrsActivitePhysique],
-    obtention: { type: 'maitrise', seuil: 5 },
   }),
   card({
     id: 'limites-charge',
@@ -393,7 +372,6 @@ export const CARDS: Card[] = [
       'Les limites légales ne garantissent pas l’absence de risque : on réduit le port de charges au maximum.',
     nature: 'obligation',
     sources: [codeTravail('R4541-9 et D4152-12'), SRC.inrsActivitePhysique],
-    obtention: { type: 'parcours', parcoursId: 'p-postures' },
   }),
   card({
     id: 'tms',
@@ -410,7 +388,6 @@ export const CARDS: Card[] = [
     aRetenir: 'En cas de douleurs persistantes, on en parle au médecin du travail sans attendre.',
     nature: 'recommandation',
     sources: [SRC.inrsTms, SRC.ameliRisquesPro],
-    obtention: { type: 'scenario', scenarioId: 's-postures' },
   }),
   card({
     id: 'manutention-assistee',
@@ -427,7 +404,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Une aide mécanique disponible, c’est une aide à utiliser.',
     nature: 'obligation',
     sources: [codeTravail('R4541-3'), SRC.inrsActivitePhysique],
-    obtention: { type: 'collection' },
   }),
 
   // ───────────── Organisation et procédures ─────────────
@@ -446,7 +422,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Un panneau bleu rond signifie une obligation : par exemple, porter un casque.',
     nature: 'obligation',
     sources: [SRC.arreteSignalisation, norme('ISO 7010'), SRC.inrsSignalisation],
-    obtention: { type: 'maitrise', seuil: 1 },
   }),
   card({
     id: 'numeros-urgence',
@@ -463,7 +438,6 @@ export const CARDS: Card[] = [
       'Connaître aussi le numéro d’urgence interne de son site et la procédure d’accueil des secours.',
     nature: 'recommandation',
     sources: [SRC.numerosUrgence],
-    obtention: { type: 'maitrise', seuil: 3 },
   }),
   card({
     id: 'proteger-alerter-secourir',
@@ -480,7 +454,6 @@ export const CARDS: Card[] = [
     aRetenir: 'On ne déplace pas une victime, sauf danger immédiat et impossible à supprimer.',
     nature: 'recommandation',
     sources: [SRC.inrsSst],
-    obtention: { type: 'maitrise', seuil: 5 },
   }),
   card({
     id: 'droit-alerte-retrait',
@@ -497,7 +470,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Face à un danger grave et imminent : alerter d’abord, se retirer si nécessaire.',
     nature: 'obligation',
     sources: [codeTravail('L4131-1 et L4131-3')],
-    obtention: { type: 'parcours', parcoursId: 'p-organisation' },
   }),
   card({
     id: 'circulation',
@@ -514,7 +486,6 @@ export const CARDS: Card[] = [
     aRetenir: 'Un câble qui traîne ou un sol glissant se signale et se traite tout de suite.',
     nature: 'recommandation',
     sources: [SRC.inrsPlainPied],
-    obtention: { type: 'scenario', scenarioId: 's-organisation' },
   }),
   card({
     id: 'sst',
@@ -532,6 +503,5 @@ export const CARDS: Card[] = [
       'Connaître les SST de son équipe et l’emplacement de la trousse de secours et du défibrillateur.',
     nature: 'obligation',
     sources: [codeTravail('R4224-15'), SRC.inrsSst],
-    obtention: { type: 'collection' },
   }),
 ];

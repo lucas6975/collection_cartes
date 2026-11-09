@@ -1,50 +1,40 @@
-import { debutSemaine, niveauDepuisXp, progressionVide, xpDepuis } from '../domain/engine';
+import { jourDe, progressionVide, serie } from '../domain/packs';
 import type { User } from '../domain/types';
 import type { DbState } from './store';
 
-export interface Row {
+export interface Participant {
   user: User;
-  xp: number;
-  niveau: number;
   cartes: number;
+  packs: number;
+  serie: number;
+  dernierPack: string | null;
+  ouvertAujourdhui: boolean;
 }
 
-/** Collaborateurs actifs classés par XP (totale ou de la semaine en cours). */
-export function classement(db: DbState, periode: 'general' | 'semaine', now = new Date()): Row[] {
-  const depuis = debutSemaine(now);
+const DAY = 86_400_000;
+
+/**
+ * Participants actifs : collaborateurs ayant ouvert au moins un pack ces 7 derniers jours,
+ * classés par nombre de cartes différentes collectionnées.
+ */
+export function participantsActifs(db: DbState, now = new Date()): Participant[] {
+  const depuis = now.getTime() - 7 * DAY;
   return db.users
-    .filter((u) => u.actif && u.role === 'collaborateur')
+    .filter((u) => u.actif)
     .map((user) => {
       const p = db.progress[user.id] ?? progressionVide(user.id);
+      const dernier = p.packs.reduce<string | null>((m, x) => (!m || x.at > m ? x.at : m), null);
       return {
         user,
-        xp: periode === 'general' ? p.xp : xpDepuis(p, depuis),
-        niveau: niveauDepuisXp(p.xp).niveau,
         cartes: p.cards.length,
+        packs: p.packs.length,
+        serie: serie(p, now),
+        dernierPack: dernier,
+        ouvertAujourdhui: p.packs.some((x) => !x.bonus && x.jour === jourDe(now)),
       };
     })
-    .sort((a, b) => b.xp - a.xp || a.user.nom.localeCompare(b.user.nom));
-}
-
-/** Classement par service : moyenne d'XP par membre, pour ne pas avantager les grandes équipes. */
-export function classementEquipes(db: DbState) {
-  const groups = new Map<
-    string,
-    { service: string; membres: number; xp: number; cartes: number }
-  >();
-  for (const r of classement(db, 'general')) {
-    const g = groups.get(r.user.service) ?? {
-      service: r.user.service,
-      membres: 0,
-      xp: 0,
-      cartes: 0,
-    };
-    g.membres++;
-    g.xp += r.xp;
-    g.cartes += r.cartes;
-    groups.set(r.user.service, g);
-  }
-  return [...groups.values()]
-    .map((g) => ({ ...g, moyenne: Math.round(g.xp / g.membres) }))
-    .sort((a, b) => b.moyenne - a.moyenne);
+    .filter((x) => x.dernierPack && Date.parse(x.dernierPack) >= depuis)
+    .sort(
+      (a, b) => b.cartes - a.cartes || b.serie - a.serie || a.user.nom.localeCompare(b.user.nom),
+    );
 }

@@ -1,16 +1,15 @@
 import {
   BadgeCheck,
   CalendarDays,
+  Copy,
   ExternalLink,
   Lightbulb,
   Lock,
   ShieldAlert,
-  Sparkles,
   Star,
 } from 'lucide-react';
 import { CATEGORY_BY_ID, NATURE_LABEL, RARITY_BY_ID } from '../../content/categories';
-import { indiceObtention, type Catalog } from '../../domain/engine';
-import type { Card, Nature, Traceable } from '../../domain/types';
+import type { Card, Nature } from '../../domain/types';
 import { Modal } from '../ui/overlay';
 import { cx } from '../ui/primitives';
 import { GameCard, RARITY_STYLE } from './GameCard';
@@ -36,15 +35,15 @@ export function NatureBadge({ nature }: { nature: Nature }) {
   );
 }
 
-export function SourcesBlock({ item, compact }: { item: Traceable; compact?: boolean }) {
-  const v = item.verification;
+function SourcesBlock({ card }: { card: Card }) {
+  const v = card.verification;
   return (
-    <div className={cx('rounded-2xl border border-line', compact ? 'p-3' : 'p-4')}>
+    <div className="rounded-2xl border border-line p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="eyebrow">Sources</p>
-        {v.statut === 'valide' ? (
+        {v.statut === 'valide' && v.date ? (
           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success">
-            <BadgeCheck size={13} /> Vérifié le {new Date(v.date!).toLocaleDateString('fr-FR')}
+            <BadgeCheck size={13} /> Vérifié le {new Date(v.date).toLocaleDateString('fr-FR')}
           </span>
         ) : (
           <span className="inline-flex items-center gap-1 rounded-full bg-sun/20 px-2 py-0.5 text-[11px] font-semibold text-sun-dark">
@@ -53,7 +52,7 @@ export function SourcesBlock({ item, compact }: { item: Traceable; compact?: boo
         )}
       </div>
       <ul className="mt-2 space-y-1">
-        {item.sources.map((s) => (
+        {card.sources.map((s) => (
           <li key={s.label} className="text-[13px] text-ink/80">
             {s.url ? (
               <a
@@ -76,23 +75,23 @@ export function SourcesBlock({ item, compact }: { item: Traceable; compact?: boo
 
 export function CardDetail({
   card,
-  catalog,
+  total,
   owned,
+  count,
   obtainedAt,
   onClose,
 }: {
   card: Card | null;
-  catalog: Catalog;
+  total: number;
   owned: boolean;
+  count?: number;
   obtainedAt?: string;
   onClose: () => void;
 }) {
-  const total = catalog.cards.filter((c) => c.publie).length;
   return (
     <Modal open={!!card} onClose={onClose} size="xl">
       {card && (
         <div className="grid md:grid-cols-[minmax(0,380px)_1fr]">
-          {/* Carte mise en scène */}
           <div
             className="relative flex items-center justify-center overflow-hidden px-6 pb-8 pt-10 md:rounded-l-3xl md:py-12"
             style={{
@@ -111,7 +110,6 @@ export function CardDetail({
             </div>
           </div>
 
-          {/* Contenu pédagogique */}
           <div className="p-5 sm:p-7">
             <div className="flex flex-wrap items-center gap-2">
               <span
@@ -135,12 +133,17 @@ export function CardDetail({
 
             {owned ? (
               <>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div className="mt-3 flex flex-wrap items-center gap-3">
                   <NatureBadge nature={card.nature} />
                   {obtainedAt && (
                     <span className="inline-flex items-center gap-1 text-xs text-muted">
                       <CalendarDays size={13} /> Obtenue le{' '}
                       {new Date(obtainedAt).toLocaleDateString('fr-FR')}
+                    </span>
+                  )}
+                  {count !== undefined && count > 1 && (
+                    <span className="inline-flex items-center gap-1 text-xs text-muted">
+                      <Copy size={13} /> {count} exemplaires
                     </span>
                   )}
                 </div>
@@ -164,18 +167,17 @@ export function CardDetail({
                 </div>
 
                 <div className="mt-4">
-                  <SourcesBlock item={card} compact />
+                  <SourcesBlock card={card} />
                 </div>
               </>
             ) : (
               <div className="mt-5 rounded-2xl border border-dashed border-navy/20 bg-canvas p-5">
                 <p className="flex items-center gap-2 text-sm font-bold text-navy-950">
-                  <Lock size={16} /> Comment l’obtenir
+                  <Lock size={16} /> Pas encore dans ta collection
                 </p>
-                <p className="mt-2 text-[15px] text-ink/80">{indiceObtention(catalog, card)}</p>
-                <p className="mt-4 flex items-center gap-2 text-sm text-muted">
-                  <Sparkles size={15} className="text-sun-dark" />
-                  Les cartes se gagnent en apprenant : parcours, défis et mises en situation.
+                <p className="mt-2 text-[15px] text-ink/80">
+                  Ouvre ton pack chaque jour pour tenter de l’obtenir. Plus une carte est rare, plus
+                  elle est difficile à trouver.
                 </p>
               </div>
             )}

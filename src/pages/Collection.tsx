@@ -1,14 +1,13 @@
 import { ArrowDownUp, Search, SearchX, Trophy } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { CardDetail } from '../components/cards/CardDetail';
 import { GameCard } from '../components/cards/GameCard';
 import { Icon } from '../components/ui/Icon';
 import { Chip, PageHeader, ProgressBar, Ring, cx } from '../components/ui/primitives';
-import { CATEGORIES, CATEGORY_BY_ID, RARITIES, RARITY_BY_ID } from '../content/categories';
+import { CATEGORIES, RARITIES, RARITY_BY_ID } from '../content/categories';
 import { useSession } from '../data/store';
-import { collectionCategorie, published } from '../domain/engine';
 import type { Card, CategoryId, Rarity } from '../domain/types';
 
 type Sort = 'numero' | 'date' | 'rarete';
@@ -16,7 +15,7 @@ type Sort = 'numero' | 'date' | 'rarete';
 const normalize = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 export function Collection() {
-  const { progress, catalog } = useSession();
+  const { progress, cards } = useSession();
   const [params, setParams] = useSearchParams();
   const cat = (params.get('cat') as CategoryId | null) ?? null;
   const [rarete, setRarete] = useState<Rarity | ''>('');
@@ -24,14 +23,9 @@ export function Collection() {
   const [query, setQuery] = useState('');
   const [missingOnly, setMissingOnly] = useState(false);
   const [detail, setDetail] = useState<Card | null>(null);
-
-  const cards = published(catalog.cards);
-  const owned = useMemo(
-    () => new Map(progress?.cards.map((c) => [c.cardId, c.at]) ?? []),
-    [progress],
-  );
   if (!progress) return null;
 
+  const owned = new Map(progress.cards.map((c) => [c.cardId, c]));
   const total = cards.length;
   const ratio = owned.size / total;
 
@@ -49,8 +43,8 @@ export function Collection() {
     })
     .sort((a, b) => {
       if (sort === 'date') {
-        const da = owned.get(a.id) ?? '';
-        const dbb = owned.get(b.id) ?? '';
+        const da = owned.get(a.id)?.firstAt ?? '';
+        const dbb = owned.get(b.id)?.firstAt ?? '';
         if (da !== dbb) return dbb.localeCompare(da);
       }
       if (sort === 'rarete') {
@@ -80,7 +74,7 @@ export function Collection() {
       <PageHeader
         eyebrow="Album"
         title="Ma collection"
-        description="Chaque carte est une règle de sécurité à connaître. Les cartes grisées sont encore à découvrir."
+        description="Chaque carte rappelle une règle de sécurité. Les cartes encore à découvrir montrent leur verso."
       >
         <div className="panel flex items-center gap-4 px-5 py-4">
           <Ring value={ratio} size={64} stroke={6} color="#F5C542">
@@ -97,7 +91,7 @@ export function Collection() {
       </PageHeader>
 
       {/* ───── Filtres ───── */}
-      <div className="sticky top-14 z-20 -mx-4 mb-6 space-y-3 border-b border-line bg-canvas/90 px-4 pb-4 pt-2 backdrop-blur-md sm:-mx-6 sm:px-6 md:top-0 md:-mx-8 md:px-8 lg:-mx-10 lg:px-10">
+      <div className="mb-6 space-y-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <label className="relative flex-1">
             <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
@@ -172,10 +166,17 @@ export function Collection() {
       ) : (
         <div className="space-y-10">
           {groups.map((g) => {
-            const col = g.meta ? collectionCategorie(catalog, progress, g.meta.id) : null;
+            const obtenues = g.cards.filter((c) => owned.has(c.id)).length;
+            const familleTotal = g.meta
+              ? cards.filter((c) => c.categorie === g.meta!.id).length
+              : 0;
+            const familleObtenues = g.meta
+              ? cards.filter((c) => c.categorie === g.meta!.id && owned.has(c.id)).length
+              : obtenues;
+            const complete = !!g.meta && familleObtenues === familleTotal;
             return (
               <section key={g.meta?.id ?? 'all'}>
-                {g.meta && col && (
+                {g.meta && (
                   <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                     <span
                       className="grid size-10 place-items-center rounded-xl"
@@ -188,19 +189,23 @@ export function Collection() {
                       <p className="text-xs text-muted">{g.meta.description}</p>
                     </div>
                     <div className="flex w-full items-center gap-3 sm:w-56">
-                      <ProgressBar value={col.ratio} tone={g.meta.couleur} height={6} />
+                      <ProgressBar
+                        value={familleObtenues / familleTotal}
+                        tone={g.meta.couleur}
+                        height={6}
+                      />
                       <span
                         className={cx(
                           'shrink-0 text-xs font-bold',
-                          col.ratio === 1 ? 'text-success' : 'text-muted',
+                          complete ? 'text-success' : 'text-muted',
                         )}
                       >
-                        {col.ratio === 1 ? (
+                        {complete ? (
                           <span className="inline-flex items-center gap-1">
                             <Trophy size={13} /> Complète
                           </span>
                         ) : (
-                          `${col.obtenues}/${col.total}`
+                          `${familleObtenues}/${familleTotal}`
                         )}
                       </span>
                     </div>
@@ -218,7 +223,7 @@ export function Collection() {
                 >
                   <motion.div
                     layout
-                    className="grid grid-cols-2 gap-3 min-[480px]:grid-cols-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+                    className="grid grid-cols-2 gap-3 min-[480px]:grid-cols-3 sm:gap-5 lg:grid-cols-4 xl:grid-cols-6"
                   >
                     <AnimatePresence mode="popLayout">
                       {g.cards.map((c, i) => (
@@ -236,6 +241,7 @@ export function Collection() {
                             size="md"
                             className="w-full"
                             locked={!owned.has(c.id)}
+                            count={owned.get(c.id)?.count}
                             onClick={() => setDetail(c)}
                           />
                         </motion.div>
@@ -249,19 +255,12 @@ export function Collection() {
         </div>
       )}
 
-      {cat && (
-        <p className="mt-8 text-center text-sm text-muted">
-          Famille « {CATEGORY_BY_ID[cat].nom} » :{' '}
-          {collectionCategorie(catalog, progress, cat).obtenues} cartes sur{' '}
-          {collectionCategorie(catalog, progress, cat).total}.
-        </p>
-      )}
-
       <CardDetail
         card={detail}
-        catalog={catalog}
+        total={total}
         owned={!!detail && owned.has(detail.id)}
-        obtainedAt={detail ? owned.get(detail.id) : undefined}
+        count={detail ? owned.get(detail.id)?.count : undefined}
+        obtainedAt={detail ? owned.get(detail.id)?.firstAt : undefined}
         onClose={() => setDetail(null)}
       />
     </div>

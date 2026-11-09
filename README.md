@@ -1,97 +1,81 @@
-# Vigie : la sécurité au travail, une carte à la fois
+# Vigie : un pack par jour, cinq règles de sécurité
 
-Plateforme web gamifiée pour apprendre et retenir les règles de sécurité en entreprise. Les
-collaborateurs gagnent des cartes à collectionner en répondant à des quiz, en réussissant des
-mises en situation et en validant des parcours thématiques. La direction suit la progression et
-repère les domaines à renforcer.
+Jeu de cartes à collectionner pour sensibiliser l’équipe à la sécurité au travail. Chaque jour,
+chaque collaborateur ouvre un pack de 5 cartes de raretés différentes et complète sa collection.
+Au verso de chaque carte : Ulysse, notre mascotte.
 
-**Aperçu en ligne :** https://lucas6975.github.io/collection_cartes/ (après activation de GitHub
-Pages, voir plus bas).
+**Aperçu en ligne :** https://lucas6975.github.io/collection_cartes/
 
-## Fonctionnalités
+## Le jeu
 
-| Espace         | Contenu                                                                                                                                                                          |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Accueil        | Niveau, XP, défi du jour, dernières cartes, progression par famille, classement                                                                                                  |
-| Ma collection  | Album de 30 cartes en 5 familles et 5 raretés, filtres, tri, recherche, cartes verrouillées avec indice d’obtention, vue détaillée (« Le savais-tu ? », « À retenir », sources)  |
-| Apprendre      | Parcours thématiques (seuil de 80 %), file de révision des questions échouées                                                                                                    |
-| Défis          | Défi du jour, mises en situation interactives, objectifs                                                                                                                         |
-| Classement     | Hebdomadaire, général, par service (moyenne par membre)                                                                                                                          |
-| Profil         | Maîtrise par domaine, progression par catégorie, succès, historique                                                                                                              |
-| Administration | Tableau de bord direction (filtres service, équipe, période), collaborateurs, cartes (avec import d’illustration et aperçu en direct), quiz et parcours, validation des contenus |
+- **Accueil** : le pack du jour à ouvrir, un résumé de ma collection, les participants actifs.
+- **Pack du jour** : un seul par jour (il se renouvelle à minuit), 5 cartes, la dernière au moins peu commune. Animation d’ouverture, puis on retourne les cartes une à une.
+- **Ma collection** : 30 cartes en 5 familles (incendie, EPI, risques, gestes et postures, procédures). Les cartes manquantes montrent leur verso ; les doublons sont comptés (×2, ×3…). Filtres, tri et recherche.
+- **Participants actifs** : collaborateurs ayant ouvert un pack ces 7 derniers jours, classés par nombre de cartes, avec leur série de jours consécutifs.
 
-### Règles de progression
+### Raretés
 
-- Une bonne réponse rapporte 10 XP **uniquement la première fois** : rejouer un quiz déjà maîtrisé ne rapporte rien.
-- Parcours validé : +50 XP et une carte rare. Mise en situation réussie sans faute : +40 XP et une carte épique.
-- Défi du jour réussi (3 bonnes réponses sur 4) : +30 XP, une fois par jour.
-- Famille complétée : +100 XP. La carte légendaire récompense une famille entièrement collectionnée.
-- Les erreurs alimentent une file de révision.
+| Rareté      | Probabilité par emplacement | Finition           |
+| ----------- | --------------------------- | ------------------ |
+| Commune     | 55 %                        | Bordure sobre      |
+| Peu commune | 27 %                        | Bordure bleue      |
+| Rare        | 12 %                        | Finition argentée  |
+| Épique      | 5 %                         | Finition dorée     |
+| Légendaire  | 1 %                         | Finition lumineuse |
 
-## Fiabilité des contenus
+Le 5ᵉ emplacement est toujours au moins peu commun. Les probabilités se règlent dans
+`src/domain/packs.ts` (et dans la migration SQL pour la production).
 
-Chaque carte, question et mise en situation porte :
+## Contenu des cartes
 
-- une **nature** : obligation réglementaire, norme technique, recommandation de prévention ou pratique interne ;
-- une ou plusieurs **sources** (INRS, Code du travail, règlements européens, normes) ;
-- un **statut de vérification** avec la date et le nom du vérificateur.
+Chaque carte présente une règle de sécurité : description, « Le savais-tu ? », « À retenir »,
+nature de l’information (obligation réglementaire, norme, recommandation, pratique interne) et
+sources.
 
-> ⚠️ Les 30 cartes, 30 questions et 5 mises en situation fournies sont des **contenus de
-> démonstration non vérifiés**. Ils ont été rédigés à partir de références connues, mais les sources
-> n’ont pas pu être consultées en ligne lors de la rédaction. Le référent sécurité doit contrôler
-> chaque élément dans l’espace **Administration › Validation** avant tout usage réel.
-
-Toute modification d’un contenu le repasse « à vérifier ». Un contenu nouveau ou modifié ne peut
-être publié qu’après vérification.
+> ⚠️ Les 30 cartes fournies sont des **contenus de démonstration non vérifiés** : les sources
+> n’ont pas pu être consultées en ligne lors de la rédaction. Le référent sécurité doit les
+> contrôler avant tout usage réel (fichier `src/content/cards.ts`).
 
 ## Démarrage
 
-Prérequis : Node.js 22 (voir `.nvmrc`).
+Prérequis : Node.js 22.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Sur l’écran de connexion, choisissez **Camille Martin** (collaboratrice) ou **Nathalie Durand**
-(administratrice). En mode démonstration, les données sont stockées dans le navigateur ; un bouton
-de l’écran Validation permet de les réinitialiser.
+Choisissez **Camille Martin** sur l’écran de connexion : son pack du jour l’attend. Le bouton
+« Pack bonus (démo) » permet d’ouvrir des packs supplémentaires pour tester.
 
 ## Scripts
 
-| Commande          | Rôle                                                                 |
-| ----------------- | -------------------------------------------------------------------- |
-| `npm run dev`     | Serveur de développement                                             |
-| `npm run build`   | Vérification des types puis build de production                      |
-| `npm test`        | Tests du moteur de jeu et de cohérence des contenus                  |
-| `npm run lint`    | ESLint                                                               |
-| `npm run db:seed` | Régénère `supabase/seed.sql` à partir des contenus TypeScript        |
-| `npm run test:db` | Teste la migration SQL et les règles serveur sur un PostgreSQL local |
+| Commande          | Rôle                                             |
+| ----------------- | ------------------------------------------------ |
+| `npm run dev`     | Serveur de développement                         |
+| `npm run build`   | Vérification des types puis build de production  |
+| `npm test`        | Tests du tirage des packs et des cartes          |
+| `npm run lint`    | ESLint                                           |
+| `npm run db:seed` | Régénère `supabase/seed.sql` à partir des cartes |
+| `npm run test:db` | Teste la migration SQL sur un PostgreSQL local   |
 
 ## Architecture
 
 ```
 src/
-  domain/        modèle de données et moteur de jeu (règles pures, testées)
-  content/       contenus pédagogiques : cartes, questions, scénarios, sources
-  data/          accès aux données (mode démo local), données de démonstration, statistiques
-  components/    cartes à collectionner, mise en page, composants d’interface
-  pages/         pages collaborateur et pages d’administration
-supabase/
-  migrations/    schéma PostgreSQL, sécurité par ligne, fonctions de jeu côté serveur
-  tests/         scénarios de test SQL (triche, règles, validation)
+  domain/packs.ts   règles des packs (tirage, pack du jour, doublons, séries), testées
+  content/          les 30 cartes et leurs sources
+  data/             accès aux données (mode démo local) et données de démonstration
+  components/       carte, verso à la mascotte, pack, animation d’ouverture
+  pages/            connexion, accueil, collection
+public/mascotte.webp  Ulysse
+supabase/           schéma PostgreSQL et tirage côté serveur pour la production
 ```
 
-Pile : React 19, TypeScript, Vite, Tailwind CSS 4, Motion (animations), Recharts (graphiques de
-l’espace admin, chargés à la demande).
-
-Détails : [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+En mode démo (l’aperçu GitHub Pages), tout est enregistré dans le navigateur. Pour un usage
+réel, le tirage doit se faire sur le serveur : voir [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Aperçu GitHub Pages
 
-Le workflow `.github/workflows/deploy.yml` construit et publie le site à chaque push. Il faut
-l’activer une fois : **Settings › Pages › Build and deployment › Source : GitHub Actions**.
-
-## Contribuer
-
-Voir [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Le workflow `.github/workflows/deploy.yml` publie le site à chaque push. À activer une fois :
+**Settings › Pages › Build and deployment › Source : GitHub Actions**.

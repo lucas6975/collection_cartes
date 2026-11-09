@@ -1,24 +1,16 @@
 # Contribuer
 
-## Ajouter ou modifier un contenu
+## Ajouter ou modifier une carte
 
-En production, les contenus se gèrent depuis l’espace **Administration** (cartes, quiz,
-parcours), puis sont vérifiés et publiés depuis **Validation**.
-
-Les contenus de démonstration sont définis dans `src/content/` :
-
-| Fichier        | Contenu                                              |
-| -------------- | ---------------------------------------------------- |
-| `cards.ts`     | Cartes : texte, rareté, icône, condition d’obtention |
-| `questions.ts` | Questions : choix, bonne réponse, explication        |
-| `scenarios.ts` | Mises en situation et parcours thématiques           |
-| `sources.ts`   | Références réutilisables (INRS, Code du travail…)    |
+Les cartes sont définies dans `src/content/cards.ts`, les références réutilisables dans
+`src/content/sources.ts`.
 
 Règles à respecter :
 
-- chaque contenu cite **au moins une source** ;
+- chaque carte cite **au moins une source** ;
 - la **nature** est exacte : ne jamais présenter une recommandation comme une obligation ;
-- un contenu ajouté arrive avec le statut « à vérifier ».
+- chaque famille garde au moins une carte de chaque rareté (vérifié par les tests) ;
+- les numéros vont de 1 à N sans trou.
 
 Après modification, régénérez le jeu de données SQL :
 

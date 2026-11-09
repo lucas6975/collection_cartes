@@ -7,6 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   base: process.env.GITHUB_PAGES ? '/collection_cartes/' : '/',
   plugins: [react(), tailwindcss()],
+  build: { chunkSizeWarningLimit: 600 },
   test: {
     include: ['tests/**/*.test.ts'],
   },
