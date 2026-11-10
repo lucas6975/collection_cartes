@@ -6,7 +6,11 @@ Au verso de chaque carte : Ulysse, notre mascotte.
 
 **Aperçu en ligne :** https://lucas6975.github.io/collection_cartes/
 
-## Le jeu
+## Les jeux
+
+Le site s’ouvre sur un **menu** avec deux jeux.
+
+### Cartes à collectionner
 
 - **Pas de compte** : on ouvre le site et on joue. Chaque personne part de zéro.
 - **Pack du jour** : un seul par jour (renouvelé à minuit), 5 cartes, la dernière au moins peu commune. Animation d’ouverture, puis on retourne les cartes une à une.
@@ -23,6 +27,29 @@ collection en revenant **sur le même appareil et le même navigateur**. En reva
 
 Un classement entre collègues ou une collection retrouvable sur plusieurs appareils demandera un
 serveur (voir `docs/ARCHITECTURE.md`) : ce sera la seconde étape si le jeu prend.
+
+### Calendrier de l’Avent
+
+Une case par jour du 1er au 24 décembre 2026 ; la case N s’ouvre le N décembre à minuit.
+Chaque case contient un défi tiré du calendrier IMECA de la Team Ulysse, avec des étoiles à gagner
+(de 0 à 3) et la correction à la fin :
+
+| Jour              | Défi                                                           |
+| ----------------- | -------------------------------------------------------------- |
+| 1                 | Trouver les 4 anomalies sur l’image (on touche l’image)        |
+| 2, 6, 7, 8, 9, 10 | Remettre la consigne dans l’ordre (glisser-déposer ou flèches) |
+| 3                 | Quiz SST et premiers secours                                   |
+| 4                 | Associer les pictogrammes aux dangers                          |
+| 5                 | Vrai ou faux (boutons ou carte à faire glisser)                |
+| 10 (bonus)        | Pendu d’Ulysse                                                 |
+| 11 à 24           | À préparer : la case affiche « le défi se prépare »            |
+
+**Tester avant décembre :** ajoutez `?apercu` à l’adresse du calendrier
+(`…/collection_cartes/#/avent?apercu`) pour ouvrir toutes les cases le temps de la visite.
+
+**Ajouter un défi :** remplissez `jeux` du jour concerné dans `src/avent/jours.ts`, en vous
+inspirant des jours déjà faits (types : `anomalies`, `ordre`, `quiz`, `association`, `vraifaux`,
+`pendu`). Les images vont dans `public/avent/`.
 
 ### Raretés
 
@@ -78,7 +105,8 @@ src/
   content/          les 30 cartes et leurs sources
   data/store.ts     sauvegarde de la partie dans le navigateur
   components/       carte, verso à la mascotte, pack, animation d’ouverture
-  pages/            accueil (pack du jour), collection
+  pages/            menu, pack du jour, collection, calendrier de l’Avent
+  avent/            contenu du calendrier, règles et mini-jeux
 public/mascotte.webp  Ulysse
 supabase/           schéma serveur prêt pour la seconde étape (comptes, classement)
 ```

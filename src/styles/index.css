@@ -53,6 +53,15 @@
   }
 }
 
+@keyframes neige {
+  from {
+    transform: translate3d(0, -10px, 0);
+  }
+  to {
+    transform: translate3d(24px, 110vh, 0);
+  }
+}
+
 @layer base {
   html {
     -webkit-tap-highlight-color: transparent;
