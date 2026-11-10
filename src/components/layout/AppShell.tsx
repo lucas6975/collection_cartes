@@ -67,7 +67,7 @@ export function AppShell() {
                   ? 'Calendrier de l’Avent'
                   : section === 'cartes'
                     ? 'Cartes à collectionner'
-                    : 'Sécurité au travail'}
+                    : 'La sécurité, notre Odyssée'}
               </p>
             </div>
           </NavLink>

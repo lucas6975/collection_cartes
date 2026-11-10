@@ -48,6 +48,7 @@ lien depuis votre téléphone pro :
 La fiche pas à pas est jointe à ce mail.
 
 À très vite dans la Team Ulysse !
+**La sécurité, notre Odyssée.** 🦺
 
 [Votre prénom et votre nom]
 [Fonction] · IMECA

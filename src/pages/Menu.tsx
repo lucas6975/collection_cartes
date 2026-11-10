@@ -51,8 +51,11 @@ export function Menu() {
             Bienvenue dans la
           </p>
           <h1 className="font-display text-3xl font-extrabold sm:text-4xl">Team Ulysse</h1>
+          <p className="font-display text-[15px] font-bold italic text-sun sm:text-lg">
+            La sécurité, notre Odyssée
+          </p>
           <p className="mt-1 max-w-md text-sm text-white/75 sm:text-[15px]">
-            La sécurité au travail, en jouant un peu chaque jour. Choisis ton jeu !
+            Un peu de jeu chaque jour pour les bons réflexes. Choisis ton jeu !
           </p>
         </div>
       </motion.section>

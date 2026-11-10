@@ -69,6 +69,9 @@ export function Bienvenue() {
             Bienvenue dans la
           </p>
           <h1 className="font-display text-4xl font-extrabold">Team Ulysse</h1>
+          <p className="mt-1 font-display text-lg font-bold italic text-sun">
+            La sécurité, notre Odyssée
+          </p>
           <p className="mt-2 text-sm text-white/75">
             Dis-nous qui tu es pour participer aux jeux et aux tirages au sort.
           </p>
