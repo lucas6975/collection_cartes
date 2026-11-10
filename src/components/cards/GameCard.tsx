@@ -5,7 +5,7 @@ import { CATEGORY_BY_ID, RARITY_BY_ID } from '../../content/categories';
 import type { Card, Rarity } from '../../domain/types';
 import { Icon } from '../ui/Icon';
 import { cx } from '../ui/primitives';
-import { CardBack } from './CardBack';
+import { CardBack, MASCOTTE_URL } from './CardBack';
 
 /** Traitement graphique propre à chaque rareté. */
 export const RARITY_STYLE: Record<
@@ -36,9 +36,8 @@ export const RARITY_STYLE: Record<
     shimmer: true,
   },
   legendaire: {
-    frame:
-      'conic-gradient(from 210deg, #F5C542, #FFF1C2, #2563A6, #153E75, #F5C542, #FFE9A3, #2563A6, #F5C542)',
-    accent: '#F5C542',
+    frame: 'conic-gradient(from 200deg, #FFE58A, #FF8FB1, #9B8CFF, #6FE3FF, #8CFFB4, #FFE58A)',
+    accent: '#C9871A',
     label: 'text-sun-dark',
     glow: 'rgba(245,197,66,0.55)',
     shimmer: true,
@@ -78,6 +77,8 @@ export function CardArt({ card, size }: { card: Card; size: 'sm' | 'md' | 'lg' }
   const cat = CATEGORY_BY_ID[card.categorie];
   const r = RARITY_BY_ID[card.rarete].rang;
   const iconSize = size === 'sm' ? 30 : size === 'md' ? 52 : 76;
+  if (card.art?.type === 'lsr') return <ArtLsr card={card} size={size} />;
+  if (card.art?.type === 'mascotte') return <ArtMascotte size={size} />;
   if (card.image) {
     return (
       <img
@@ -135,6 +136,75 @@ export function CardArt({ card, size }: { card: Card; size: 'sm' | 'md' | 'lg' }
   );
 }
 
+const POINTS = (size: 'sm' | 'md' | 'lg') => ({
+  backgroundImage: 'radial-gradient(rgba(255,255,255,0.9) 1px, transparent 1.2px)',
+  backgroundSize: size === 'sm' ? '8px 8px' : '12px 12px',
+});
+
+/** Règle qui sauve la vie : gros chiffre italique et pictogramme, aux couleurs de l'affiche LSR. */
+function ArtLsr({ card, size }: { card: Card; size: 'sm' | 'md' | 'lg' }) {
+  if (card.art?.type !== 'lsr') return null;
+  const { chiffre, couleur } = card.art;
+  const k = size === 'sm' ? 0.45 : size === 'md' ? 0.72 : 1;
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden"
+      style={{ background: `linear-gradient(140deg, ${couleur} 0%, ${mix(couleur)} 110%)` }}
+    >
+      <div className="absolute inset-0 opacity-[0.16]" style={POINTS(size)} />
+      <span
+        className="absolute left-[7%] top-[7%] rounded-full bg-black/25 font-bold uppercase tracking-wider text-white"
+        style={{ fontSize: 10 * k + 1, padding: `${2 * k}px ${7 * k}px` }}
+      >
+        LSR {chiffre}
+      </span>
+      <div className="absolute inset-0 flex items-center justify-center" style={{ gap: 14 * k }}>
+        <span
+          className="font-display font-extrabold italic leading-none text-white"
+          style={{ fontSize: 104 * k, textShadow: `${4 * k}px ${4 * k}px 0 rgba(0,0,0,0.2)` }}
+        >
+          {chiffre}
+        </span>
+        <span
+          className="grid place-items-center rounded-full bg-white/20"
+          style={{
+            width: 74 * k,
+            height: 74 * k,
+            boxShadow: `0 0 0 ${12 * k}px rgba(255,255,255,0.08)`,
+          }}
+        >
+          <Icon name={card.icone} size={40 * k} strokeWidth={2} color="white" />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Carte secrète : Ulysse en entier sur fond de rayons dorés. */
+function ArtMascotte({ size }: { size: 'sm' | 'md' | 'lg' }) {
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden"
+      style={{ background: 'radial-gradient(circle at 50% 35%, #2563A6, #0B2347 80%)' }}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'repeating-conic-gradient(from 0deg at 50% 60%, rgba(245,197,66,0.2) 0 8deg, transparent 8deg 20deg)',
+        }}
+      />
+      <div className="absolute inset-0 opacity-[0.12]" style={POINTS(size)} />
+      <img
+        src={MASCOTTE_URL}
+        alt=""
+        draggable={false}
+        className="absolute left-1/2 top-[14%] h-[118%] w-auto max-w-none -translate-x-1/2 drop-shadow-[0_6px_8px_rgba(0,0,0,0.4)]"
+      />
+    </div>
+  );
+}
+
 /** Recto d'une carte, sans interaction (réutilisé par la carte cliquable et l'ouverture de pack). */
 export function CardFace({
   card,
@@ -175,7 +245,7 @@ export function CardFace({
           )}
         >
           <span
-            className="inline-flex items-center gap-1 font-semibold"
+            className="inline-flex min-w-0 items-center gap-1 truncate font-semibold"
             style={{ color: cat.couleur, fontSize: size === 'sm' ? 9 : 11 }}
           >
             <Icon name={cat.icone} size={size === 'sm' ? 10 : 12} strokeWidth={2.4} />

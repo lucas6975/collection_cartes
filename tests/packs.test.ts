@@ -3,6 +3,7 @@ import { CARDS } from '../src/content/cards';
 import {
   CARTES_PAR_PACK,
   PackIndisponible,
+  carteADebloquer,
   PROBABILITES,
   PROBABILITES_GARANTIE,
   ouvrirPack,
@@ -43,7 +44,12 @@ describe('tirage', () => {
     }
     // Tri du pack : les 4 premières sont les moins rares, donc on vérifie seulement des bornes larges.
     expect(counts.commune / (N * 4)).toBeGreaterThan(0.4);
-    expect((counts.legendaire ?? 0) / (N * 4)).toBeLessThan(0.03);
+    expect((counts.legendaire ?? 0) / (N * 4)).toBeLessThan(0.07);
+  });
+
+  it('ne tire jamais Ulysse, qui se débloque autrement', () => {
+    for (let seed = 1; seed < 3000; seed++)
+      expect(tirerPack(CARDS, seed).some((c) => c.id === 'ulysse')).toBe(false);
   });
 });
 
@@ -71,6 +77,29 @@ describe('pack du jour', () => {
     }
     expect(new Set(p.cards.map((c) => c.cardId)).size).toBe(p.cards.length);
     expect(p.cards.reduce((s, c) => s + c.count, 0)).toBe(exemplaires);
+  });
+
+  it('débloque Ulysse quand les 5 règles qui sauvent la vie sont réunies', () => {
+    const lsr = CARDS.filter((c) => c.categorie === 'lsr').map((c) => c.id);
+    expect(carteADebloquer(CARDS, new Set(lsr.slice(0, 4)))).toBeNull();
+    expect(carteADebloquer(CARDS, new Set(lsr))?.id).toBe('ulysse');
+    expect(carteADebloquer(CARDS, new Set([...lsr, 'ulysse']))).toBeNull();
+
+    // Ouverture d'un pack : il manque une seule LSR, que le pack apporte.
+    const manquante = lsr[4];
+    let p = progressionVide('u');
+    let d = 0;
+    let res;
+    do {
+      p = {
+        ...progressionVide('u'),
+        cards: lsr.slice(0, 4).map((id) => ({ cardId: id, count: 1, firstAt: '' })),
+      };
+      res = ouvrirPack(CARDS, { ...p, userId: `u${d}` }, new Date(2026, 10, 9, 9));
+      d++;
+    } while (!res.cards.some((c) => c.id === manquante) && d < 5000);
+    expect(res.debloquee?.id).toBe('ulysse');
+    expect(res.progress.cards.some((c) => c.cardId === 'ulysse')).toBe(true);
   });
 
   it('calcule la série de jours consécutifs', () => {

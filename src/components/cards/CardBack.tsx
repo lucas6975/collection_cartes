@@ -68,7 +68,7 @@ export function CardBack({
             marginBottom: size === 'sm' ? 8 : 14,
           }}
         >
-          {label ?? 'Vigie'}
+          {label ?? 'Team Ulysse'}
         </p>
       </div>
     </div>

@@ -87,4 +87,6 @@ export const SRC = {
     label: 'Service-Public.fr : Numéros d’urgence',
     url: 'https://www.service-public.fr/particuliers/vosdroits/F33954',
   },
+  lsrImeca: { label: 'Life Saving Rules IMECA (04/06/2025)' },
+  teamUlysse: { label: 'Team Ulysse' },
 } satisfies Record<string, Source>;

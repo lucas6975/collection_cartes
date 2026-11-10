@@ -504,4 +504,109 @@ export const CARDS: Card[] = [
     nature: 'obligation',
     sources: [codeTravail('R4224-15'), SRC.inrsSst],
   }),
+
+  // ───────────── Règles qui sauvent la vie (LSR IMECA) : toutes légendaires ─────────────
+  card({
+    id: 'lsr-1-formation',
+    numero: 31,
+    nom: 'Formation & autorisation',
+    categorie: 'lsr',
+    rarete: 'legendaire',
+    icone: 'GraduationCap',
+    art: { type: 'lsr', chiffre: 1, couleur: '#1A2BA0' },
+    description:
+      'Je n’exécute que les tâches pour lesquelles j’ai été formé, validé et autorisé, afin de travailler en toute sécurité.',
+    info: 'Ponts roulants, chariots élévateurs, gerbeurs, travaux sur armoires électriques : sans formation ni autorisation, on n’y touche pas.',
+    leSavaisTu:
+      'Si je supervise des sous-traitants, je m’assure qu’un plan de prévention est réalisé avant le début des travaux.',
+    aRetenir: 'Pas formé, pas autorisé : je ne fais pas, je demande.',
+    nature: 'pratique-interne',
+    sources: [SRC.lsrImeca],
+  }),
+  card({
+    id: 'lsr-2-dispositifs',
+    numero: 32,
+    nom: 'Intégrité des dispositifs de sécurité',
+    categorie: 'lsr',
+    rarete: 'legendaire',
+    icone: 'ShieldCheck',
+    art: { type: 'lsr', chiffre: 2, couleur: '#6CB51F' },
+    description:
+      'Je ne désactive, ne modifie ni ne contourne jamais un dispositif ou un équipement de sécurité.',
+    info: 'Seule exception : une évaluation fiable des risques faite par une personne compétente, avec une méthode autorisée pour agir en sécurité.',
+    leSavaisTu:
+      'Cette règle couvre aussi les issues de secours et les RIA, qu’il faut laisser dégagés, les déclencheurs manuels et les extincteurs, qui doivent rester accessibles, et le DATI, à porter en travail isolé.',
+    aRetenir: 'Une sécurité contournée, c’est une protection en moins pour toi.',
+    nature: 'pratique-interne',
+    sources: [SRC.lsrImeca],
+  }),
+  card({
+    id: 'lsr-3-lototo',
+    numero: 33,
+    nom: 'LOTOTO',
+    categorie: 'lsr',
+    rarete: 'legendaire',
+    icone: 'Lock',
+    art: { type: 'lsr', chiffre: 3, couleur: '#2E9E83' },
+    description:
+      'Avant toute intervention hors production, je consigne : je cadenasse (Lock-out), j’étiquette (Tag-out), je vérifie (Try-out).',
+    info: 'Maintenance, réglage, nettoyage… sur toute machine ou tout équipement. Si la procédure standard ne s’applique pas, une personne compétente évalue les risques.',
+    leSavaisTu: 'Pour consigner, il faut être formé et avoir son kit de consignation.',
+    aRetenir: 'Je cadenasse, j’étiquette, je vérifie… puis j’interviens.',
+    nature: 'pratique-interne',
+    sources: [SRC.lsrImeca],
+  }),
+  card({
+    id: 'lsr-4-trafic',
+    numero: 34,
+    nom: 'Trafic',
+    categorie: 'lsr',
+    rarete: 'legendaire',
+    icone: 'TrafficCone',
+    art: { type: 'lsr', chiffre: 4, couleur: '#3D1F9A' },
+    description:
+      'Je respecte le plan et les règles de circulation, à pied, à vélo ou aux commandes d’un engin.',
+    info: 'Allées de circulation et balisage respectés : à l’atelier, dans le parking d’IMECA et en déplacement.',
+    leSavaisTu:
+      'Dans les zones de cohabitation de l’atelier, le chariot élévateur à fourches (CEF) est prioritaire.',
+    aRetenir: 'Je reste dans les allées balisées et je me rends visible.',
+    nature: 'pratique-interne',
+    sources: [SRC.lsrImeca],
+  }),
+  card({
+    id: 'lsr-5-interventions',
+    numero: 35,
+    nom: 'Interventions spécifiques',
+    categorie: 'lsr',
+    rarete: 'legendaire',
+    icone: 'Flame',
+    art: { type: 'lsr', chiffre: 5, couleur: '#2B88C8' },
+    description:
+      'J’applique strictement les règles et les procédures pour les interventions spécifiques à haut risque.',
+    info: 'Point chaud, distribution électrique, espace confiné, travail en hauteur (y compris sur plateforme), zone ATEX, charges lourdes suspendues.',
+    leSavaisTu:
+      'Pour un point chaud, le permis de feu doit être rédigé. Selon le chantier, il faut aussi un plan de prévention ou une analyse de risques.',
+    aRetenir: 'Haut risque : procédure, permis et analyse avant de commencer.',
+    nature: 'pratique-interne',
+    sources: [SRC.lsrImeca],
+  }),
+
+  // ───────────── Carte secrète ─────────────
+  card({
+    id: 'ulysse',
+    numero: 36,
+    nom: 'Ulysse, gardien de la Team',
+    categorie: 'ulysse',
+    rarete: 'legendaire',
+    icone: 'HardHat',
+    art: { type: 'mascotte' },
+    deblocage: 'toutes-les-lsr',
+    description: 'Il veille sur les 5 règles qui sauvent la vie. La sécurité, notre Odyssée.',
+    info: 'Gilet haute visibilité, cape au vent : Ulysse est la mascotte sécurité d’IMECA. Sa mission : nous rappeler les bons réflexes, chaque jour.',
+    leSavaisTu:
+      'C’est la carte la plus rare du jeu : elle ne sort jamais d’un pack, elle se débloque en réunissant les 5 règles qui sauvent la vie.',
+    aRetenir: 'La sécurité, notre Odyssée.',
+    nature: 'pratique-interne',
+    sources: [SRC.teamUlysse],
+  }),
 ];

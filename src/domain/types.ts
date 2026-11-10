@@ -1,6 +1,7 @@
 // Modèle de données. Le schéma SQL (supabase/migrations) en est la traduction côté serveur.
 
-export type CategoryId = 'incendie' | 'epi' | 'risques' | 'postures' | 'organisation';
+export type CategoryId =
+  'incendie' | 'epi' | 'risques' | 'postures' | 'organisation' | 'lsr' | 'ulysse';
 
 export type Rarity = 'commune' | 'peu-commune' | 'rare' | 'epique' | 'legendaire';
 
@@ -35,6 +36,10 @@ export interface Card {
   icone: string;
   /** Illustration personnalisée (URL), prioritaire sur l'icône. */
   image?: string;
+  /** Illustration spéciale : une règle qui sauve la vie (gros chiffre) ou la mascotte. */
+  art?: { type: 'lsr'; chiffre: number; couleur: string } | { type: 'mascotte' };
+  /** Carte qui ne sort jamais d'un pack : elle se débloque en réunissant toutes les LSR. */
+  deblocage?: 'toutes-les-lsr';
   description: string;
   info: string;
   leSavaisTu: string;

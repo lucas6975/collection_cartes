@@ -7,20 +7,20 @@ export const CARTES_PAR_PACK = 5;
 
 /** Probabilités de chaque rareté pour un emplacement normal (total = 100). */
 export const PROBABILITES: Record<Rarity, number> = {
-  commune: 55,
+  commune: 52,
   'peu-commune': 27,
   rare: 12,
   epique: 5,
-  legendaire: 1,
+  legendaire: 4,
 };
 
 /** Le dernier emplacement garantit au moins une carte peu commune. */
 export const PROBABILITES_GARANTIE: Record<Rarity, number> = {
   commune: 0,
-  'peu-commune': 62,
+  'peu-commune': 58,
   rare: 26,
   epique: 9,
-  legendaire: 3,
+  legendaire: 7,
 };
 
 const ORDRE: Rarity[] = ['commune', 'peu-commune', 'rare', 'epique', 'legendaire'];
@@ -68,7 +68,9 @@ function tirerRarete(
 export function tirerPack(cards: Card[], seed: number): Card[] {
   const rand = rng(seed);
   const parRarete = new Map<Rarity, Card[]>();
-  for (const c of cards) parRarete.set(c.rarete, [...(parRarete.get(c.rarete) ?? []), c]);
+  // Les cartes à débloquer (Ulysse) ne sortent jamais d'un pack.
+  for (const c of cards.filter((x) => !x.deblocage))
+    parRarete.set(c.rarete, [...(parRarete.get(c.rarete) ?? []), c]);
   const disponibles = new Set(parRarete.keys());
   const tirage: Card[] = [];
   for (let i = 0; i < CARTES_PAR_PACK; i++) {
@@ -93,6 +95,16 @@ export interface PackResult {
   cards: Card[];
   /** Pour chaque carte du pack : vrai si elle est nouvelle dans la collection. */
   nouvelles: boolean[];
+  /** Carte secrète débloquée grâce à ce pack (Ulysse, quand les 5 LSR sont réunies). */
+  debloquee: Card | null;
+}
+
+/** Ulysse se débloque dès que toutes les règles qui sauvent la vie sont dans la collection. */
+export function carteADebloquer(cards: Card[], possedees: Set<string>): Card | null {
+  const lsr = cards.filter((c) => c.categorie === 'lsr');
+  const secrete = cards.find((c) => c.deblocage === 'toutes-les-lsr');
+  if (!secrete || possedees.has(secrete.id) || lsr.length === 0) return null;
+  return lsr.every((c) => possedees.has(c.id)) ? secrete : null;
 }
 
 /**
@@ -124,11 +136,14 @@ export function ouvrirPack(
     owned.set(c.id, { cardId: c.id, count: 1, firstAt: at });
     return true;
   });
+  const debloquee = carteADebloquer(cards, new Set(owned.keys()));
+  if (debloquee) owned.set(debloquee.id, { cardId: debloquee.id, count: 1, firstAt: at });
   const pack: PackOpening = { jour, at, cardIds: tirage.map((c) => c.id), bonus };
   return {
     progress: { ...progress, cards: [...owned.values()], packs: [...progress.packs, pack] },
     cards: tirage,
     nouvelles,
+    debloquee,
   };
 }
 

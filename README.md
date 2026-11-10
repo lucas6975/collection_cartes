@@ -22,8 +22,8 @@ Le site s’ouvre sur un **menu** avec deux jeux.
 ### Cartes à collectionner
 
 - **Pas de compte** : on ouvre le site et on joue. Chaque personne part de zéro.
-- **Pack du jour** : un seul par jour (renouvelé à minuit), 5 cartes, la dernière au moins peu commune. Animation d’ouverture, puis on retourne les cartes une à une.
-- **Ma collection** : 30 cartes en 5 familles (incendie, EPI, risques, gestes et postures, procédures). Les cartes manquantes montrent leur verso ; les doublons sont comptés (×2, ×3…). Filtres, tri et recherche.
+- **Pack du jour** : un seul par jour (renouvelé à minuit), 5 cartes, la dernière au moins peu commune. Les cartes se révèlent une par une, en grand ; avant une carte rare ou mieux, le dos tremble et s’illumine. Un récap termine l’ouverture.
+- **Ma collection** : 36 cartes. 30 cartes en 5 familles (incendie, EPI, risques, gestes et postures, procédures), les **5 règles qui sauvent la vie** d’IMECA (LSR, légendaires) et la carte secrète **Ulysse**, qui ne sort jamais d’un pack : elle se débloque quand on a réuni les 5 LSR. Les cartes manquantes montrent leur verso ; les doublons sont comptés (×2, ×3…). Filtres, tri et recherche.
 
 ### Où est enregistrée la collection ?
 
@@ -79,13 +79,13 @@ inspirant des jours déjà faits (types : `anomalies`, `ordre`, `quiz`, `associa
 
 ### Raretés
 
-| Rareté      | Probabilité par emplacement | Finition           |
-| ----------- | --------------------------- | ------------------ |
-| Commune     | 55 %                        | Bordure sobre      |
-| Peu commune | 27 %                        | Bordure bleue      |
-| Rare        | 12 %                        | Finition argentée  |
-| Épique      | 5 %                         | Finition dorée     |
-| Légendaire  | 1 %                         | Finition lumineuse |
+| Rareté      | Probabilité par emplacement | Finition          |
+| ----------- | --------------------------- | ----------------- |
+| Commune     | 52 %                        | Bordure sobre     |
+| Peu commune | 27 %                        | Bordure bleue     |
+| Rare        | 12 %                        | Finition argentée |
+| Épique      | 5 %                         | Finition dorée    |
+| Légendaire  | 4 %                         | Finition irisée   |
 
 Le 5ᵉ emplacement est toujours au moins peu commun. Les probabilités se règlent dans
 `src/domain/packs.ts` (et dans la migration SQL pour la production).

@@ -10,6 +10,8 @@ export interface CategoryMeta {
   couleur: string;
   /** Teinte claire pour les fonds. */
   fond: string;
+  /** Famille spéciale, composée uniquement de cartes légendaires. */
+  speciale?: boolean;
 }
 
 export const CATEGORIES: CategoryMeta[] = [
@@ -57,6 +59,26 @@ export const CATEGORIES: CategoryMeta[] = [
     icone: 'ClipboardCheck',
     couleur: '#6A4FB3',
     fond: '#F0ECF9',
+  },
+  {
+    id: 'lsr',
+    nom: 'Règles qui sauvent la vie',
+    court: 'LSR IMECA',
+    description: 'Les 5 Life Saving Rules d’IMECA : réunis-les toutes pour débloquer Ulysse.',
+    icone: 'Star',
+    couleur: '#1A2BA0',
+    fond: '#EBEDFA',
+    speciale: true,
+  },
+  {
+    id: 'ulysse',
+    nom: 'Team Ulysse',
+    court: 'Team Ulysse',
+    description: 'La carte secrète de la mascotte, débloquée avec les 5 règles qui sauvent la vie.',
+    icone: 'HardHat',
+    couleur: '#B07A0E',
+    fond: '#FFF6D8',
+    speciale: true,
   },
 ];
 
