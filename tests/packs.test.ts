@@ -87,15 +87,12 @@ describe('pack du jour', () => {
 
     // Ouverture d'un pack : il manque une seule LSR, que le pack apporte.
     const manquante = lsr[4];
-    let p = progressionVide('u');
+    const cartes = lsr.slice(0, 4).map((id) => ({ cardId: id, count: 1, firstAt: '' }));
     let d = 0;
     let res;
     do {
-      p = {
-        ...progressionVide('u'),
-        cards: lsr.slice(0, 4).map((id) => ({ cardId: id, count: 1, firstAt: '' })),
-      };
-      res = ouvrirPack(CARDS, { ...p, userId: `u${d}` }, new Date(2026, 10, 9, 9));
+      const p = { ...progressionVide(`u${d}`), cards: cartes };
+      res = ouvrirPack(CARDS, p, new Date(2026, 10, 9, 9));
       d++;
     } while (!res.cards.some((c) => c.id === manquante) && d < 5000);
     expect(res.debloquee?.id).toBe('ulysse');
