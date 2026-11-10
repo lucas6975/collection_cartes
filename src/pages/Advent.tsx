@@ -176,9 +176,9 @@ export function Advent() {
           <div className="flex items-start gap-3 rounded-2xl bg-sun/20 px-4 py-3 text-sm text-navy-950">
             <FlaskConical size={18} className="mt-0.5 shrink-0 text-sun-dark" />
             <p>
-              <strong>Phase de test :</strong> les {prets} premiers défis sont déjà ouverts,
-              joue-les quand tu veux ! Le vrai calendrier démarrera le 1er décembre, avec une case
-              par jour et des scores remis à zéro.
+              <strong>Phase de test :</strong> les {prets} défis sont déjà ouverts, joue-les quand
+              tu veux ! Le vrai calendrier démarrera le 1er décembre, avec une case par jour et des
+              scores remis à zéro.
             </p>
           </div>
         )
@@ -193,17 +193,17 @@ export function Advent() {
         <div className="relative mb-5 flex flex-wrap items-center justify-between gap-3 text-white">
           <div>
             <h2 className="font-display text-xl font-extrabold sm:text-2xl">
-              {PHASE_TEST ? 'Teste les premiers défis' : 'Ouvre une case chaque jour'}
+              {PHASE_TEST ? 'Teste les défis' : 'Ouvre une case chaque jour'}
             </h2>
             <p className="text-sm text-white/70">
               {PHASE_TEST
-                ? 'Chaque case ouverte cache un défi sécurité. Les autres arrivent bientôt.'
+                ? 'Chaque case cache un défi sécurité, à jouer dans l’ordre que tu veux.'
                 : 'Chaque case cache un défi sécurité. Une nouvelle s’ouvre chaque matin de décembre.'}
             </p>
           </div>
           <div className="flex gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold">
-              <CalendarClock size={15} /> {terminees}/24
+              <CalendarClock size={15} /> {terminees}/{JOURS.length}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold">
               <Star size={15} className="fill-sun text-sun" /> {etoiles}
@@ -222,7 +222,7 @@ export function Advent() {
           </motion.p>
         )}
 
-        <div className="relative grid grid-cols-4 gap-3 sm:grid-cols-6 sm:gap-4">
+        <div className="relative grid grid-cols-3 gap-3 min-[480px]:grid-cols-6 sm:gap-4">
           {JOURS.map((j) => (
             <Porte
               key={j.jour}

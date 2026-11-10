@@ -21,6 +21,7 @@ export function Pendu({ jeu, graine, onFini }: Props) {
   const [lettres, setLettres] = useState<string[]>([]);
   const [termine, setTermine] = useState(false);
   const erreurs = lettres.filter((l) => !mot.includes(l)).length;
+  const plusLong = Math.max(...mot.split(' ').map((m) => m.length));
   const gagne = [...mot].every((c) => c === ' ' || lettres.includes(c));
   const perdu = erreurs >= VIES;
 
@@ -82,14 +83,16 @@ export function Pendu({ jeu, graine, onFini }: Props) {
       {/* Mot à trouver */}
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-3">
         {mot.split(' ').map((m, wi) => (
-          <div key={wi} className="flex gap-1.5">
+          <div key={wi} className="flex gap-[3px] sm:gap-1.5">
             {[...m].map((c, ci) => {
               const visible = lettres.includes(c) || termine;
               return (
                 <span
                   key={ci}
+                  // Largeur adaptée à la longueur du mot, pour qu'il tienne sur un téléphone.
+                  style={{ width: `min(2.5rem, calc((100vw - 7rem) / ${plusLong}))` }}
                   className={cx(
-                    'grid h-12 w-9 place-items-end justify-center border-b-[3px] pb-1 font-display text-2xl font-extrabold sm:w-10',
+                    'grid h-12 place-items-end justify-center border-b-[3px] pb-1 font-display text-xl font-extrabold sm:text-2xl',
                     visible && !lettres.includes(c)
                       ? 'border-danger/60 text-danger'
                       : 'border-navy/30 text-navy-950',

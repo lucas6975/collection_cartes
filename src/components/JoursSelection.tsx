@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import { motion } from 'motion/react';
-import { TOUS_LES_JOURS } from '../data/identite';
+import { JOURS_OUVRES } from '../data/identite';
 import { cx } from './ui/primitives';
 
 /** Grille des 24 jours de décembre à cocher pour participer au tirage au sort. */
@@ -11,7 +11,7 @@ export function JoursSelection({
   value: number[];
   onChange: (jours: number[]) => void;
 }) {
-  const tous = value.length === TOUS_LES_JOURS.length;
+  const tous = value.length === JOURS_OUVRES.length;
   const basculer = (j: number) =>
     onChange(
       value.includes(j) ? value.filter((x) => x !== j) : [...value, j].sort((a, b) => a - b),
@@ -28,14 +28,14 @@ export function JoursSelection({
         </p>
         <button
           type="button"
-          onClick={() => onChange(tous ? [] : TOUS_LES_JOURS)}
+          onClick={() => onChange(tous ? [] : JOURS_OUVRES)}
           className="text-sm font-semibold text-blue hover:underline"
         >
           {tous ? 'Tout décocher' : 'Tout cocher'}
         </button>
       </div>
       <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
-        {TOUS_LES_JOURS.map((j) => {
+        {JOURS_OUVRES.map((j) => {
           const on = value.includes(j);
           return (
             <motion.button

@@ -17,13 +17,13 @@ import { Modal, useToast } from '../components/ui/overlay';
 import { Avatar, Button, PageHeader, cx } from '../components/ui/primitives';
 import { baseConfiguree } from '../config';
 import { ApiError, api, type Participant, type Tirage } from '../data/api';
-import { TOUS_LES_JOURS, useIdentite } from '../data/identite';
+import { JOURS_OUVRES, useIdentite } from '../data/identite';
 
 type Onglet = 'tirage' | 'inscrits' | 'resultats';
 
 /** [1,2,3,5,7,8] → « 1–3, 5, 7–8 » */
 export function plages(jours: number[]): string {
-  if (jours.length === 24) return 'Tous les jours';
+  if (jours.length === JOURS_OUVRES.length) return 'Tous les jours';
   const out: string[] = [];
   let debut = jours[0];
   for (let i = 1; i <= jours.length; i++) {
@@ -38,8 +38,8 @@ export function plages(jours: number[]): string {
 
 function jourParDefaut(tirages: Tirage[]): number {
   const now = new Date();
-  if (now.getMonth() === 11 && now.getDate() <= 24) return now.getDate();
-  return TOUS_LES_JOURS.find((j) => !tirages.some((t) => t.jour === j)) ?? 1;
+  if (now.getMonth() === 11 && JOURS_OUVRES.includes(now.getDate())) return now.getDate();
+  return JOURS_OUVRES.find((j) => !tirages.some((t) => t.jour === j)) ?? 1;
 }
 
 const nomComplet = (p: { prenom: string; nom: string }) => `${p.prenom} ${p.nom}`;
@@ -238,7 +238,7 @@ function OngletTirage({
     <div className="space-y-5">
       {fete && <Confetti />}
       <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
-        {TOUS_LES_JOURS.map((j) => {
+        {JOURS_OUVRES.map((j) => {
           const fait = tirages.some((t) => t.jour === j);
           return (
             <button
@@ -538,7 +538,7 @@ function OngletInscrits({
 function OngletResultats({ tirages }: { tirages: Tirage[] }) {
   return (
     <ul className="panel divide-y divide-line">
-      {TOUS_LES_JOURS.map((j) => {
+      {JOURS_OUVRES.map((j) => {
         const t = tirages.find((x) => x.jour === j);
         return (
           <li key={j} className="flex items-center gap-4 px-4 py-3">

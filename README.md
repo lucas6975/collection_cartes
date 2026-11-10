@@ -39,21 +39,32 @@ serveur (voir `docs/ARCHITECTURE.md`) : ce sera la seconde étape si le jeu pren
 
 ### Calendrier de l’Avent
 
-Une case par jour du 1er au 24 décembre 2026 ; la case N s’ouvre le N décembre à minuit.
-Chaque case contient un défi tiré du calendrier IMECA de la Team Ulysse, avec des étoiles à gagner
-(de 0 à 3) et la correction à la fin :
+Un défi par jour ouvré du 1er au 24 décembre 2026 (pas de week-end : ni le 5, 6, 12, 13, 19 et 20) ;
+la case N s’ouvre le N décembre à minuit. Chaque défi rapporte de 0 à 3 étoiles. Les types de jeu
+alternent pour ne jamais avoir deux jours de suite le même :
 
-| Jour              | Défi                                                           |
-| ----------------- | -------------------------------------------------------------- |
-| 1                 | Trouver les 4 anomalies sur l’image (on touche l’image)        |
-| 2, 6, 7, 8, 9, 10 | Remettre la consigne dans l’ordre (glisser-déposer ou flèches) |
-| 3                 | Quiz SST et premiers secours                                   |
-| 4                 | Associer les pictogrammes aux dangers                          |
-| 5                 | Vrai ou faux (boutons ou carte à faire glisser)                |
-| 10 (bonus)        | Pendu d’Ulysse                                                 |
-| 11 à 24           | À préparer : la case affiche « le défi se prépare »            |
+| Jour | Défi                                                 | Origine       |
+| ---- | ---------------------------------------------------- | ------------- |
+| 1    | Trouver les 4 anomalies (cariste)                    | calendrier V1 |
+| 2    | Remettre la consigne dans l’ordre (sous-traitant)    | calendrier V1 |
+| 3    | Quiz SST et premiers secours                         | calendrier V1 |
+| 4    | Associer les pictogrammes aux dangers                | calendrier V1 |
+| 7    | Vrai ou faux                                         | calendrier V1 |
+| 8    | Remettre dans l’ordre : LOTOTO                       | calendrier V1 |
+| 9    | Memory des EPI                                       | nouveau       |
+| 10   | Le pendu d’Ulysse                                    | nouveau       |
+| 11   | Remettre dans l’ordre : trafic                       | calendrier V1 |
+| 14   | Trouve l’intrus                                      | nouveau       |
+| 15   | Remettre dans l’ordre : DATI                         | calendrier V1 |
+| 16   | Mots mêlés sécurité                                  | nouveau       |
+| 17   | Scènes chocs à IMECA                                 | nouveau       |
+| 18   | Remettre dans l’ordre : permis de feu                | calendrier V1 |
+| 21   | Le grand tri (protection collective ou individuelle) | nouveau       |
+| 22   | Trouve l’erreur dans la consigne                     | nouveau       |
+| 23   | Remettre dans l’ordre : CACES pont roulant           | calendrier V1 |
+| 24   | Le grand quiz de Noël (révision)                     | nouveau       |
 
-**Phase de test (actuelle) :** les jours déjà prêts (1 à 10) sont ouverts tout de suite pour
+**Phase de test (actuelle) :** les 18 défis sont ouverts tout de suite pour
 tout le monde. Pour lancer le vrai calendrier de décembre, passer `PHASE_TEST` à `false` dans
 `src/avent/jours.ts` : les cases s’ouvriront alors jour après jour, et les scores du test seront
 remis à zéro.

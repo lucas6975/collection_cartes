@@ -26,7 +26,7 @@ create table public.participants (
 create unique index participants_nom_unique on public.participants (lower(prenom), lower(nom));
 
 create table public.tirages (
-  jour int primary key check (jour between 1 and 24),
+  jour int primary key check (jour between 1 and 24 and jour not in (5, 6, 12, 13, 19, 20)),
   participant_id uuid references public.participants (id) on delete set null,
   prenom text not null,
   nom text not null,
@@ -60,7 +60,8 @@ language sql immutable as $$ select regexp_replace(trim(coalesce(p, '')), '\s+',
 
 create function public.jours_valides(p int[]) returns int[]
 language sql immutable as $$
-  select coalesce(array_agg(distinct j order by j), '{}') from unnest(coalesce(p, '{}')) j where j between 1 and 24
+  select coalesce(array_agg(distinct j order by j), '{}') from unnest(coalesce(p, '{}')) j
+  where j between 1 and 24 and j not in (5, 6, 12, 13, 19, 20) -- pas de tirage le week-end
 $$;
 
 -- ───────────── Fonctions publiques (collaborateurs) ─────────────

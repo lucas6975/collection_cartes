@@ -144,11 +144,11 @@ export function Menu() {
                   ? `Phase de test : ${JOURS.filter(jourJouable).length} défis à essayer · ${Object.keys(avent).length} relevé${Object.keys(avent).length > 1 ? 's' : ''}`
                   : duJour
                     ? caseFaite
-                      ? `Case du ${duJour} déjà relevée · ${Object.keys(avent).length}/24`
+                      ? `Case du ${duJour} déjà relevée · ${Object.keys(avent).length}/${JOURS.length}`
                       : `La case du ${duJour} décembre est ouverte !`
                     : avantDebut > 0
                       ? `Ouverture dans ${avantDebut} jour${avantDebut > 1 ? 's' : ''}`
-                      : `${Object.keys(avent).length}/24 cases relevées`}
+                      : `${Object.keys(avent).length}/${JOURS.length} cases relevées`}
               </p>
               <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-navy-950 shadow-lg">
                 <CalendarDays size={16} /> Voir le calendrier{' '}

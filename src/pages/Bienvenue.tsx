@@ -5,7 +5,7 @@ import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { JoursSelection } from '../components/JoursSelection';
 import { Button } from '../components/ui/primitives';
 import { ApiError } from '../data/api';
-import { TOUS_LES_JOURS, identiteStore } from '../data/identite';
+import { JOURS_OUVRES, identiteStore } from '../data/identite';
 
 const champ =
   'h-12 w-full rounded-xl border border-line bg-white px-4 text-[16px] text-ink outline-none transition-shadow placeholder:text-muted/70 focus:border-blue focus:ring-4 focus:ring-blue/10';
@@ -14,7 +14,7 @@ const champ =
 export function Bienvenue() {
   const [prenom, setPrenom] = useState('');
   const [nom, setNom] = useState('');
-  const [jours, setJours] = useState<number[]>(TOUS_LES_JOURS);
+  const [jours, setJours] = useState<number[]>(JOURS_OUVRES);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [modeAdmin, setModeAdmin] = useState(false);

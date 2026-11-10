@@ -43,6 +43,42 @@ export type Jeu =
       type: 'pendu';
       consigne: string;
       mots: { mot: string; indice: string }[];
+    }
+  | {
+      type: 'memory';
+      consigne: string;
+      /** Chaque paire : une carte « équipement » (icône + nom) et une carte « risque ». */
+      paires: { icone: string; nom: string; associe: string }[];
+    }
+  | {
+      type: 'intrus';
+      consigne: string;
+      series: { elements: string[]; intrus: number; explication: string }[];
+    }
+  | {
+      type: 'motsmeles';
+      consigne: string;
+      mots: string[];
+      taille: number;
+    }
+  | {
+      type: 'scenes';
+      consigne: string;
+      scenes: {
+        situation: string;
+        options: { texte: string; correct: boolean; consequence: string }[];
+      }[];
+    }
+  | {
+      type: 'tri';
+      consigne: string;
+      bacs: [string, string];
+      elements: { texte: string; bac: 0 | 1; explication: string }[];
+    }
+  | {
+      type: 'erreur';
+      consigne: string;
+      consignes: { titre: string; phrases: string[]; erreur: number; explication: string }[];
     };
 
 export interface JourAvent {

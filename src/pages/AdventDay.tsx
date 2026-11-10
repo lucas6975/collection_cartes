@@ -6,8 +6,12 @@ import { Button } from '../components/ui/primitives';
 import { Anomalies } from '../avent/jeux/Anomalies';
 import { Association } from '../avent/jeux/Association';
 import { Ordre } from '../avent/jeux/Ordre';
+import { Memory } from '../avent/jeux/Memory';
+import { MotsMeles } from '../avent/jeux/MotsMeles';
 import { Pendu } from '../avent/jeux/Pendu';
 import { Quiz } from '../avent/jeux/Quiz';
+import { Erreur, Intrus, Scenes } from '../avent/jeux/Series';
+import { Tri } from '../avent/jeux/Tri';
 import { VraiFaux } from '../avent/jeux/VraiFaux';
 import { ANNEE_AVENT, JOURS, PHASE_TEST, caseOuverte } from '../avent/jours';
 import { dateOuverture, etoilesJour } from '../avent/logic';
@@ -22,6 +26,12 @@ const NOM_JEU: Record<Jeu['type'], string> = {
   association: 'Associe',
   vraifaux: 'Vrai ou faux',
   pendu: 'Pendu',
+  memory: 'Memory',
+  intrus: 'Trouve l’intrus',
+  motsmeles: 'Mots mêlés',
+  scenes: 'Scènes chocs',
+  tri: 'Le grand tri',
+  erreur: 'Trouve l’erreur',
 };
 
 function RenduJeu({
@@ -46,6 +56,18 @@ function RenduJeu({
       return <VraiFaux jeu={jeu} onFini={onFini} />;
     case 'pendu':
       return <Pendu jeu={jeu} graine={graine} onFini={onFini} />;
+    case 'memory':
+      return <Memory jeu={jeu} graine={graine} onFini={onFini} />;
+    case 'intrus':
+      return <Intrus jeu={jeu} onFini={onFini} />;
+    case 'motsmeles':
+      return <MotsMeles jeu={jeu} graine={graine} onFini={onFini} />;
+    case 'scenes':
+      return <Scenes jeu={jeu} onFini={onFini} />;
+    case 'tri':
+      return <Tri jeu={jeu} graine={graine} onFini={onFini} />;
+    case 'erreur':
+      return <Erreur jeu={jeu} onFini={onFini} />;
   }
 }
 

@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { ANNEE_AVENT, JOURS, PHASE_TEST, caseOuverte } from '../src/avent/jours';
+import { JOURS_OUVRES, WEEKENDS } from '../src/data/identite';
 import {
   caseDuJour,
   estOuverte,
   etoilesEssais,
   etoilesJour,
   etoilesScore,
+  genererGrille,
   joursAvantDebut,
   melangerSansPointFixe,
 } from '../src/avent/logic';
@@ -56,9 +58,22 @@ describe('mélange', () => {
 });
 
 describe('contenu du calendrier', () => {
-  it('contient les 24 jours de décembre', () => {
-    expect(JOURS.map((j) => j.jour)).toEqual(Array.from({ length: 24 }, (_, i) => i + 1));
+  it('contient un défi pour chaque jour ouvré, aucun le week-end', () => {
+    expect(JOURS.map((j) => j.jour)).toEqual(JOURS_OUVRES);
+    expect(JOURS.some((j) => WEEKENDS.includes(j.jour))).toBe(false);
+    expect(JOURS.every((j) => j.jeux.length > 0)).toBe(true);
     expect(ANNEE_AVENT).toBe(2026);
+    for (const w of WEEKENDS) expect([0, 6]).toContain(new Date(ANNEE_AVENT, 11, w).getDay());
+  });
+
+  it('ne propose jamais deux jours de suite le même type de jeu', () => {
+    const types = JOURS.map((j) => j.jeux[0].type);
+    for (let i = 1; i < types.length; i++)
+      expect(types[i], `jour ${JOURS[i].jour}`).not.toBe(types[i - 1]);
+  });
+
+  it('le 17 décembre s’intitule « Scènes chocs à IMECA »', () => {
+    expect(JOURS.find((j) => j.jour === 17)?.titre).toBe('Scènes chocs à IMECA');
   });
 
   it('chaque jeu est cohérent', () => {
@@ -81,6 +96,22 @@ describe('contenu du calendrier', () => {
           }
         }
         if (jeu.type === 'pendu') for (const m of jeu.mots) expect(m.mot).toMatch(/^[A-Z ]+$/);
+        if (jeu.type === 'motsmeles') {
+          for (let g = 1; g < 60; g++) {
+            const { grille, places } = genererGrille(jeu.mots, jeu.taille, g * 101);
+            expect(places.map((p) => p.mot)).toEqual(jeu.mots);
+            for (const p of places)
+              expect(p.cases.map(([r, c]) => grille[r][c]).join('')).toBe(p.mot);
+          }
+        }
+        if (jeu.type === 'intrus')
+          for (const se of jeu.series) expect(se.intrus).toBeLessThan(se.elements.length);
+        if (jeu.type === 'scenes')
+          for (const sc of jeu.scenes) expect(sc.options.filter((o) => o.correct)).toHaveLength(1);
+        if (jeu.type === 'erreur')
+          for (const c of jeu.consignes) expect(c.erreur).toBeLessThan(c.phrases.length);
+        if (jeu.type === 'memory')
+          expect(new Set(jeu.paires.map((p) => p.nom)).size).toBe(jeu.paires.length);
       }
     }
   });
@@ -90,7 +121,7 @@ describe('phase de test', () => {
   it('ouvre tout de suite les jours prêts, et seulement eux', () => {
     const novembre = new Date(2026, 10, 10);
     const ouvertes = JOURS.filter((j) => caseOuverte(j, novembre, false)).map((j) => j.jour);
-    if (PHASE_TEST) expect(ouvertes).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    if (PHASE_TEST) expect(ouvertes).toEqual(JOURS_OUVRES);
     else expect(ouvertes).toEqual([]);
     expect(JOURS.every((j) => caseOuverte(j, novembre, true))).toBe(true);
   });

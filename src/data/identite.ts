@@ -21,15 +21,31 @@ interface Etat {
 }
 
 const KEY = 'team-ulysse-identite';
-export const TOUS_LES_JOURS = Array.from({ length: 24 }, (_, i) => i + 1);
+/** Week-ends de décembre 2026 : pas de défi ni de tirage ces jours-là. */
+export const WEEKENDS = [5, 6, 12, 13, 19, 20];
+/** Jours ouvrés du 1er au 24 décembre, les seuls où l'on peut s'inscrire. */
+export const JOURS_OUVRES = Array.from({ length: 24 }, (_, i) => i + 1).filter(
+  (j) => !WEEKENDS.includes(j),
+);
 
 function load(): Etat {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const p = JSON.parse(raw) as Etat;
-      if (p && typeof p === 'object')
-        return { identite: p.identite ?? null, codeAdmin: p.codeAdmin ?? null };
+      if (p && typeof p === 'object') {
+        let identite = p.identite ?? null;
+        // Les week-ends ne sont plus proposés : on les retire des inscriptions existantes,
+        // et l'inscription corrigée sera renvoyée à la base.
+        if (identite && identite.jours.some((j) => WEEKENDS.includes(j))) {
+          identite = {
+            ...identite,
+            jours: identite.jours.filter((j) => !WEEKENDS.includes(j)),
+            synchro: false,
+          };
+        }
+        return { identite, codeAdmin: p.codeAdmin ?? null };
+      }
     }
   } catch {
     // Stockage indisponible : identité le temps de la visite.
@@ -70,7 +86,7 @@ export const identiteStore = {
       identite: {
         prenom: propre(prenom),
         nom: propre(nom),
-        jours: [...jours].sort((a, b) => a - b),
+        jours: jours.filter((j) => !WEEKENDS.includes(j)).sort((a, b) => a - b),
         jeton: avant?.jeton,
         synchro: false,
       },

@@ -109,3 +109,78 @@ export function etoilesJour(resultats: ResultatJeu[]): 0 | 1 | 2 | 3 {
 }
 
 export const jourJouable = (j: JourAvent) => j.jeux.length > 0;
+
+// ───────────── Mots mêlés ─────────────
+
+export interface GrilleMots {
+  grille: string[][];
+  /** Cases de chaque mot, dans l'ordre des lettres. */
+  places: { mot: string; cases: [number, number][] }[];
+}
+
+const DIRECTIONS: [number, number][] = [
+  [0, 1], // vers la droite
+  [1, 0], // vers le bas
+  [1, 1], // en diagonale
+];
+
+/** Place les mots dans une grille carrée et complète avec des lettres au hasard (déterministe). */
+export function genererGrille(mots: string[], taille: number, graine: number): GrilleMots {
+  let s = graine >>> 0 || 1;
+  const rand = () => {
+    s ^= s << 13;
+    s ^= s >>> 17;
+    s ^= s << 5;
+    return (s >>> 0) / 2 ** 32;
+  };
+  for (let essai = 0; essai < 40; essai++) {
+    const grille: string[][] = Array.from({ length: taille }, () => Array(taille).fill(''));
+    const places: GrilleMots['places'] = [];
+    const tries = [...mots].sort((a, b) => b.length - a.length);
+    let ok = true;
+    for (const mot of tries) {
+      let pose = false;
+      for (let t = 0; t < 300 && !pose; t++) {
+        const [dr, dc] = DIRECTIONS[Math.floor(rand() * DIRECTIONS.length)];
+        const r0 = Math.floor(rand() * (taille - dr * (mot.length - 1)));
+        const c0 = Math.floor(rand() * (taille - dc * (mot.length - 1)));
+        if (r0 < 0 || c0 < 0) continue;
+        const cases: [number, number][] = [...mot].map((_, i) => [r0 + dr * i, c0 + dc * i]);
+        if (cases.every(([r, c], i) => grille[r][c] === '' || grille[r][c] === mot[i])) {
+          cases.forEach(([r, c], i) => (grille[r][c] = mot[i]));
+          places.push({ mot, cases });
+          pose = true;
+        }
+      }
+      if (!pose) {
+        ok = false;
+        break;
+      }
+    }
+    if (!ok) continue;
+    const alphabet = 'ABCDEFGHIJKLMNOPRSTUVE';
+    for (const ligne of grille)
+      for (let c = 0; c < taille; c++)
+        if (!ligne[c]) ligne[c] = alphabet[Math.floor(rand() * alphabet.length)];
+    return { grille, places: mots.map((m) => places.find((p) => p.mot === m)!) };
+  }
+  throw new Error('Impossible de placer les mots : agrandir la grille.');
+}
+
+/** Mots mêlés : moins on utilise d'indices, plus on gagne d'étoiles. */
+export function etoilesMotsMeles(
+  indices: number,
+  abandon: boolean,
+  trouves: number,
+  total: number,
+): ResultatJeu {
+  if (abandon)
+    return { etoiles: trouves >= total / 2 ? 1 : 0, resume: `${trouves}/${total} mots trouvés` };
+  return {
+    etoiles: indices === 0 ? 3 : indices <= 2 ? 2 : 1,
+    resume:
+      indices === 0
+        ? 'Tous les mots, sans indice !'
+        : `Tous les mots, avec ${indices} indice${indices > 1 ? 's' : ''}`,
+  };
+}
