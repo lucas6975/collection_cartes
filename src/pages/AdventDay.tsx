@@ -10,7 +10,8 @@ import { Memory } from '../avent/jeux/Memory';
 import { MotsMeles } from '../avent/jeux/MotsMeles';
 import { Pendu } from '../avent/jeux/Pendu';
 import { Quiz } from '../avent/jeux/Quiz';
-import { Erreur, Intrus, Scenes } from '../avent/jeux/Series';
+import { SceneChoc } from '../avent/jeux/SceneChoc';
+import { Erreur, Intrus } from '../avent/jeux/Series';
 import { Tri } from '../avent/jeux/Tri';
 import { VraiFaux } from '../avent/jeux/VraiFaux';
 import { ANNEE_AVENT, JOURS, caseOuverte } from '../avent/jours';
@@ -30,7 +31,7 @@ const NOM_JEU: Record<Jeu['type'], string> = {
   memory: 'Memory',
   intrus: 'Trouve l’intrus',
   motsmeles: 'Mots mêlés',
-  scenes: 'Scènes chocs',
+  scenechoc: 'Scène choc',
   tri: 'Le grand tri',
   erreur: 'Trouve l’erreur',
 };
@@ -63,8 +64,8 @@ function RenduJeu({
       return <Intrus jeu={jeu} onFini={onFini} />;
     case 'motsmeles':
       return <MotsMeles jeu={jeu} graine={graine} onFini={onFini} />;
-    case 'scenes':
-      return <Scenes jeu={jeu} onFini={onFini} />;
+    case 'scenechoc':
+      return null; // page dédiée, voir plus bas
     case 'tri':
       return <Tri jeu={jeu} graine={graine} onFini={onFini} />;
     case 'erreur':
@@ -166,6 +167,32 @@ export function AdventDay() {
             <ArrowLeft size={17} /> Retour au calendrier
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  const premier = jour.jeux[0];
+  if (premier.type === 'scenechoc') {
+    return (
+      <div className="mx-auto max-w-3xl space-y-5">
+        <Link
+          to={retour}
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-navy hover:underline"
+        >
+          <ArrowLeft size={16} /> Calendrier
+        </Link>
+        <EnTeteJour jour={jour.jour} titre={jour.titre} />
+        <SceneChoc
+          jeu={premier}
+          deja={deja}
+          onDefi={() =>
+            aventStore.terminer(jour.jour, {
+              etoiles: 3,
+              resultats: [{ etoiles: 3, resume: 'Défi au poste relevé' }],
+              at: new Date().toISOString(),
+            })
+          }
+        />
       </div>
     );
   }

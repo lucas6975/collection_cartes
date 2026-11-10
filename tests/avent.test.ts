@@ -72,8 +72,11 @@ describe('contenu du calendrier', () => {
       expect(types[i], `jour ${JOURS[i].jour}`).not.toBe(types[i - 1]);
   });
 
-  it('le 17 décembre s’intitule « Scènes chocs à IMECA »', () => {
-    expect(JOURS.find((j) => j.jour === 17)?.titre).toBe('Scènes chocs à IMECA');
+  it('le 17 décembre est la scène choc à IMECA, seul jour sans jeu', () => {
+    const j17 = JOURS.find((j) => j.jour === 17)!;
+    expect(j17.titre).toBe('Scène choc à IMECA');
+    expect(j17.jeux.map((j) => j.type)).toEqual(['scenechoc']);
+    expect(JOURS.filter((j) => j.jeux.some((x) => x.type === 'scenechoc'))).toHaveLength(1);
   });
 
   it('chaque jeu est cohérent', () => {
@@ -106,8 +109,6 @@ describe('contenu du calendrier', () => {
         }
         if (jeu.type === 'intrus')
           for (const se of jeu.series) expect(se.intrus).toBeLessThan(se.elements.length);
-        if (jeu.type === 'scenes')
-          for (const sc of jeu.scenes) expect(sc.options.filter((o) => o.correct)).toHaveLength(1);
         if (jeu.type === 'erreur')
           for (const c of jeu.consignes) expect(c.erreur).toBeLessThan(c.phrases.length);
         if (jeu.type === 'memory')

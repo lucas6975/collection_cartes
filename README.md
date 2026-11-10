@@ -57,12 +57,16 @@ alternent pour ne jamais avoir deux jours de suite le même :
 | 14   | Trouve l’intrus                                      | nouveau       |
 | 15   | Remettre dans l’ordre : DATI                         | calendrier V1 |
 | 16   | Mots mêlés sécurité                                  | nouveau       |
-| 17   | Scènes chocs à IMECA                                 | nouveau       |
+| 17   | Scène choc à IMECA (en vrai, pas de jeu)             | interne       |
 | 18   | Remettre dans l’ordre : permis de feu                | calendrier V1 |
 | 21   | Le grand tri (protection collective ou individuelle) | nouveau       |
 | 22   | Trouve l’erreur dans la consigne                     | nouveau       |
 | 23   | Remettre dans l’ordre : CACES pont roulant           | calendrier V1 |
 | 24   | Le grand quiz de Noël (révision)                     | nouveau       |
+
+**Le 17 décembre** est le seul jour sans jeu : la Team Ulysse prépare une scène choc réelle sur site
+et la personne tirée au sort ce jour-là vient intervenir. Les autres y trouvent Ulysse en Père Noël,
+une anecdote (la pyramide de Heinrich) et un petit défi à faire à leur poste.
 
 **Ouverture :** pour les collaborateurs, les cases restent fermées jusqu’au N décembre, avec un
 compte à rebours avant la première. L’administrateur (code saisi sur son téléphone) a accès à toutes

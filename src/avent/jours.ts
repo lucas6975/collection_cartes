@@ -337,130 +337,18 @@ export const JOURS: JourAvent[] = [
   },
   {
     jour: 17,
-    titre: 'Scènes chocs à IMECA',
+    titre: 'Scène choc à IMECA',
+    // Pas de jeu ce jour-là : la scène choc est jouée en vrai, sur site, par la Team Ulysse.
     jeux: [
       {
-        type: 'scenes',
-        consigne: 'Cinq scènes qui auraient pu mal tourner. À chaque fois, choisis le bon réflexe.',
-        scenes: [
-          {
-            situation:
-              'Un collègue est allongé au sol, immobile, devant une armoire électrique ouverte.',
-            options: [
-              {
-                texte: 'Je le secoue pour le réveiller',
-                correct: false,
-                consequence:
-                  'S’il est encore en contact avec le courant, tu risques d’être électrisé à ton tour.',
-              },
-              {
-                texte: 'Je fais couper le courant sans m’exposer, puis j’alerte les secours',
-                correct: true,
-                consequence:
-                  'Protéger, alerter, secourir : on supprime d’abord le danger, sans se mettre soi-même en danger.',
-              },
-              {
-                texte: 'Je vais chercher de l’eau pour le ranimer',
-                correct: false,
-                consequence:
-                  'L’eau et l’électricité font très mauvais ménage, et l’urgence est d’alerter.',
-              },
-            ],
-          },
-          {
-            situation:
-              'Un chariot recule dans une allée. Un piéton, casque audio sur les oreilles, traverse juste derrière sans regarder.',
-            options: [
-              {
-                texte: 'Je crie et je fais signe au cariste et au piéton pour qu’ils s’arrêtent',
-                correct: true,
-                consequence:
-                  'Alerter tout de suite peut éviter la collision. Le piéton doit ensuite emprunter les allées piétonnes.',
-              },
-              {
-                texte: 'Je ne dis rien, le cariste a sûrement vu',
-                correct: false,
-                consequence:
-                  'En marche arrière, la visibilité est réduite : il ne faut jamais compter sur la chance.',
-              },
-              {
-                texte: 'Je sors mon téléphone pour filmer',
-                correct: false,
-                consequence: 'Chaque seconde compte : il faut alerter, pas filmer.',
-              },
-            ],
-          },
-          {
-            situation:
-              'De la fumée sort sous la porte d’un local de stockage. L’alarme ne s’est pas déclenchée.',
-            options: [
-              {
-                texte: 'J’ouvre la porte en grand pour voir ce qui se passe',
-                correct: false,
-                consequence: 'L’appel d’air peut attiser le feu et t’exposer aux fumées.',
-              },
-              {
-                texte: 'J’attends de voir si ça s’aggrave',
-                correct: false,
-                consequence:
-                  'Un feu double de taille très vite : attendre fait perdre un temps précieux.',
-              },
-              {
-                texte: 'Je déclenche l’alarme et je préviens les secours selon la consigne',
-                correct: true,
-                consequence:
-                  'Donner l’alerte immédiatement permet d’évacuer et d’intervenir tant que le feu est petit.',
-              },
-            ],
-          },
-          {
-            situation:
-              'Un intérimaire grimpe sur les fourches d’un chariot élévateur pour attraper un carton en hauteur.',
-            options: [
-              {
-                texte: 'Je lui demande de descendre immédiatement et je le signale',
-                correct: true,
-                consequence:
-                  'Les fourches ne sont pas faites pour lever des personnes : la chute peut être grave.',
-              },
-              {
-                texte: 'Je tiens le chariot pour qu’il reste stable',
-                correct: false,
-                consequence:
-                  'Tu cautionnes une situation dangereuse sans réduire le risque de chute.',
-              },
-              {
-                texte: 'Ce n’est pas mon problème',
-                correct: false,
-                consequence:
-                  'La sécurité, c’est l’affaire de tous : laisser faire, c’est laisser l’accident arriver.',
-              },
-            ],
-          },
-          {
-            situation: 'Une flaque d’un produit inconnu s’étend sous un fût percé.',
-            options: [
-              {
-                texte: 'J’éponge à mains nues avec un chiffon',
-                correct: false,
-                consequence:
-                  'Un produit inconnu peut être corrosif ou toxique : jamais de contact sans protection.',
-              },
-              {
-                texte:
-                  'Je balise la zone, je préviens mon responsable et on consulte la fiche de données de sécurité',
-                correct: true,
-                consequence:
-                  'On isole le danger, on alerte, et la FDS indique comment intervenir et avec quels EPI.',
-              },
-              {
-                texte: 'Je passe à côté en faisant attention',
-                correct: false,
-                consequence: 'D’autres risquent de glisser ou d’être exposés : il faut signaler.',
-              },
-            ],
-          },
-        ],
+        type: 'scenechoc',
+        consigne: 'Aujourd’hui, pas de jeu sur l’écran : la scène choc se passe en vrai, à IMECA.',
+        anecdote: {
+          titre: 'La pyramide de Heinrich',
+          texte:
+            'En 1931, l’ingénieur américain Herbert W. Heinrich a étudié des milliers d’accidents du travail. Il en a tiré une image restée célèbre : pour 1 accident grave, on compte environ 29 accidents légers et 300 incidents sans blessure. Les chiffres exacts se discutent, mais l’idée reste vraie : chaque « ouf, on a eu chaud » est un avertissement gratuit. Le signaler, c’est empêcher la prochaine scène choc d’être réelle.',
+        },
+        defi: 'Prends 2 minutes pour regarder ton poste comme si tu le découvrais. Repère une situation qui pourrait mal tourner (un câble qui traîne, un passage encombré, un EPI abîmé…) et signale-la à ton responsable.',
       },
     ],
   },

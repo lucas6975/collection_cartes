@@ -62,12 +62,12 @@ export type Jeu =
       taille: number;
     }
   | {
-      type: 'scenes';
+      /** Jour sans jeu : une scène choc jouée en vrai, sur site, avec la personne tirée au sort. */
+      type: 'scenechoc';
       consigne: string;
-      scenes: {
-        situation: string;
-        options: { texte: string; correct: boolean; consequence: string }[];
-      }[];
+      /** Pour tous les autres : une anecdote et un petit défi à faire au poste. */
+      anecdote: { titre: string; texte: string };
+      defi: string;
     }
   | {
       type: 'tri';
