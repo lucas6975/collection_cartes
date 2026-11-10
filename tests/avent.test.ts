@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ANNEE_AVENT, JOURS } from '../src/avent/jours';
+import { ANNEE_AVENT, JOURS, PHASE_TEST, caseOuverte } from '../src/avent/jours';
 import {
   caseDuJour,
   estOuverte,
@@ -83,5 +83,15 @@ describe('contenu du calendrier', () => {
         if (jeu.type === 'pendu') for (const m of jeu.mots) expect(m.mot).toMatch(/^[A-Z ]+$/);
       }
     }
+  });
+});
+
+describe('phase de test', () => {
+  it('ouvre tout de suite les jours prêts, et seulement eux', () => {
+    const novembre = new Date(2026, 10, 10);
+    const ouvertes = JOURS.filter((j) => caseOuverte(j, novembre, false)).map((j) => j.jour);
+    if (PHASE_TEST) expect(ouvertes).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    else expect(ouvertes).toEqual([]);
+    expect(JOURS.every((j) => caseOuverte(j, novembre, true))).toBe(true);
   });
 });

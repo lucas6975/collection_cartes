@@ -2,11 +2,19 @@
 // de la Team Ulysse. Les jours sans jeu sont à compléter : il suffit de remplir `jeux`.
 
 import type { JourAvent } from './types';
+import { estOuverte, jourJouable } from './logic';
 
 const img = (nom: string) => `${import.meta.env.BASE_URL}avent/${nom}`;
 
 /** Année du calendrier : la case N s'ouvre le N décembre de cette année. */
 export const ANNEE_AVENT = 2026;
+
+/**
+ * Phase de test : les jours déjà prêts sont ouverts tout de suite, quelle que soit la date.
+ * Pour lancer le vrai calendrier de décembre, passer à `false` : les cases s'ouvriront alors
+ * jour après jour, et les scores du test seront remis à zéro.
+ */
+export const PHASE_TEST = true;
 
 export const JOURS: JourAvent[] = [
   {
@@ -298,3 +306,10 @@ export const JOURS: JourAvent[] = [
   { jour: 23, titre: 'Surprise', jeux: [] },
   { jour: 24, titre: 'Le grand jour', jeux: [] },
 ];
+
+/** Une case est-elle ouverte ? (aperçu : tout ; test : les jours prêts ; sinon : selon la date) */
+export function caseOuverte(jour: JourAvent, now: Date, apercu: boolean): boolean {
+  if (apercu) return true;
+  if (PHASE_TEST) return jourJouable(jour);
+  return estOuverte(ANNEE_AVENT, jour.jour, now);
+}

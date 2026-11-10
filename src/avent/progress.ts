@@ -1,6 +1,7 @@
 // Progression du calendrier, enregistrée dans le navigateur (comme la collection de cartes).
 
 import { useSyncExternalStore } from 'react';
+import { ANNEE_AVENT, PHASE_TEST } from './jours';
 import type { ResultatJeu } from './types';
 
 export interface JourTermine {
@@ -11,7 +12,8 @@ export interface JourTermine {
 
 type Etat = Record<number, JourTermine>;
 
-const KEY = 'team-ulysse-avent';
+// Les scores du test et ceux de décembre sont enregistrés séparément.
+const KEY = `team-ulysse-avent-${PHASE_TEST ? 'test' : ANNEE_AVENT}`;
 const APERCU = 'team-ulysse-avent-apercu';
 
 function load(): Etat {

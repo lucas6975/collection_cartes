@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { PackArt } from '../components/cards/Pack';
-import { ANNEE_AVENT } from '../avent/jours';
-import { caseDuJour, joursAvantDebut } from '../avent/logic';
+import { ANNEE_AVENT, JOURS, PHASE_TEST } from '../avent/jours';
+import { caseDuJour, jourJouable, joursAvantDebut } from '../avent/logic';
 import { useAvent } from '../avent/progress';
 import { NOEL, Neige } from '../avent/ui';
 import { useGame } from '../data/store';
@@ -140,13 +140,15 @@ export function Menu() {
             </div>
             <div className="relative mt-auto pt-6">
               <p className="text-sm font-semibold text-white/90">
-                {duJour
-                  ? caseFaite
-                    ? `Case du ${duJour} déjà relevée · ${Object.keys(avent).length}/24`
-                    : `La case du ${duJour} décembre est ouverte !`
-                  : avantDebut > 0
-                    ? `Ouverture dans ${avantDebut} jour${avantDebut > 1 ? 's' : ''}`
-                    : `${Object.keys(avent).length}/24 cases relevées`}
+                {PHASE_TEST
+                  ? `Phase de test : ${JOURS.filter(jourJouable).length} défis à essayer · ${Object.keys(avent).length} relevé${Object.keys(avent).length > 1 ? 's' : ''}`
+                  : duJour
+                    ? caseFaite
+                      ? `Case du ${duJour} déjà relevée · ${Object.keys(avent).length}/24`
+                      : `La case du ${duJour} décembre est ouverte !`
+                    : avantDebut > 0
+                      ? `Ouverture dans ${avantDebut} jour${avantDebut > 1 ? 's' : ''}`
+                      : `${Object.keys(avent).length}/24 cases relevées`}
               </p>
               <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-navy-950 shadow-lg">
                 <CalendarDays size={16} /> Voir le calendrier{' '}

@@ -9,8 +9,8 @@ import { Ordre } from '../avent/jeux/Ordre';
 import { Pendu } from '../avent/jeux/Pendu';
 import { Quiz } from '../avent/jeux/Quiz';
 import { VraiFaux } from '../avent/jeux/VraiFaux';
-import { ANNEE_AVENT, JOURS } from '../avent/jours';
-import { dateOuverture, estOuverte, etoilesJour } from '../avent/logic';
+import { ANNEE_AVENT, JOURS, PHASE_TEST, caseOuverte } from '../avent/jours';
+import { dateOuverture, etoilesJour } from '../avent/logic';
 import { aventStore, modeApercu, useAvent } from '../avent/progress';
 import type { Jeu, ResultatJeu } from '../avent/types';
 import { Confetti, Etoiles, NOEL, Neige } from '../avent/ui';
@@ -99,7 +99,7 @@ export function AdventDay() {
   const [fete, setFete] = useState(false);
 
   if (!jour) return <p className="text-center text-muted">Ce jour n’existe pas.</p>;
-  const ouverte = apercu || estOuverte(ANNEE_AVENT, jour.jour, now);
+  const ouverte = caseOuverte(jour, now, apercu);
   const deja = progression[jour.jour];
   const retour = `/avent${apercu ? '?apercu' : ''}`;
 
@@ -107,13 +107,17 @@ export function AdventDay() {
     const d = dateOuverture(ANNEE_AVENT, jour.jour);
     return (
       <div className="mx-auto max-w-2xl space-y-5">
-        <EnTeteJour jour={jour.jour} titre="Case encore fermée" />
+        <EnTeteJour
+          jour={jour.jour}
+          titre={PHASE_TEST ? 'Bientôt disponible' : 'Case encore fermée'}
+        />
         <div className="panel flex flex-col items-center p-8 text-center">
           <Lock size={36} className="text-navy/40" />
           <p className="mt-3 font-display text-xl font-extrabold text-navy-950">Patience !</p>
           <p className="mt-1 text-muted">
-            Cette case s’ouvre le{' '}
-            {d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}.
+            {PHASE_TEST
+              ? 'Ce défi n’est pas encore prêt : il arrivera avec le calendrier de décembre.'
+              : `Cette case s’ouvre le ${d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}.`}
           </p>
           <Button className="mt-6" onClick={() => navigate(retour)}>
             <ArrowLeft size={17} /> Retour au calendrier

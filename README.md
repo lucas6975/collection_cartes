@@ -44,7 +44,12 @@ Chaque case contient un défi tiré du calendrier IMECA de la Team Ulysse, avec 
 | 10 (bonus)        | Pendu d’Ulysse                                                 |
 | 11 à 24           | À préparer : la case affiche « le défi se prépare »            |
 
-**Tester avant décembre :** ajoutez `?apercu` à l’adresse du calendrier
+**Phase de test (actuelle) :** les jours déjà prêts (1 à 10) sont ouverts tout de suite pour
+tout le monde. Pour lancer le vrai calendrier de décembre, passer `PHASE_TEST` à `false` dans
+`src/avent/jours.ts` : les cases s’ouvriront alors jour après jour, et les scores du test seront
+remis à zéro.
+
+**Tout ouvrir pour vérifier :** ajoutez `?apercu` à l’adresse du calendrier
 (`…/collection_cartes/#/avent?apercu`) pour ouvrir toutes les cases le temps de la visite.
 
 **Ajouter un défi :** remplissez `jeux` du jour concerné dans `src/avent/jours.ts`, en vous
