@@ -1,10 +1,20 @@
-import { CalendarDays, GalleryVerticalEnd, Gift, House, Layers, Star } from 'lucide-react';
+import {
+  CalendarDays,
+  GalleryVerticalEnd,
+  Gift,
+  House,
+  Layers,
+  ShieldCheck,
+  Star,
+  UserRound,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
 import { NavLink, useLocation, useOutlet } from 'react-router';
 import { useAvent } from '../../avent/progress';
+import { useIdentite } from '../../data/identite';
 import { useGame } from '../../data/store';
-import { cx } from '../ui/primitives';
+import { Avatar, cx } from '../ui/primitives';
 
 /** Onglets de la partie « cartes à collectionner ». */
 const NAV_CARTES = [
@@ -18,11 +28,15 @@ export function AppShell() {
   const location = useLocation();
   // On fige l'élément de route pour que la page sortante garde son contenu pendant la transition.
   const outlet = useOutlet();
-  const section = location.pathname.startsWith('/avent')
+  const { identite, codeAdmin } = useIdentite();
+  const chemin = location.pathname;
+  const section = chemin.startsWith('/avent')
     ? 'avent'
-    : location.pathname === '/'
+    : chemin === '/'
       ? 'menu'
-      : 'cartes';
+      : chemin === '/moi' || chemin === '/admin'
+        ? 'compte'
+        : 'cartes';
   const etoiles = Object.values(avent).reduce((s, j) => s + j.etoiles, 0);
 
   // Chaque nouvelle page s'affiche depuis le haut.
@@ -125,11 +139,41 @@ export function AppShell() {
                 {progress.cards.length}/{cards.length}
               </NavLink>
             )}
+            {codeAdmin && (
+              <NavLink
+                to="/admin"
+                className="inline-flex h-9 items-center gap-1 rounded-full bg-navy px-3 text-sm font-bold text-white"
+                title="Espace administrateur"
+              >
+                <ShieldCheck size={15} /> <span className="hidden sm:inline">Admin</span>
+              </NavLink>
+            )}
+            <NavLink
+              to="/moi"
+              aria-label="Mes inscriptions"
+              title="Mes inscriptions"
+              className="shrink-0"
+            >
+              {identite ? (
+                <Avatar
+                  user={{
+                    id: identite.jeton ?? identite.nom,
+                    prenom: identite.prenom,
+                    nom: identite.nom,
+                  }}
+                  size={36}
+                />
+              ) : (
+                <span className="grid size-9 place-items-center rounded-full bg-canvas text-navy">
+                  <UserRound size={17} />
+                </span>
+              )}
+            </NavLink>
           </div>
         </div>
 
         {/* Navigation mobile, sous l'en-tête */}
-        {section !== 'menu' && (
+        {section !== 'menu' && section !== 'compte' && (
           <nav className="grid grid-cols-3 gap-2 px-4 pb-3 sm:hidden" aria-label="Navigation">
             <NavLink
               to="/"

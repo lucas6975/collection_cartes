@@ -12,16 +12,10 @@ Règles à respecter :
 - chaque famille garde au moins une carte de chaque rareté (vérifié par les tests) ;
 - les numéros vont de 1 à N sans trou.
 
-Après modification, régénérez le jeu de données SQL :
-
-```bash
-npm run db:seed
-```
-
 ## Avant d’ouvrir une pull request
 
 ```bash
 npm run lint && npm run typecheck && npm test
 ```
 
-Si vous modifiez la migration SQL, lancez aussi `npm run test:db` (PostgreSQL local requis).
+Si vous modifiez `supabase/setup.sql`, rejouez `supabase/test.sql` sur une base PostgreSQL de test.

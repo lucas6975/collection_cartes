@@ -6,6 +6,15 @@ Au verso de chaque carte : Ulysse, notre mascotte.
 
 **Aperçu en ligne :** https://lucas6975.github.io/collection_cartes/
 
+## Inscriptions et tirage au sort
+
+À la première ouverture, chacun saisit son **prénom et son nom** et choisit les jours où il veut être
+tiré au sort (pas de mot de passe). L'administrateur entre avec un **code secret** : il voit la liste
+des inscrits, lance le tirage de chaque jour (une personne gagne au plus une fois) et exporte la liste
+pour Excel. Les inscriptions sont centralisées dans une base Supabase : voir
+[`docs/SUPABASE.md`](docs/SUPABASE.md) pour la connecter. Tant qu'elle ne l'est pas, les inscriptions
+restent sur chaque téléphone et sont envoyées dès la connexion.
+
 ## Les jeux
 
 Le site s’ouvre sur un **menu** avec deux jeux.
@@ -93,14 +102,12 @@ stockage local du site (clé `vigie-partie`).
 
 ## Scripts
 
-| Commande          | Rôle                                             |
-| ----------------- | ------------------------------------------------ |
-| `npm run dev`     | Serveur de développement                         |
-| `npm run build`   | Vérification des types puis build de production  |
-| `npm test`        | Tests du tirage des packs et des cartes          |
-| `npm run lint`    | ESLint                                           |
-| `npm run db:seed` | Régénère `supabase/seed.sql` à partir des cartes |
-| `npm run test:db` | Teste la migration SQL sur un PostgreSQL local   |
+| Commande        | Rôle                                            |
+| --------------- | ----------------------------------------------- |
+| `npm run dev`   | Serveur de développement                        |
+| `npm run build` | Vérification des types puis build de production |
+| `npm test`      | Tests du tirage des packs et des cartes         |
+| `npm run lint`  | ESLint                                          |
 
 ## Architecture
 
@@ -113,7 +120,7 @@ src/
   pages/            menu, pack du jour, collection, calendrier de l’Avent
   avent/            contenu du calendrier, règles et mini-jeux
 public/mascotte.webp  Ulysse
-supabase/           schéma serveur prêt pour la seconde étape (comptes, classement)
+supabase/setup.sql  base des inscriptions et des tirages (à coller dans Supabase)
 ```
 
 ## Aperçu GitHub Pages

@@ -1,6 +1,6 @@
 # Architecture
 
-## Aujourd’hui : sans compte, sans serveur
+## Jeux : dans le navigateur
 
 Application React (Vite, TypeScript, Tailwind CSS, Motion) publiée sur GitHub Pages.
 
@@ -18,18 +18,19 @@ Limites, acceptables pour tester l’intérêt du jeu :
   tricher : rien n’est vérifié par un serveur ;
 - pas de classement entre collègues.
 
-## Seconde étape : comptes et classement (Supabase)
+## Inscriptions et tirages (Supabase)
 
-Si le jeu prend, `supabase/migrations/20261109000000_schema.sql` fournit la base :
+Seules les inscriptions au tirage au sort sont centralisées. `supabase/setup.sql` crée :
 
-- comptes (`profiles`), cartes, ouvertures de packs, collections, avec sécurité par ligne (RLS) ;
-- tirage côté serveur (`open_daily_pack()`), un seul pack par jour garanti par la base ;
-- `active_participants()` pour afficher les participants actifs.
+- `participants` (prénom, nom, jours choisis, jeton secret du téléphone) et `tirages` ;
+- des fonctions appelées par le site : `inscrire`, `ma_participation`, et pour l'administrateur
+  `admin_liste`, `admin_tirer`, `admin_annuler_tirage`, `admin_supprimer` ;
+- aucun accès direct aux tables : la liste des noms et les tirages exigent le code administrateur,
+  vérifié par la base (stocké chiffré, tentatives ralenties).
 
-Ce schéma est testé sur PostgreSQL (`npm run test:db`, scénarios dans `supabase/tests/`).
-Pour le brancher : créer un projet Supabase, appliquer la migration et `supabase/seed.sql`,
-puis remplacer la sauvegarde locale de `src/data/store.ts` par des appels à Supabase. Une
-connexion par lien e-mail évite d’avoir à gérer des mots de passe.
+Le tirage est fait par la base, parmi les inscrits du jour qui n'ont encore jamais gagné.
+Le site appelle ces fonctions via l'API REST de Supabase (`src/data/api.ts`), avec l'URL et la clé
+publique de `src/config.ts`. Tests : `supabase/test.sql`. Mise en place : `docs/SUPABASE.md`.
 
 ## Design
 
