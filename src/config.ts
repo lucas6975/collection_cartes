@@ -4,8 +4,9 @@
 // La clé « anon » est publique par conception : elle ne donne accès qu'aux fonctions prévues,
 // et la liste des inscrits reste protégée par le code administrateur.
 
-const URL_PROJET = '';
-const CLE_ANON = '';
+const URL_PROJET = 'https://madwvbzvjgckzykuqvdm.supabase.co';
+// Clé « publishable » (nouveau format Supabase) : publique par conception.
+const CLE_ANON = 'sb_publishable_Qc77rmMNCEFvX3G9hRIZZw__eph6Nr4';
 
 export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL || URL_PROJET;
 export const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY || CLE_ANON;
