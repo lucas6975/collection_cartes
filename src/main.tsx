@@ -1,6 +1,7 @@
 import { Component, StrictMode, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { surveillerMisesAJour } from './miseAJour';
 import './styles/index.css';
 
 /** Écran de secours : une erreur d'affichage ne doit jamais laisser une page blanche. */
@@ -50,3 +51,5 @@ createRoot(document.getElementById('root')!).render(
     </ErrorBoundary>
   </StrictMode>,
 );
+
+surveillerMisesAJour();
