@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Fiche d'installation Team Ulysse</title>
+    <link rel="stylesheet" href="commun.css" />
+    <style>
+      .page {
+        background: #f5f7fa;
+      }
+      header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 6mm;
+        height: 46mm;
+        padding: 0 12mm;
+        color: #fff;
+        background: linear-gradient(125deg, #2563a6 0%, #153e75 55%, #0b2347 100%);
+        overflow: hidden;
+      }
+      header .mascotte {
+        height: 40mm;
+        margin-top: 6mm;
+        align-self: flex-start;
+        filter: drop-shadow(0 3mm 4mm rgba(0, 0, 0, 0.4));
+      }
+      header h1 {
+        font-size: 27pt;
+        line-height: 1.02;
+      }
+      header h1 em {
+        font-style: normal;
+        color: var(--sun);
+      }
+      header p {
+        margin-top: 2mm;
+        font-size: 10.5pt;
+        color: rgba(255, 255, 255, 0.82);
+      }
+      header .qr {
+        margin-left: auto;
+        flex: none;
+        width: 32mm;
+        padding: 1.6mm;
+        border-radius: 3mm;
+        background: #fff;
+      }
+      header .qr img {
+        display: block;
+        width: 100%;
+      }
+
+      main {
+        padding: 7mm 10mm 0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5mm;
+      }
+      .etape {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding: 4mm 4mm 0;
+        border-radius: 5mm;
+        background: #fff;
+        border: 0.3mm solid var(--line);
+        overflow: hidden;
+      }
+      .num {
+        position: absolute;
+        top: 3.5mm;
+        left: 4mm;
+        display: grid;
+        place-items: center;
+        width: 9mm;
+        height: 9mm;
+        border-radius: 3mm;
+        color: #fff;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: 14pt;
+      }
+      .etape h2 {
+        margin-left: 11.5mm;
+        min-height: 9mm;
+        display: flex;
+        align-items: center;
+        font-size: 12pt;
+        line-height: 1.1;
+        color: var(--navy-950);
+      }
+      .etape p {
+        margin-top: 2.2mm;
+        font-size: 9pt;
+        line-height: 1.42;
+        color: var(--ink);
+      }
+      .etape p b {
+        color: var(--navy-950);
+      }
+      .ecran-bas {
+        margin: auto auto 0;
+        padding-top: 3mm;
+        width: 38mm;
+        height: 52mm;
+        overflow: hidden;
+      }
+      .ecran-bas .phone {
+        border-radius: 7mm 7mm 0 0;
+        padding: 1.6mm 1.6mm 0;
+        box-shadow: 0 0 0 0.5mm #3a4250 inset;
+      }
+      .ecran-bas .phone img.ecran {
+        border-radius: 5.5mm 5.5mm 0 0;
+      }
+      .ecran-bas .phone::before {
+        top: 2.6mm;
+        height: 3mm;
+      }
+
+      .sans-encoche::before {
+        display: none;
+      }
+
+      /* Étape écran d'accueil : deux encadrés iPhone / Android */
+      .etape.large {
+        grid-column: span 2;
+      }
+      .systemes {
+        margin-top: 3mm;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3.5mm;
+        padding-bottom: 4mm;
+      }
+      .systeme {
+        padding: 3mm 3.5mm;
+        border-radius: 3.5mm;
+        background: #eef3f9;
+      }
+      .systeme h3 {
+        font-family: 'Manrope', sans-serif;
+        font-size: 10.5pt;
+        font-weight: 800;
+        color: var(--navy-950);
+      }
+      .systeme ol {
+        margin-top: 1.8mm;
+        padding-left: 4.2mm;
+        font-size: 9pt;
+        line-height: 1.5;
+      }
+      .ico {
+        display: inline-grid;
+        place-items: center;
+        width: 5.4mm;
+        height: 5.4mm;
+        margin: 0 0.6mm;
+        vertical-align: -1.6mm;
+        border-radius: 1.4mm;
+        background: #fff;
+        border: 0.3mm solid var(--line);
+      }
+      .ico svg {
+        width: 3.6mm;
+        height: 3.6mm;
+      }
+      .astuce {
+        margin-top: 3mm;
+        padding: 2.4mm 3mm;
+        border-radius: 3mm;
+        background: #fff6d8;
+        font-size: 8.6pt;
+        line-height: 1.4;
+      }
+
+      /* À savoir */
+      .savoir {
+        margin: 5mm 10mm 0;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3mm;
+      }
+      .savoir div {
+        padding: 3mm;
+        border-radius: 3.5mm;
+        background: #fff;
+        border: 0.3mm solid var(--line);
+        font-size: 8.4pt;
+        line-height: 1.4;
+      }
+      .savoir b {
+        display: block;
+        margin-bottom: 0.8mm;
+        font-family: 'Manrope', sans-serif;
+        font-size: 9.5pt;
+        color: var(--navy-950);
+      }
+      footer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 13mm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3mm;
+        background: #15171c;
+        color: #fff;
+        font-size: 9.5pt;
+        font-weight: 600;
+      }
+      footer::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto;
+        height: 2mm;
+        background: repeating-linear-gradient(135deg, var(--sun) 0 4mm, #15171c 4mm 8mm);
+      }
+      footer img {
+        height: 8mm;
+        border-radius: 50%;
+      }
+      footer em {
+        font-style: normal;
+        color: var(--sun);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <img class="mascotte" src="img/mascotte.png" alt="" />
+        <div>
+          <p class="eyebrow" style="color: var(--sun); margin: 0">Fiche d’installation</p>
+          <h1 class="display">Team Ulysse<br /><em>en 2 minutes</em></h1>
+          <p>Sur ton téléphone pro, sans application à télécharger.</p>
+        </div>
+        <div class="qr"><img src="img/qrcode.png" alt="QR code" /></div>
+      </header>
+
+      <main>
+        <section class="etape">
+          <span class="num" style="background: var(--navy)">1</span>
+          <h2 class="display">Scanne le QR code</h2>
+          <p>
+            Ouvre l’<b>appareil photo</b> du téléphone et vise le QR code. Touche le lien qui
+            apparaît : le site s’ouvre. Sur iPhone, il doit s’ouvrir dans <b>Safari</b>.
+          </p>
+          <div class="ecran-bas">
+            <div class="phone"><img class="ecran" src="img/bienvenue.jpg" alt="" /></div>
+          </div>
+        </section>
+
+        <section class="etape">
+          <span class="num" style="background: var(--blue)">2</span>
+          <h2 class="display">Présente-toi</h2>
+          <p>
+            Entre ton <b>prénom</b> et ton <b>nom</b>. Pas de mot de passe, pas d’adresse mail. Ils
+            servent seulement au tirage au sort.
+          </p>
+          <div class="ecran-bas">
+            <div class="phone"><img class="ecran" src="img/formulaire.jpg" alt="" /></div>
+          </div>
+        </section>
+
+        <section class="etape">
+          <span class="num" style="background: var(--vert)">3</span>
+          <h2 class="display">Choisis tes jours</h2>
+          <p>
+            Tous les jours sont cochés : décoche ceux où tu es absent (congés…). Puis touche
+            <b>« C’est parti ! »</b>. Tu pourras les changer plus tard.
+          </p>
+          <div class="ecran-bas">
+            <div class="phone sans-encoche">
+              <img class="ecran" src="img/formulaire.jpg" alt="" style="margin-top: -30mm" />
+            </div>
+          </div>
+        </section>
+
+        <section class="etape large">
+          <span class="num" style="background: var(--rouge)">4</span>
+          <h2 class="display">Ajoute Ulysse à ton écran d’accueil</h2>
+          <p>
+            Ulysse aura sa propre icône, comme une vraie appli. C’est <b>important</b> : ta
+            collection et tes étoiles sont gardées sur ton téléphone.
+          </p>
+          <div class="systemes">
+            <div class="systeme">
+              <h3>🍏 iPhone (Safari)</h3>
+              <ol>
+                <li>
+                  Touche
+                  <span class="ico"
+                    ><svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#2563A6"
+                      stroke-width="2.2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" />
+                      <path d="M8 11H6v10h12V11h-2" /></svg
+                  ></span>
+                  <b>Partager</b> en bas de l’écran
+                </li>
+                <li>Fais défiler et touche <b>« Sur l’écran d’accueil »</b></li>
+                <li>Touche <b>Ajouter</b> en haut à droite</li>
+              </ol>
+            </div>
+            <div class="systeme">
+              <h3>🤖 Android (Chrome)</h3>
+              <ol>
+                <li>
+                  Touche
+                  <span class="ico"
+                    ><svg viewBox="0 0 24 24" fill="#2563A6">
+                      <circle cx="12" cy="5" r="2.2" />
+                      <circle cx="12" cy="12" r="2.2" />
+                      <circle cx="12" cy="19" r="2.2" /></svg
+                  ></span>
+                  en haut à droite
+                </li>
+                <li>
+                  Touche <b>« Ajouter à l’écran d’accueil »</b> ou <b>« Installer l’appli »</b>
+                </li>
+                <li>Confirme avec <b>Ajouter</b></li>
+              </ol>
+            </div>
+          </div>
+          <p class="astuce">
+            💡 Ensuite, ouvre toujours Ulysse avec sa <b>nouvelle icône</b> sur l’écran d’accueil.
+          </p>
+        </section>
+
+        <section class="etape">
+          <span class="num" style="background: #c08a1c">5</span>
+          <h2 class="display">Ouvre ton 1er pack !</h2>
+          <p>
+            Dans le menu, touche <b>Cartes à collectionner</b> puis
+            <b>« Ouvrir mon premier pack »</b>. 5 cartes à retourner, un nouveau pack chaque jour.
+          </p>
+          <div class="ecran-bas">
+            <div class="phone"><img class="ecran" src="img/cartes.jpg" alt="" /></div>
+          </div>
+        </section>
+      </main>
+
+      <section class="savoir">
+        <div>
+          <b>🎄 Le calendrier</b>Du 1er au 24 décembre, une case s’ouvre chaque jour ouvré, avec un
+          défi sécurité.
+        </div>
+        <div>
+          <b>🎁 Le tirage au sort</b>Chaque jour, une personne inscrite est tirée au sort. Va voir
+          sur ton médaillon, en haut à droite.
+        </div>
+        <div>
+          <b>📱 Ton téléphone</b>Ta progression reste sur ce téléphone. Évite la navigation privée
+          et n’efface pas les données du site.
+        </div>
+        <div>
+          <b>🙋 Un souci ?</b>Viens nous voir : la Team Ulysse est là pour t’aider à l’installer.
+        </div>
+      </section>
+
+      <footer>
+        <img src="img/avatar.png" alt="" />
+        <span>Team Ulysse · <em>la sécurité, un peu chaque jour</em></span>
+      </footer>
+    </div>
+  </body>
+</html>
