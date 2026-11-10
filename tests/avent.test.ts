@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ANNEE_AVENT, JOURS, PHASE_TEST, caseOuverte } from '../src/avent/jours';
+import { ANNEE_AVENT, JOURS, caseOuverte } from '../src/avent/jours';
 import { JOURS_OUVRES, WEEKENDS } from '../src/data/identite';
 import {
   caseDuJour,
@@ -117,12 +117,17 @@ describe('contenu du calendrier', () => {
   });
 });
 
-describe('phase de test', () => {
-  it('ouvre tout de suite les jours prêts, et seulement eux', () => {
+describe('ouverture des cases', () => {
+  it('collaborateurs : tout est fermé avant le 1er décembre, puis jour après jour', () => {
     const novembre = new Date(2026, 10, 10);
-    const ouvertes = JOURS.filter((j) => caseOuverte(j, novembre, false)).map((j) => j.jour);
-    if (PHASE_TEST) expect(ouvertes).toEqual(JOURS_OUVRES);
-    else expect(ouvertes).toEqual([]);
-    expect(JOURS.every((j) => caseOuverte(j, novembre, true))).toBe(true);
+    expect(JOURS.filter((j) => caseOuverte(j, novembre, false))).toHaveLength(0);
+    const le9 = new Date(2026, 11, 9, 8);
+    expect(JOURS.filter((j) => caseOuverte(j, le9, false)).map((j) => j.jour)).toEqual([
+      1, 2, 3, 4, 7, 8, 9,
+    ]);
+  });
+
+  it('administrateur : toutes les cases sont ouvertes en avance', () => {
+    expect(JOURS.every((j) => caseOuverte(j, new Date(2026, 10, 10), true))).toBe(true);
   });
 });

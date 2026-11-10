@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, CalendarDays, Gift, Lock, RotateCcw, Sparkles } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { Button } from '../components/ui/primitives';
 import { Anomalies } from '../avent/jeux/Anomalies';
 import { Association } from '../avent/jeux/Association';
@@ -13,9 +13,10 @@ import { Quiz } from '../avent/jeux/Quiz';
 import { Erreur, Intrus, Scenes } from '../avent/jeux/Series';
 import { Tri } from '../avent/jeux/Tri';
 import { VraiFaux } from '../avent/jeux/VraiFaux';
-import { ANNEE_AVENT, JOURS, PHASE_TEST, caseOuverte } from '../avent/jours';
+import { ANNEE_AVENT, JOURS, caseOuverte } from '../avent/jours';
 import { dateOuverture, etoilesJour } from '../avent/logic';
-import { aventStore, modeApercu, useAvent } from '../avent/progress';
+import { aventStore, useAvent } from '../avent/progress';
+import { useIdentite } from '../data/identite';
 import type { Jeu, ResultatJeu } from '../avent/types';
 import { Confetti, Etoiles, NOEL, Neige } from '../avent/ui';
 
@@ -107,10 +108,9 @@ function EnTeteJour({ jour, titre, lsr }: { jour: number; titre: string; lsr?: s
 
 export function AdventDay() {
   const { jour: param } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const progression = useAvent();
-  const apercu = modeApercu(location.search);
+  const { codeAdmin } = useIdentite();
   const jour = JOURS.find((j) => j.jour === Number(param));
   const [now] = useState(() => new Date());
   const [partie, setPartie] = useState(0);
@@ -121,25 +121,21 @@ export function AdventDay() {
   const [fete, setFete] = useState(false);
 
   if (!jour) return <p className="text-center text-muted">Ce jour n’existe pas.</p>;
-  const ouverte = caseOuverte(jour, now, apercu);
+  const ouverte = caseOuverte(jour, now, !!codeAdmin);
   const deja = progression[jour.jour];
-  const retour = `/avent${apercu ? '?apercu' : ''}`;
+  const retour = '/avent';
 
   if (!ouverte) {
     const d = dateOuverture(ANNEE_AVENT, jour.jour);
     return (
       <div className="mx-auto max-w-2xl space-y-5">
-        <EnTeteJour
-          jour={jour.jour}
-          titre={PHASE_TEST ? 'Bientôt disponible' : 'Case encore fermée'}
-        />
+        <EnTeteJour jour={jour.jour} titre="Case encore fermée" />
         <div className="panel flex flex-col items-center p-8 text-center">
           <Lock size={36} className="text-navy/40" />
           <p className="mt-3 font-display text-xl font-extrabold text-navy-950">Patience !</p>
           <p className="mt-1 text-muted">
-            {PHASE_TEST
-              ? 'Ce défi n’est pas encore prêt : il arrivera avec le calendrier de décembre.'
-              : `Cette case s’ouvre le ${d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}.`}
+            Cette case s’ouvre le{' '}
+            {d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}.
           </p>
           <Button className="mt-6" onClick={() => navigate(retour)}>
             <ArrowLeft size={17} /> Retour au calendrier

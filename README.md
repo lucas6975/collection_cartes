@@ -64,13 +64,10 @@ alternent pour ne jamais avoir deux jours de suite le même :
 | 23   | Remettre dans l’ordre : CACES pont roulant           | calendrier V1 |
 | 24   | Le grand quiz de Noël (révision)                     | nouveau       |
 
-**Phase de test (actuelle) :** les 18 défis sont ouverts tout de suite pour
-tout le monde. Pour lancer le vrai calendrier de décembre, passer `PHASE_TEST` à `false` dans
-`src/avent/jours.ts` : les cases s’ouvriront alors jour après jour, et les scores du test seront
-remis à zéro.
-
-**Tout ouvrir pour vérifier :** ajoutez `?apercu` à l’adresse du calendrier
-(`…/collection_cartes/#/avent?apercu`) pour ouvrir toutes les cases le temps de la visite.
+**Ouverture :** pour les collaborateurs, les cases restent fermées jusqu’au N décembre, avec un
+compte à rebours avant la première. L’administrateur (code saisi sur son téléphone) a accès à toutes
+les cases en avance pour présenter le calendrier ; ses étoiles ne sont pas enregistrées et un bouton
+les remet à zéro.
 
 **Ajouter un défi :** remplissez `jeux` du jour concerné dans `src/avent/jours.ts`, en vous
 inspirant des jours déjà faits (types : `anomalies`, `ordre`, `quiz`, `association`, `vraifaux`,

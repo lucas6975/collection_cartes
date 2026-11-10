@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { PackArt } from '../components/cards/Pack';
-import { ANNEE_AVENT, JOURS, PHASE_TEST } from '../avent/jours';
-import { caseDuJour, jourJouable, joursAvantDebut } from '../avent/logic';
+import { ANNEE_AVENT, JOURS } from '../avent/jours';
+import { caseDuJour, joursAvantDebut } from '../avent/logic';
 import { useAvent } from '../avent/progress';
 import { NOEL, Neige } from '../avent/ui';
 import { useGame } from '../data/store';
@@ -58,6 +58,56 @@ export function Menu() {
       </motion.section>
 
       <div className="grid gap-5 md:grid-cols-2">
+        {/* Calendrier de l'Avent */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14 }}
+        >
+          <Link
+            to="/avent"
+            className="group relative flex h-full min-h-72 flex-col overflow-hidden rounded-3xl p-6 text-white shadow-lift transition-transform hover:-translate-y-1"
+            style={{ background: `linear-gradient(170deg, #173A6B, ${NOEL.nuit})` }}
+          >
+            <img
+              src={FOND_NOEL}
+              alt=""
+              className="absolute inset-0 size-full object-cover opacity-45 transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3F] via-[#0B1F3F]/60 to-transparent" />
+            <Neige flocons={22} />
+            <div className="relative">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white"
+                style={{ background: NOEL.rouge }}
+              >
+                <Gift size={12} /> Décembre {ANNEE_AVENT}
+              </span>
+              <h2 className="mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl">
+                Calendrier de l’Avent
+              </h2>
+              <p className="mt-2 max-w-xs text-sm text-white/80">
+                Une case par jour, un défi sécurité à relever.
+              </p>
+            </div>
+            <div className="relative mt-auto pt-6">
+              <p className="text-sm font-semibold text-white/90">
+                {duJour
+                  ? caseFaite
+                    ? `Case du ${duJour} déjà relevée · ${Object.keys(avent).length}/${JOURS.length}`
+                    : `La case du ${duJour} décembre est ouverte !`
+                  : avantDebut > 0
+                    ? `Ouverture dans ${avantDebut} jour${avantDebut > 1 ? 's' : ''} · le mardi 1er décembre`
+                    : `${Object.keys(avent).length}/${JOURS.length} cases relevées`}
+              </p>
+              <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-navy-950 shadow-lg">
+                <CalendarDays size={16} /> Voir le calendrier{' '}
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+              </span>
+            </div>
+          </Link>
+        </motion.div>
+
         {/* Cartes à collectionner */}
         <motion.div
           initial={{ opacity: 0, y: 14 }}
@@ -100,58 +150,6 @@ export function Menu() {
               </p>
               <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-sun px-4 py-2.5 text-sm font-bold text-navy-950 shadow-lg shadow-sun/20">
                 {packOuvert ? 'Voir ma collection' : 'Ouvrir mon pack'}{' '}
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </span>
-            </div>
-          </Link>
-        </motion.div>
-
-        {/* Calendrier de l'Avent */}
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.14 }}
-        >
-          <Link
-            to="/avent"
-            className="group relative flex h-full min-h-72 flex-col overflow-hidden rounded-3xl p-6 text-white shadow-lift transition-transform hover:-translate-y-1"
-            style={{ background: `linear-gradient(170deg, #173A6B, ${NOEL.nuit})` }}
-          >
-            <img
-              src={FOND_NOEL}
-              alt=""
-              className="absolute inset-0 size-full object-cover opacity-45 transition-transform duration-500 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3F] via-[#0B1F3F]/60 to-transparent" />
-            <Neige flocons={22} />
-            <div className="relative">
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white"
-                style={{ background: NOEL.rouge }}
-              >
-                <Gift size={12} /> Décembre {ANNEE_AVENT}
-              </span>
-              <h2 className="mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl">
-                Calendrier de l’Avent
-              </h2>
-              <p className="mt-2 max-w-xs text-sm text-white/80">
-                Une case par jour, un défi sécurité à relever.
-              </p>
-            </div>
-            <div className="relative mt-auto pt-6">
-              <p className="text-sm font-semibold text-white/90">
-                {PHASE_TEST
-                  ? `Phase de test : ${JOURS.filter(jourJouable).length} défis à essayer · ${Object.keys(avent).length} relevé${Object.keys(avent).length > 1 ? 's' : ''}`
-                  : duJour
-                    ? caseFaite
-                      ? `Case du ${duJour} déjà relevée · ${Object.keys(avent).length}/${JOURS.length}`
-                      : `La case du ${duJour} décembre est ouverte !`
-                    : avantDebut > 0
-                      ? `Ouverture dans ${avantDebut} jour${avantDebut > 1 ? 's' : ''}`
-                      : `${Object.keys(avent).length}/${JOURS.length} cases relevées`}
-              </p>
-              <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-navy-950 shadow-lg">
-                <CalendarDays size={16} /> Voir le calendrier{' '}
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </span>
             </div>

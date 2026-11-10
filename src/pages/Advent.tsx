@@ -1,12 +1,13 @@
-import { CalendarClock, Eye, FlaskConical, Lock, Star } from 'lucide-react';
-import { motion, useAnimationControls } from 'motion/react';
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { CalendarClock, Lock, RotateCcw, ShieldCheck, Star } from 'lucide-react';
+import { AnimatePresence, motion, useAnimationControls } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useToast } from '../components/ui/overlay';
 import { cx } from '../components/ui/primitives';
-import { ANNEE_AVENT, JOURS, PHASE_TEST, caseOuverte } from '../avent/jours';
-import { caseDuJour, joursAvantDebut, jourJouable } from '../avent/logic';
-import { modeApercu, useAvent, type JourTermine } from '../avent/progress';
+import { ANNEE_AVENT, JOURS, caseOuverte } from '../avent/jours';
+import { caseDuJour, dateOuverture, joursAvantDebut } from '../avent/logic';
+import { aventStore, useAvent, type JourTermine } from '../avent/progress';
+import { useIdentite } from '../data/identite';
 import { Etoiles, NOEL, Neige } from '../avent/ui';
 
 const FOND = `${import.meta.env.BASE_URL}avent/fond-noel.webp`;
@@ -100,7 +101,7 @@ function Porte({
           </span>
           {!ouverte && (
             <span className="mt-0.5 inline-flex items-center gap-1 rounded-full bg-black/25 px-1.5 py-0.5 text-[10px] font-semibold text-white/90">
-              <Lock size={9} /> {PHASE_TEST ? 'Bientôt' : `${jour} déc.`}
+              <Lock size={9} /> {jour} déc.
             </span>
           )}
         </div>
@@ -126,15 +127,75 @@ function Porte({
   );
 }
 
+/** Temps restant avant une date, rafraîchi chaque seconde. */
+function useDecompte(cible: Date) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const ms = Math.max(0, cible.getTime() - now.getTime());
+  return {
+    now,
+    fini: ms === 0,
+    jours: Math.floor(ms / 86_400_000),
+    heures: Math.floor(ms / 3_600_000) % 24,
+    minutes: Math.floor(ms / 60_000) % 60,
+    secondes: Math.floor(ms / 1000) % 60,
+  };
+}
+
+function Decompte({ d }: { d: ReturnType<typeof useDecompte> }) {
+  const blocs: [number, string][] = [
+    [d.jours, d.jours > 1 ? 'jours' : 'jour'],
+    [d.heures, d.heures > 1 ? 'heures' : 'heure'],
+    [d.minutes, 'min'],
+    [d.secondes, 's'],
+  ];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="relative mb-6 rounded-3xl bg-white/[0.07] px-4 py-5 text-center ring-1 ring-white/10"
+    >
+      <p className="text-xs font-bold uppercase tracking-[0.16em] text-sun">
+        Ouverture de la 1re case dans
+      </p>
+      <div className="mt-3 flex justify-center gap-2 sm:gap-4">
+        {blocs.map(([v, label]) => (
+          <div key={label} className="w-[72px] rounded-2xl bg-white px-2 py-3 shadow-lg sm:w-24">
+            <AnimatePresence mode="popLayout">
+              <motion.p
+                key={v}
+                initial={{ y: -12, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 12, opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="font-display text-3xl font-extrabold tabular-nums text-navy-950 sm:text-4xl"
+              >
+                {String(v).padStart(2, '0')}
+              </motion.p>
+            </AnimatePresence>
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">{label}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-sm text-white/75">
+        Rendez-vous le mardi 1er décembre : une nouvelle case s’ouvrira chaque jour ouvré.
+      </p>
+    </motion.div>
+  );
+}
+
 export function Advent() {
   const navigate = useNavigate();
-  const location = useLocation();
   const toast = useToast();
   const progression = useAvent();
-  const apercu = modeApercu(location.search);
-  const [now] = useState(() => new Date());
-  const duJour = PHASE_TEST ? null : caseDuJour(ANNEE_AVENT, now);
-  const prets = JOURS.filter(jourJouable).length;
+  const { codeAdmin } = useIdentite();
+  const admin = !!codeAdmin;
+  const decompte = useDecompte(dateOuverture(ANNEE_AVENT, 1));
+  const now = decompte.now;
+  const duJour = caseDuJour(ANNEE_AVENT, now);
   const avantDebut = joursAvantDebut(ANNEE_AVENT, now);
   const terminees = Object.keys(progression).length;
   const etoiles = Object.values(progression).reduce((s, j) => s + j.etoiles, 0);
@@ -156,32 +217,33 @@ export function Advent() {
             Par la Team Ulysse
           </p>
           <p className="mt-2 hidden rounded-full bg-navy px-3 py-1 text-xs font-semibold text-white sm:mt-4 sm:block sm:text-sm">
-            {PHASE_TEST
-              ? 'Phase de test'
-              : duJour
-                ? `Case du jour : ${duJour}`
-                : avantDebut > 0
-                  ? `Ouverture dans ${avantDebut} jour${avantDebut > 1 ? 's' : ''}`
-                  : 'Joyeuses fêtes en toute sécurité !'}
+            {duJour
+              ? `Case du jour : ${duJour}`
+              : avantDebut > 0
+                ? `Ouverture dans ${avantDebut} jour${avantDebut > 1 ? 's' : ''}`
+                : 'Joyeuses fêtes en toute sécurité !'}
           </p>
         </div>
       </section>
 
-      {apercu ? (
-        <p className="flex items-center gap-2 rounded-2xl bg-sun/20 px-4 py-3 text-sm font-semibold text-navy-950">
-          <Eye size={17} /> Mode aperçu : toutes les cases sont ouvertes pour tester le calendrier.
-        </p>
-      ) : (
-        PHASE_TEST && (
-          <div className="flex items-start gap-3 rounded-2xl bg-sun/20 px-4 py-3 text-sm text-navy-950">
-            <FlaskConical size={18} className="mt-0.5 shrink-0 text-sun-dark" />
-            <p>
-              <strong>Phase de test :</strong> les {prets} défis sont déjà ouverts, joue-les quand
-              tu veux ! Le vrai calendrier démarrera le 1er décembre, avec une case par jour et des
-              scores remis à zéro.
-            </p>
-          </div>
-        )
+      {admin && (
+        <div className="flex flex-col gap-3 rounded-2xl bg-navy px-4 py-3 text-sm text-white sm:flex-row sm:items-center">
+          <ShieldCheck size={18} className="shrink-0 text-sun" />
+          <p className="flex-1">
+            <strong>Mode administrateur :</strong> toutes les cases sont ouvertes pour ta
+            démonstration. Tes étoiles ne sont pas enregistrées et repartent de zéro.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              aventStore.remettreAZeroAdmin();
+              toast('Étoiles remises à zéro', 'info');
+            }}
+            className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 font-semibold hover:bg-white/20"
+          >
+            <RotateCcw size={15} /> Remettre à zéro
+          </button>
+        </div>
       )}
 
       {/* Calendrier */}
@@ -193,12 +255,11 @@ export function Advent() {
         <div className="relative mb-5 flex flex-wrap items-center justify-between gap-3 text-white">
           <div>
             <h2 className="font-display text-xl font-extrabold sm:text-2xl">
-              {PHASE_TEST ? 'Teste les défis' : 'Ouvre une case chaque jour'}
+              Ouvre une case chaque jour
             </h2>
             <p className="text-sm text-white/70">
-              {PHASE_TEST
-                ? 'Chaque case cache un défi sécurité, à jouer dans l’ordre que tu veux.'
-                : 'Chaque case cache un défi sécurité. Une nouvelle s’ouvre chaque matin de décembre.'}
+              Chaque case cache un défi sécurité. Une nouvelle s’ouvre chaque jour ouvré de
+              décembre.
             </p>
           </div>
           <div className="flex gap-2">
@@ -211,31 +272,21 @@ export function Advent() {
           </div>
         </div>
 
-        {!PHASE_TEST && !duJour && avantDebut > 0 && !apercu && (
-          <motion.p
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative mb-5 rounded-2xl bg-white/10 px-4 py-3 text-center text-sm font-semibold text-white"
-          >
-            🎄 Première case le 1er décembre : encore {avantDebut} jour{avantDebut > 1 ? 's' : ''}{' '}
-            de patience !
-          </motion.p>
-        )}
+        {/* Compte à rebours avant l'ouverture de la première case */}
+        {!decompte.fini && <Decompte d={decompte} />}
 
         <div className="relative grid grid-cols-3 gap-3 min-[480px]:grid-cols-6 sm:gap-4">
           {JOURS.map((j) => (
             <Porte
               key={j.jour}
               jour={j.jour}
-              ouverte={caseOuverte(j, now, apercu)}
+              ouverte={caseOuverte(j, now, admin)}
               aujourdhui={duJour === j.jour}
               termine={progression[j.jour]}
-              onOuvrir={() => navigate(`/avent/${j.jour}${apercu ? '?apercu' : ''}`)}
+              onOuvrir={() => navigate(`/avent/${j.jour}`)}
               onFermee={() =>
                 toast(
-                  PHASE_TEST
-                    ? `Le défi du ${j.jour} n’est pas encore prêt : il arrive bientôt !`
-                    : `Patience ! La case ${j.jour} s’ouvre le ${j.jour} décembre.`,
+                  `Patience ! La case ${j.jour} s’ouvre le ${j.jour === 1 ? '1er' : j.jour} décembre.`,
                   'info',
                 )
               }

@@ -3,19 +3,12 @@
 // 4, 7, 8, 10, 11, 15, 18 et 23), complétés par de nouveaux jeux. L'ordre alterne les types de jeu.
 
 import type { JourAvent } from './types';
-import { estOuverte, jourJouable } from './logic';
+import { estOuverte } from './logic';
 
 const img = (nom: string) => `${import.meta.env.BASE_URL}avent/${nom}`;
 
 /** Année du calendrier : la case N s'ouvre le N décembre de cette année. */
 export const ANNEE_AVENT = 2026;
-
-/**
- * Phase de test : les jours déjà prêts sont ouverts tout de suite, quelle que soit la date.
- * Pour lancer le vrai calendrier de décembre, passer à `false` : les cases s'ouvriront alors
- * jour après jour, et les scores du test seront remis à zéro.
- */
-export const PHASE_TEST = true;
 
 export const JOURS: JourAvent[] = [
   {
@@ -683,9 +676,11 @@ export const JOURS: JourAvent[] = [
   },
 ];
 
-/** Une case est-elle ouverte ? (aperçu : tout ; test : les jours prêts ; sinon : selon la date) */
-export function caseOuverte(jour: JourAvent, now: Date, apercu: boolean): boolean {
-  if (apercu) return true;
-  if (PHASE_TEST) return jourJouable(jour);
+/**
+ * Une case est-elle ouverte ? Pour les collaborateurs : à partir du N décembre.
+ * L'administrateur a accès à toutes les cases en avance, pour présenter le calendrier.
+ */
+export function caseOuverte(jour: JourAvent, now: Date, admin: boolean): boolean {
+  if (admin) return true;
   return estOuverte(ANNEE_AVENT, jour.jour, now);
 }
