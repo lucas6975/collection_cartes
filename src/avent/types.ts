@@ -11,13 +11,23 @@ export interface Cible {
 export type Jeu =
   | {
       type: 'anomalies';
-      /** Titre de la mission, affiché par Ulysse au-dessus de l'image. */
-      mission?: string;
+      /** Contexte raconté par Ulysse au-dessus de l'image. */
+      contexte?: string;
       consigne: string;
       image: string;
       /** Rapport largeur / hauteur de l'image. */
       ratio: number;
-      anomalies: { id: string; label: string; cibles: Cible[] }[];
+      anomalies: {
+        id: string;
+        label: string;
+        cibles: Cible[];
+        /** Pictogramme court affiché quand l'anomalie est trouvée. */
+        emoji?: string;
+        /** Le bon réflexe, en une phrase. */
+        explication?: string;
+        /** Aide proposée quand il ne reste que cette anomalie. */
+        indice?: string;
+      }[];
     }
   | {
       type: 'ordre';
