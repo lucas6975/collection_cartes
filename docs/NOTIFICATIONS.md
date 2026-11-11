@@ -46,9 +46,10 @@ La clé publique est aussi dans `src/config.ts` : les deux doivent être identiq
 
 1. Supabase › **Edge Functions** › **Deploy a new function** › **Via Editor**.
 2. Nom de la fonction : `envoyer-rappels`.
-3. Remplacer le contenu du fichier `index.ts` par celui de
-   `supabase/functions/envoyer-rappels/index.ts`.
-4. Ajouter un fichier nommé `rappel.ts` et y coller `supabase/functions/envoyer-rappels/rappel.ts`.
+3. Remplacer **tout** le contenu du fichier `index.ts` par celui de
+   `supabase/functions/envoyer-rappels/tout-en-un.ts` (version en un seul fichier, rien d’autre à
+   ajouter).
+4. (Version en deux fichiers, au choix : `index.ts` + un fichier `rappel.ts`.)
 5. **Deploy function**.
 6. Dans les réglages de la fonction (**Details** ou **Settings**), **désactiver** l’option
    « Verify JWT » / « Enforce JWT verification », puis enregistrer. La fonction ne fait rien en

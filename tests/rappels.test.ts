@@ -36,3 +36,14 @@ describe('rappels', () => {
     expect(appels(2026, 6, 9).map((r) => r?.type)).toEqual([undefined, 'pack', undefined]);
   });
 });
+
+describe('fonction Supabase en un seul fichier', () => {
+  it('tout-en-un.ts est à jour (sinon : node scripts/fonction-tout-en-un.mjs)', async () => {
+    const { readFileSync } = await import('node:fs');
+    // @ts-expect-error script JavaScript sans types
+    const { toutEnUn } = await import('../scripts/fonction-tout-en-un.mjs');
+    const fichier = readFileSync('supabase/functions/envoyer-rappels/tout-en-un.ts', 'utf8');
+    expect(fichier).toBe(toutEnUn());
+    expect(fichier).not.toContain("from './rappel.ts'");
+  });
+});
