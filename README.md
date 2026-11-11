@@ -15,12 +15,6 @@ pour Excel. Les inscriptions sont centralisées dans une base Supabase : voir
 [`docs/SUPABASE.md`](docs/SUPABASE.md) pour la connecter. Tant qu'elle ne l'est pas, les inscriptions
 restent sur chaque téléphone et sont envoyées dès la connexion.
 
-## Rappels sur les téléphones
-
-Chacun peut activer deux rappels : **pack du jour disponible** (lundi au vendredi, 8 h 30) et
-**case du jour à ouvrir** (calendrier de l’Avent, 7 h 30). Sur iPhone, l’appli doit être ajoutée à
-l’écran d’accueil. Mise en place côté Supabase : [`docs/NOTIFICATIONS.md`](docs/NOTIFICATIONS.md).
-
 ## Les jeux
 
 Le site s’ouvre sur un **menu** avec deux jeux.
