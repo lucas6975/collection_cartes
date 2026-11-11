@@ -120,7 +120,8 @@ export const identiteStore = {
           jours: r.jours,
           jeton: r.jeton,
           synchro: true,
-          joursChoisis: id.joursChoisis,
+          // Déjà inscrit(e) avec des jours (par ex. depuis un autre téléphone) : on les garde.
+          joursChoisis: id.joursChoisis || r.jours.length > 0,
         },
       });
       return true;

@@ -16,7 +16,9 @@ import { NOEL } from './ui';
 export function TirageInscription() {
   const { identite, codeAdmin } = useIdentite();
   const toast = useToast();
-  const [jours, setJours] = useState<number[]>(JOURS_OUVRES);
+  const [jours, setJours] = useState<number[]>(() =>
+    identite?.jours.length ? identite.jours : JOURS_OUVRES,
+  );
   const [envoi, setEnvoi] = useState(false);
 
   if (!identite || codeAdmin) return null;
