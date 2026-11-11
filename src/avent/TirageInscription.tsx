@@ -95,11 +95,19 @@ export function TirageInscription() {
               Participe au tirage au sort !
             </p>
             <p className="text-sm text-white/85">
-              Chaque jour, une personne inscrite est tirée au sort et gagne la récompense du jour.
+              Chaque jour, une personne est tirée au sort : si elle réussit le défi du jour, elle
+              gagne un cadeau 🎁
             </p>
           </div>
         </div>
         <div className="space-y-4 p-5">
+          <div className="flex items-start gap-2.5 rounded-2xl bg-sun/15 px-3.5 py-3 text-sm text-navy-950">
+            <span className="text-lg leading-none">🎄</span>
+            <p>
+              <b>Le plus gros cadeau</b> sera remis le <b>17 décembre</b>, lors de la{' '}
+              <b>soirée de Noël IMECA</b> !
+            </p>
+          </div>
           <p className="text-sm text-muted">
             Tous les jours sont cochés :{' '}
             <b className="text-navy-950">décoche ceux où tu es absent</b> (congés, déplacement…).

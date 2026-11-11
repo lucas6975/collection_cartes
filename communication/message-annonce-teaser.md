@@ -47,7 +47,9 @@ complétera sa collection en premier ?
 🎄 **Le calendrier de l'Avent d'Ulysse** : du 1er au 24 décembre, une case s'ouvre chaque jour
 ouvré, avec un défi : cherche-et-trouve, quiz, memory, pendu…
 
-🎁 **Un tirage au sort chaque jour** parmi les personnes inscrites.
+🎁 **Un tirage au sort chaque jour** parmi les personnes inscrites : si le gagnant réussit le
+défi du jour, il remporte un **cadeau (goodies)**. Le plus gros sera remis le **17 décembre**, lors
+de la **soirée de Noël IMECA** !
 
 🎬 **Le 17 décembre, une scène choc en situation réelle.** La personne tirée au sort ce jour-là
 interviendra sur un cas préparé par l'équipe. On n'en dit pas plus 🤫
@@ -83,7 +85,8 @@ Alors, vous pensiez vraiment vous débarrasser de nous jusqu'en 2027 ? 😉
 >
 > 🃏 5 cartes sécurité à collectionner chaque jour
 > 🎄 Un calendrier de l'Avent du 1er au 24 décembre
-> 🎁 Un tirage au sort chaque jour
+> 🎁 Un tirage au sort chaque jour : défi réussi = un cadeau !
+> 🎄 Le plus gros cadeau le 17 décembre, à la soirée de Noël IMECA
 > 🎬 Le 17 décembre : une scène choc en situation réelle 🤫
 >
 > 👉 Scanne l'affiche ou ouvre ce lien : https://lucas6975.github.io/collection_cartes/

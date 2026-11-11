@@ -60,7 +60,8 @@ export function SceneChoc({
             </p>
             <p className="mt-2 text-[15px] text-white/85">
               La Team Ulysse met en place une situation réelle à IMECA. La personne tirée au sort
-              pour ce jour vient intervenir sur le cas préparé par l’équipe.
+              pour ce jour vient intervenir sur le cas préparé par l’équipe. À la clé : le plus gros
+              cadeau du calendrier, remis à la soirée de Noël IMECA 🎁
             </p>
             <Link
               to="/moi"

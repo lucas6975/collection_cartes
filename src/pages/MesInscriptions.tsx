@@ -76,7 +76,7 @@ export function MesInscriptions() {
       <PageHeader
         eyebrow="Mon compte"
         title="Mes inscriptions"
-        description="Choisis les jours où tu veux être tiré(e) au sort pour le calendrier de l’Avent."
+        description="Choisis les jours où tu veux être tiré(e) au sort : réussis le défi du jour et gagne un cadeau !"
       />
 
       {gagne && gagne.length > 0 && (
@@ -91,7 +91,8 @@ export function MesInscriptions() {
             <p className="font-display text-xl font-extrabold">Tu as été tiré(e) au sort !</p>
             <p className="text-sm text-white/85">
               Jour{gagne.length > 1 ? 's' : ''} {gagne.join(', ')} : un membre de la Team Ulysse va
-              te contacter pour relever le défi.
+              te contacter pour relever le défi. Réussis-le et gagne ton cadeau 🎁
+              {gagne.includes(17) && ' (le gros cadeau, remis à la soirée de Noël IMECA !)'}
             </p>
           </div>
         </motion.div>
