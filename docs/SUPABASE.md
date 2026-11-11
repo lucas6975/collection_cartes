@@ -59,3 +59,12 @@ Le menu de l’appli propose « Rejoins la coalition Team Ulysse ». Pour enregi
 exécuter **une fois** `supabase/maj-coalition-et-rappels.sql` (SQL Editor › nouvel onglet vide › coller ›
 Run). Sur le téléphone de l’administrateur, l’encadré « Coalition Team Ulysse » du menu ouvre ensuite
 la liste des volontaires, avec un export Excel.
+
+## Mise à jour : corrections des cases
+
+À la fin de chaque case, un bouton **« Voir la correction »** affiche l’image de correction
+(`public/avent/corrections/jour-N.webp`, aussi dans `communication/corrections/` pour la
+partager). La personne tirée au sort ce jour-là ne la voit pas tant que l’administrateur ne l’a pas
+débloquée (espace administrateur › onglet **Résultats** › « Débloquer sa correction »).
+Exécuter **une fois** `supabase/maj-corrections.sql` (SQL Editor › nouvel onglet vide › Run).
+Tant que ce n’est pas fait, la correction s’affiche pour tout le monde.

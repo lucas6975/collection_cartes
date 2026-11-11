@@ -1,12 +1,14 @@
 import {
   Dices,
   Download,
+  Lock,
   RefreshCw,
   RotateCcw,
   Search,
   ShieldCheck,
   Trash2,
   Trophy,
+  Unlock,
   Users,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -153,7 +155,30 @@ export function Admin() {
           }}
         />
       )}
-      {onglet === 'resultats' && <OngletResultats tirages={tirages} />}
+      {onglet === 'resultats' && (
+        <OngletResultats
+          tirages={tirages}
+          onDebloquer={async (jour, debloquer) => {
+            try {
+              await api.adminDebloquerCorrection(codeAdmin, jour, debloquer);
+              toast(
+                debloquer
+                  ? `Correction du ${jour} débloquée pour le gagnant`
+                  : `Correction du ${jour} de nouveau cachée pour le gagnant`,
+                'success',
+              );
+              await charger();
+            } catch (e) {
+              toast(
+                e instanceof ApiError
+                  ? `${e.message} (as-tu lancé supabase/maj-corrections.sql ?)`
+                  : 'Erreur',
+                'error',
+              );
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -535,7 +560,13 @@ function OngletInscrits({
 
 // ───────────── Résultats ─────────────
 
-function OngletResultats({ tirages }: { tirages: Tirage[] }) {
+function OngletResultats({
+  tirages,
+  onDebloquer,
+}: {
+  tirages: Tirage[];
+  onDebloquer: (jour: number, debloquer: boolean) => Promise<void>;
+}) {
   return (
     <ul className="panel divide-y divide-line">
       {JOURS_OUVRES.map((j) => {
@@ -551,9 +582,30 @@ function OngletResultats({ tirages }: { tirages: Tirage[] }) {
               {j}
             </span>
             {t ? (
-              <p className="flex items-center gap-2 font-semibold text-navy-950">
-                <ShieldCheck size={16} className="text-success" /> {nomComplet(t)}
-              </p>
+              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
+                <p className="flex items-center gap-2 font-semibold text-navy-950">
+                  <ShieldCheck size={16} className="text-success" /> {nomComplet(t)}
+                </p>
+                {t.correction_debloquee ? (
+                  <button
+                    type="button"
+                    onClick={() => void onDebloquer(j, false)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-success/12 px-3 py-1.5 text-xs font-bold text-success"
+                    title="Cacher à nouveau la correction pour le gagnant"
+                  >
+                    <Unlock size={13} /> Correction débloquée
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => void onDebloquer(j, true)}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-sun/25 px-3 py-1.5 text-xs font-bold text-navy-950 hover:bg-sun/40"
+                    title="Le gagnant ne voit pas encore la correction de cette case"
+                  >
+                    <Lock size={13} /> Débloquer sa correction
+                  </button>
+                )}
+              </div>
             ) : (
               <p className="text-sm text-muted">Pas encore tiré</p>
             )}

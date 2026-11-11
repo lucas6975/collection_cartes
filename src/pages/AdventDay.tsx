@@ -10,6 +10,7 @@ import { Memory } from '../avent/jeux/Memory';
 import { MotsMeles } from '../avent/jeux/MotsMeles';
 import { Pendu } from '../avent/jeux/Pendu';
 import { Quiz } from '../avent/jeux/Quiz';
+import { Correction } from '../avent/Correction';
 import { SceneChoc } from '../avent/jeux/SceneChoc';
 import { Erreur, Intrus } from '../avent/jeux/Series';
 import { Tri } from '../avent/jeux/Tri';
@@ -343,7 +344,10 @@ export function AdventDay() {
                   ),
               )}
             </ul>
-            <div className="mt-6 flex flex-col justify-center gap-2 sm:flex-row">
+            <div className="mt-5 flex justify-center">
+              <Correction jour={jour.jour} />
+            </div>
+            <div className="mt-4 flex flex-col justify-center gap-2 sm:flex-row">
               <Button
                 variant="ghost"
                 onClick={rejouer}

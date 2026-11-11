@@ -80,6 +80,11 @@ alternent pour ne jamais avoir deux jours de suite le même :
 et la personne tirée au sort ce jour-là vient intervenir. Les autres y trouvent Ulysse en Père Noël,
 une anecdote (la pyramide de Heinrich) et un petit défi à faire à leur poste.
 
+**Corrections :** à la fin de chaque case, « Voir la correction » affiche la correction (même
+maquette pour toutes les cases, aussi dans `communication/corrections/`). Le tiré au sort du jour ne
+la voit qu’après déblocage par l’administrateur (onglet Résultats). Migration :
+`supabase/maj-corrections.sql`.
+
 **Ouverture :** pour les collaborateurs, les cases restent fermées jusqu’au N décembre, avec un
 compte à rebours avant la première. L’administrateur (code saisi sur son téléphone) a accès à toutes
 les cases en avance pour présenter le calendrier ; ses étoiles ne sont pas enregistrées et un bouton

@@ -59,6 +59,8 @@ export interface Tirage {
   prenom: string;
   nom: string;
   tire_le?: string;
+  /** Vrai quand l'administrateur a débloqué la correction pour le gagnant de ce jour. */
+  correction_debloquee?: boolean;
 }
 
 export interface Volontaire {
@@ -116,6 +118,16 @@ export const api = {
       p_jeton: jeton ?? null,
     }),
   rappelsSupprimer: (endpoint: string) => rpc<null>('supprimer_rappels', { p_endpoint: endpoint }),
+  correctionBloquee: (jeton: string, jour: number) =>
+    rpc<boolean>('correction_bloquee', { p_jeton: jeton, p_jour: jour }),
+
+  adminDebloquerCorrection: (code: string, jour: number, debloquer = true) =>
+    rpc<null>('admin_debloquer_correction', {
+      p_code: code,
+      p_jour: jour,
+      p_debloquer: debloquer,
+    }),
+
   adminVerifier: (code: string) => rpc<boolean>('admin_verifier', { p_code: code }),
 
   adminListe: (code: string) =>
