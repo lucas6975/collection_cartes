@@ -49,7 +49,7 @@ export function MesInscriptions() {
     if (!prenom.trim() || !nom.trim()) return toast('Indique ton prénom et ton nom.', 'error');
     setEnvoi(true);
     try {
-      const ok = await identiteStore.enregistrer(prenom, nom, jours);
+      const ok = await identiteStore.enregistrer(prenom, nom, jours, true);
       toast(
         ok ? 'Inscription mise à jour' : 'Enregistré sur ce téléphone, envoi dès que possible',
         ok ? 'success' : 'info',
@@ -113,9 +113,15 @@ export function MesInscriptions() {
                 {identite.prenom} {identite.nom}
               </p>
               {identite.synchro ? (
-                <p className="flex items-center gap-1 text-xs font-semibold text-success">
-                  <Gift size={13} /> Inscrit(e) aux tirages au sort
-                </p>
+                identite.jours.length > 0 ? (
+                  <p className="flex items-center gap-1 text-xs font-semibold text-success">
+                    <Gift size={13} /> Inscrit(e) aux tirages au sort
+                  </p>
+                ) : (
+                  <p className="flex items-center gap-1 text-xs font-semibold text-muted">
+                    <Gift size={13} /> Pas encore inscrit(e) au tirage au sort
+                  </p>
+                )
               ) : (
                 <p className="flex items-center gap-1 text-xs font-semibold text-sun-dark">
                   <CloudOff size={13} /> Pas encore envoyé : nouvel essai automatique à la prochaine

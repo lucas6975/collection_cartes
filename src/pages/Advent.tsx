@@ -8,6 +8,7 @@ import { ANNEE_AVENT, JOURS, caseOuverte } from '../avent/jours';
 import { caseDuJour, dateOuverture, joursAvantDebut } from '../avent/logic';
 import { aventStore, useAvent, type JourTermine } from '../avent/progress';
 import { useIdentite } from '../data/identite';
+import { TirageInscription } from '../avent/TirageInscription';
 import { Etoiles, NOEL, Neige } from '../avent/ui';
 
 const FOND = `${import.meta.env.BASE_URL}avent/fond-noel.webp`;
@@ -225,6 +226,8 @@ export function Advent() {
           </p>
         </div>
       </section>
+
+      {!admin && <TirageInscription />}
 
       {admin && (
         <div className="flex flex-col gap-3 rounded-2xl bg-navy px-4 py-3 text-sm text-white sm:flex-row sm:items-center">

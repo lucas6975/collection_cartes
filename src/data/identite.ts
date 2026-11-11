@@ -12,6 +12,8 @@ export interface Identite {
   jeton?: string;
   /** Faux tant que l'inscription n'a pas pu être envoyée à la base. */
   synchro: boolean;
+  /** Vrai quand la personne a validé ses jours de tirage au sort (dans le calendrier). */
+  joursChoisis?: boolean;
 }
 
 interface Etat {
@@ -44,6 +46,8 @@ function load(): Etat {
             synchro: false,
           };
         }
+        if (identite && identite.joursChoisis === undefined)
+          identite = { ...identite, joursChoisis: identite.jours.length > 0 };
         return { identite, codeAdmin: p.codeAdmin ?? null };
       }
     }
@@ -79,7 +83,7 @@ export const identiteStore = {
    * Enregistre (ou modifie) l'inscription. Elle est gardée sur le téléphone même si la base
    * est injoignable, et envoyée dès que possible.
    */
-  async enregistrer(prenom: string, nom: string, jours: number[]) {
+  async enregistrer(prenom: string, nom: string, jours: number[], joursChoisis?: boolean) {
     const avant = etat.identite;
     commit({
       ...etat,
@@ -89,9 +93,17 @@ export const identiteStore = {
         jours: jours.filter((j) => !WEEKENDS.includes(j)).sort((a, b) => a - b),
         jeton: avant?.jeton,
         synchro: false,
+        joursChoisis: joursChoisis ?? avant?.joursChoisis ?? false,
       },
     });
     return identiteStore.synchroniser();
+  },
+
+  /** Inscription au tirage au sort : valide les jours choisis dans le calendrier. */
+  async choisirJours(jours: number[]) {
+    const id = etat.identite;
+    if (!id) return false;
+    return identiteStore.enregistrer(id.prenom, id.nom, jours, true);
   },
 
   /** Envoie l'inscription à la base si elle n'y est pas encore. Renvoie vrai si c'est fait. */
@@ -102,7 +114,14 @@ export const identiteStore = {
       const r = await api.inscrire(id.prenom, id.nom, id.jours, id.jeton);
       commit({
         ...etat,
-        identite: { prenom: r.prenom, nom: r.nom, jours: r.jours, jeton: r.jeton, synchro: true },
+        identite: {
+          prenom: r.prenom,
+          nom: r.nom,
+          jours: r.jours,
+          jeton: r.jeton,
+          synchro: true,
+          joursChoisis: id.joursChoisis,
+        },
       });
       return true;
     } catch (e) {

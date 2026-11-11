@@ -2,20 +2,18 @@ import { ArrowRight, KeyRound, Lock, ShieldCheck } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState, type FormEvent } from 'react';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
-import { JoursSelection } from '../components/JoursSelection';
 import { Button } from '../components/ui/primitives';
 import { ApiError } from '../data/api';
-import { JOURS_OUVRES, identiteStore } from '../data/identite';
+import { identiteStore } from '../data/identite';
 import { estInstallee, estIOS } from '../data/rappels';
 
 const champ =
   'h-12 w-full rounded-xl border border-line bg-white px-4 text-[16px] text-ink outline-none transition-shadow placeholder:text-muted/70 focus:border-blue focus:ring-4 focus:ring-blue/10';
 
-/** Premier lancement : prénom, nom et jours de participation au tirage au sort. */
+/** Premier lancement : prénom et nom. Les jours du tirage au sort se choisissent dans le calendrier. */
 export function Bienvenue() {
   const [prenom, setPrenom] = useState('');
   const [nom, setNom] = useState('');
-  const [jours, setJours] = useState<number[]>(JOURS_OUVRES);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [modeAdmin, setModeAdmin] = useState(false);
@@ -28,7 +26,7 @@ export function Bienvenue() {
     setEnvoi(true);
     try {
       // Même hors ligne, l'inscription est gardée et sera envoyée plus tard.
-      await identiteStore.enregistrer(prenom, nom, jours);
+      await identiteStore.enregistrer(prenom, nom, [], false);
     } catch (err) {
       setErreur(err instanceof ApiError ? err.message : 'Une erreur est survenue, réessaie.');
       setEnvoi(false);
@@ -183,17 +181,6 @@ export function Bienvenue() {
                 </label>
               </div>
 
-              <div>
-                <p className="mb-1 font-display text-base font-extrabold text-navy-950">
-                  Tirage au sort du calendrier de l’Avent
-                </p>
-                <p className="mb-3 text-sm text-muted">
-                  Chaque jour, une personne inscrite est tirée au sort pour relever le défi et
-                  gagner la récompense du jour. Choisis tes jours :
-                </p>
-                <JoursSelection value={jours} onChange={setJours} />
-              </div>
-
               {erreur && (
                 <p className="rounded-xl bg-danger/10 px-3 py-2 text-sm font-medium text-danger">
                   {erreur}
@@ -212,7 +199,8 @@ export function Bienvenue() {
 
               <p className="flex items-start gap-2 text-xs text-muted">
                 <Lock size={13} className="mt-0.5 shrink-0" />
-                Ton nom sert uniquement à l’organisation des tirages au sort de la Team Ulysse.
+                Ton nom sert uniquement à l’organisation des jeux et des tirages au sort de la Team
+                Ulysse.
               </p>
             </motion.form>
           )}
