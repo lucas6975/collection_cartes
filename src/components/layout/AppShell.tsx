@@ -11,9 +11,12 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect } from 'react';
 import { NavLink, useLocation, useOutlet } from 'react-router';
+import { ANNEE_AVENT, JOURS, caseOuverte } from '../../avent/jours';
+import { caseDuJour } from '../../avent/logic';
 import { useAvent } from '../../avent/progress';
 import { useIdentite } from '../../data/identite';
 import { useGame } from '../../data/store';
+import { packDuJourOuvert } from '../../domain/packs';
 import { Avatar, cx } from '../ui/primitives';
 
 /** Onglets de la partie « cartes à collectionner ». */
@@ -171,53 +174,9 @@ export function AppShell() {
             </NavLink>
           </div>
         </div>
-
-        {/* Navigation mobile, sous l'en-tête */}
-        {section !== 'menu' && section !== 'compte' && (
-          <nav className="grid grid-cols-3 gap-2 px-4 pb-3 sm:hidden" aria-label="Navigation">
-            <NavLink
-              to="/"
-              className="flex h-11 items-center justify-center gap-1.5 rounded-xl border border-line bg-white text-sm font-bold text-navy"
-            >
-              <House size={16} /> Menu
-            </NavLink>
-            {section === 'cartes' ? (
-              NAV_CARTES.map((i) => (
-                <NavLink
-                  key={i.to}
-                  to={i.to}
-                  className={({ isActive }) =>
-                    cx(
-                      'flex h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-bold transition-colors',
-                      isActive
-                        ? 'bg-sun text-navy-950 shadow-sm shadow-sun/30'
-                        : 'border border-line bg-white text-navy',
-                    )
-                  }
-                >
-                  <i.icon size={16} />
-                  {i.label === 'Ma collection' ? 'Collection' : 'Pack'}
-                </NavLink>
-              ))
-            ) : (
-              <NavLink
-                to="/avent"
-                end
-                className={({ isActive }) =>
-                  cx(
-                    'col-span-2 flex h-11 items-center justify-center gap-1.5 rounded-xl text-sm font-bold',
-                    isActive ? 'bg-sun text-navy-950' : 'border border-line bg-white text-navy',
-                  )
-                }
-              >
-                <CalendarDays size={16} /> Calendrier
-              </NavLink>
-            )}
-          </nav>
-        )}
       </header>
 
-      <main className="mx-auto w-full max-w-[1180px] px-4 pb-16 pt-6 sm:px-6 md:pt-8">
+      <main className="mx-auto w-full max-w-[1180px] px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:pb-16 md:pt-8">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -230,6 +189,94 @@ export function AppShell() {
           </motion.div>
         </AnimatePresence>
       </main>
+
+      <BarreOnglets />
     </div>
+  );
+}
+
+/** Onglets en bas de l'écran, sur téléphone (comme la plupart des applis). */
+function BarreOnglets() {
+  const { progress } = useGame();
+  const avent = useAvent();
+  const { codeAdmin } = useIdentite();
+  const { pathname } = useLocation();
+  const now = new Date();
+  const packDispo = !packDuJourOuvert(progress, now);
+  const jour = caseDuJour(ANNEE_AVENT, now);
+  const caseDispo = (() => {
+    const j = jour ? JOURS.find((x) => x.jour === jour) : undefined;
+    return !!j && !avent[j.jour] && caseOuverte(j, now, !!codeAdmin);
+  })();
+
+  const onglets = [
+    { to: '/', label: 'Accueil', icon: House, actif: pathname === '/' },
+    {
+      to: '/cartes',
+      label: 'Pack',
+      icon: Gift,
+      actif: pathname === '/cartes',
+      pastille: packDispo ? '1' : null,
+    },
+    { to: '/collection', label: 'Collection', icon: Layers, actif: pathname === '/collection' },
+    {
+      to: '/avent',
+      label: 'Calendrier',
+      icon: CalendarDays,
+      actif: pathname.startsWith('/avent'),
+      pastille: caseDispo ? '' : null,
+    },
+    {
+      to: '/moi',
+      label: 'Moi',
+      icon: UserRound,
+      actif: ['/moi', '/admin', '/coalition'].includes(pathname),
+    },
+  ];
+
+  return (
+    <nav
+      aria-label="Navigation principale"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_18px_rgba(11,35,71,0.06)] backdrop-blur-md sm:hidden"
+    >
+      <div className="flex h-16 items-stretch px-1">
+        {onglets.map((o) => (
+          <NavLink
+            key={o.to}
+            to={o.to}
+            aria-current={o.actif ? 'page' : undefined}
+            className={cx(
+              'flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] transition-colors',
+              o.actif ? 'font-extrabold text-navy-950' : 'font-semibold text-[#7A889B]',
+            )}
+          >
+            <span className="relative grid h-8 w-12 place-items-center">
+              {o.actif && (
+                <motion.span
+                  layoutId="onglet-actif"
+                  className="absolute inset-0 rounded-2xl bg-sun"
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                />
+              )}
+              <o.icon size={22} strokeWidth={o.actif ? 2.3 : 1.9} className="relative" />
+              {o.pastille != null && (
+                <span
+                  className={cx(
+                    'absolute grid place-items-center rounded-full bg-danger font-extrabold text-white ring-2 ring-white',
+                    o.pastille
+                      ? 'right-1.5 top-0 h-4 min-w-4 px-1 text-[10px]'
+                      : 'right-3 top-1 size-2.5',
+                  )}
+                  aria-label={o.label === 'Pack' ? 'Pack à ouvrir' : 'Case du jour à ouvrir'}
+                >
+                  {o.pastille}
+                </span>
+              )}
+            </span>
+            {o.label}
+          </NavLink>
+        ))}
+      </div>
+    </nav>
   );
 }
