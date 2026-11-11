@@ -231,7 +231,7 @@ export function Advent() {
           <ShieldCheck size={18} className="shrink-0 text-sun" />
           <p className="flex-1">
             <strong>Mode administrateur :</strong> toutes les cases sont ouvertes pour ta
-            démonstration. Tes étoiles ne sont pas enregistrées et repartent de zéro.
+            démonstration. Tes étoiles sont gardées à part, jusqu’à ce que tu les remettes à zéro.
           </p>
           <button
             type="button"

@@ -87,8 +87,8 @@ la voit qu’après déblocage par l’administrateur (onglet Résultats). Migra
 
 **Ouverture :** pour les collaborateurs, les cases restent fermées jusqu’au N décembre, avec un
 compte à rebours avant la première. L’administrateur (code saisi sur son téléphone) a accès à toutes
-les cases en avance pour présenter le calendrier ; ses étoiles ne sont pas enregistrées et un bouton
-les remet à zéro.
+les cases en avance pour présenter le calendrier ; ses étoiles sont enregistrées à part (jamais
+mélangées avec celles d’un joueur) et un bouton les remet à zéro.
 
 **Ajouter un défi :** remplissez `jeux` du jour concerné dans `src/avent/jours.ts`, en vous
 inspirant des jours déjà faits (types : `anomalies`, `ordre`, `quiz`, `association`, `vraifaux`,

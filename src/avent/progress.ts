@@ -1,8 +1,9 @@
 // Progression du calendrier.
 //
 // Collaborateurs : les étoiles sont enregistrées dans le navigateur.
-// Administrateur : rien n'est enregistré. Ses étoiles ne durent que le temps de la visite,
-// pour pouvoir présenter les défis à l'équipe en repartant toujours de zéro.
+// Administrateur : ses étoiles sont enregistrées à part (clé distincte), pour ne jamais se
+// mélanger avec celles d'un joueur. Elles restent d'une visite à l'autre et ne repartent de
+// zéro que lorsqu'il touche « Remettre à zéro ».
 
 import { useSyncExternalStore } from 'react';
 import { identiteStore } from '../data/identite';
@@ -18,10 +19,11 @@ export interface JourTermine {
 type Etat = Record<number, JourTermine>;
 
 const KEY = `team-ulysse-avent-${ANNEE_AVENT}`;
+const KEY_ADMIN = `team-ulysse-avent-admin-${ANNEE_AVENT}`;
 
-function load(): Etat {
+function load(key: string): Etat {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(key);
     const parsed: unknown = raw ? JSON.parse(raw) : {};
     return parsed && typeof parsed === 'object' ? (parsed as Etat) : {};
   } catch {
@@ -29,9 +31,17 @@ function load(): Etat {
   }
 }
 
-let etat: Etat = load();
-/** Étoiles de l'administrateur, gardées en mémoire uniquement. */
-let etatAdmin: Etat = {};
+function save(key: string, e: Etat) {
+  try {
+    localStorage.setItem(key, JSON.stringify(e));
+  } catch {
+    // Stockage indisponible : le résultat reste en mémoire pour la visite.
+  }
+}
+
+let etat: Etat = load(KEY);
+/** Étoiles de l'administrateur, enregistrées à part. */
+let etatAdmin: Etat = load(KEY_ADMIN);
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
 const estAdmin = () => !!identiteStore.get().codeAdmin;
@@ -52,19 +62,17 @@ export const aventStore = {
     if (courant[jour] && courant[jour].etoiles > resultat.etoiles) return;
     if (estAdmin()) {
       etatAdmin = { ...etatAdmin, [jour]: resultat };
+      save(KEY_ADMIN, etatAdmin);
     } else {
       etat = { ...etat, [jour]: resultat };
-      try {
-        localStorage.setItem(KEY, JSON.stringify(etat));
-      } catch {
-        // Stockage indisponible : le résultat reste en mémoire pour la visite.
-      }
+      save(KEY, etat);
     }
     notify();
   },
   /** Remet les étoiles de l'administrateur à zéro (avant une démonstration). */
   remettreAZeroAdmin() {
     etatAdmin = {};
+    save(KEY_ADMIN, etatAdmin);
     notify();
   },
 };
