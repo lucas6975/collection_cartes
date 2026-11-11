@@ -57,5 +57,5 @@ Les noms sont des données personnelles : une fois l'opération terminée, suppr
 
 Le menu de l’appli propose « Rejoins la coalition Team Ulysse ». Pour enregistrer les réponses,
 exécuter **une fois** `supabase/maj-coalition-et-rappels.sql` (SQL Editor › nouvel onglet vide › coller ›
-Run). Les volontaires apparaissent ensuite dans l’espace administrateur, onglet **Coalition**,
-avec un export Excel.
+Run). Sur le téléphone de l’administrateur, l’encadré « Coalition Team Ulysse » du menu ouvre ensuite
+la liste des volontaires, avec un export Excel.

@@ -1,8 +1,6 @@
 import {
-  CalendarCheck,
   Dices,
   Download,
-  HandHeart,
   RefreshCw,
   RotateCcw,
   Search,
@@ -18,10 +16,10 @@ import { Confetti, NOEL } from '../avent/ui';
 import { Modal, useToast } from '../components/ui/overlay';
 import { Avatar, Button, PageHeader, cx } from '../components/ui/primitives';
 import { baseConfiguree } from '../config';
-import { ApiError, api, type Participant, type Tirage, type Volontaire } from '../data/api';
+import { ApiError, api, type Participant, type Tirage } from '../data/api';
 import { JOURS_OUVRES, useIdentite } from '../data/identite';
 
-type Onglet = 'tirage' | 'inscrits' | 'resultats' | 'coalition';
+type Onglet = 'tirage' | 'inscrits' | 'resultats';
 
 /** [1,2,3,5,7,8] → « 1–3, 5, 7–8 » */
 export function plages(jours: number[]): string {
@@ -52,8 +50,6 @@ export function Admin() {
   const [onglet, setOnglet] = useState<Onglet>('tirage');
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [tirages, setTirages] = useState<Tirage[]>([]);
-  const [volontaires, setVolontaires] = useState<Volontaire[]>([]);
-  const [erreurCoalition, setErreurCoalition] = useState<string | null>(null);
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState<string | null>(null);
 
@@ -69,13 +65,6 @@ export function Admin() {
       setErreur(e instanceof ApiError ? e.message : 'Erreur de chargement');
     } finally {
       setChargement(false);
-    }
-    // Volontaires de la coalition : chargés à part (la table est ajoutée par une migration).
-    try {
-      setVolontaires(await api.adminVolontaires(codeAdmin));
-      setErreurCoalition(null);
-    } catch (e) {
-      setErreurCoalition(e instanceof ApiError ? e.message : 'Erreur de chargement');
     }
   }, [codeAdmin]);
 
@@ -120,7 +109,6 @@ export function Admin() {
             ['tirage', 'Tirage', Dices],
             ['inscrits', `Inscrits (${participants.length})`, Users],
             ['resultats', 'Résultats', Trophy],
-            ['coalition', `Coalition (${volontaires.length})`, HandHeart],
           ] as const
         ).map(([id, label, I]) => (
           <button
@@ -166,21 +154,6 @@ export function Admin() {
         />
       )}
       {onglet === 'resultats' && <OngletResultats tirages={tirages} />}
-      {onglet === 'coalition' && (
-        <OngletCoalition
-          volontaires={volontaires}
-          erreur={erreurCoalition}
-          onSupprimer={async (v) => {
-            try {
-              await api.adminSupprimerVolontaire(codeAdmin, v.id);
-              toast(`${nomComplet(v)} retiré(e) de la liste`, 'info');
-              await charger();
-            } catch (e) {
-              toast(e instanceof ApiError ? e.message : 'Erreur', 'error');
-            }
-          }}
-        />
-      )}
     </div>
   );
 }
@@ -588,123 +561,5 @@ function OngletResultats({ tirages }: { tirages: Tirage[] }) {
         );
       })}
     </ul>
-  );
-}
-
-// ───────────── Coalition : volontaires ─────────────
-
-function telechargerCsvCoalition(volontaires: Volontaire[]) {
-  const echapper = (v: string) => `"${v.replace(/"/g, '""')}"`;
-  const lignes = [
-    ['Prénom', 'Nom', 'Inscrit au calendrier', 'Volontaire le'].join(';'),
-    ...volontaires.map((v) =>
-      [
-        echapper(v.prenom),
-        echapper(v.nom),
-        v.participant_id ? 'oui' : 'non',
-        echapper(new Date(v.le).toLocaleDateString('fr-FR')),
-      ].join(';'),
-    ),
-  ];
-  const blob = new Blob(['\uFEFF' + lignes.join('\n')], { type: 'text/csv;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'volontaires-coalition-team-ulysse.csv';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function OngletCoalition({
-  volontaires,
-  erreur,
-  onSupprimer,
-}: {
-  volontaires: Volontaire[];
-  erreur: string | null;
-  onSupprimer: (v: Volontaire) => Promise<void>;
-}) {
-  const [suppr, setSuppr] = useState<Volontaire | null>(null);
-
-  if (erreur) {
-    return (
-      <p className="panel p-6 text-sm text-muted">
-        La liste des volontaires n’est pas encore disponible ({erreur}). Exécute une fois le fichier{' '}
-        <strong>supabase/maj-coalition-et-rappels.sql</strong> dans Supabase (SQL Editor, onglet
-        vide).
-      </p>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted">
-          Les personnes qui ont répondu « Je veux en faire partie » sur le menu de l’appli.
-        </p>
-        <Button
-          variant="secondary"
-          onClick={() => telechargerCsvCoalition(volontaires)}
-          disabled={!volontaires.length}
-        >
-          <Download size={16} /> Exporter (Excel)
-        </Button>
-      </div>
-
-      {volontaires.length === 0 ? (
-        <p className="panel p-6 text-center text-sm text-muted">
-          Personne ne s’est encore porté volontaire.
-        </p>
-      ) : (
-        <ul className="panel divide-y divide-line">
-          {volontaires.map((v) => (
-            <li key={v.id} className="flex items-center gap-3 px-4 py-3">
-              <Avatar user={{ id: v.id, prenom: v.prenom, nom: v.nom }} size={38} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-semibold text-navy-950">{nomComplet(v)}</p>
-                <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
-                  <span>Volontaire le {new Date(v.le).toLocaleDateString('fr-FR')}</span>
-                  {v.participant_id && (
-                    <span className="inline-flex items-center gap-1 text-success">
-                      <CalendarCheck size={12} /> inscrit(e) au calendrier
-                    </span>
-                  )}
-                </p>
-              </div>
-              <button
-                onClick={() => setSuppr(v)}
-                className="grid size-9 shrink-0 place-items-center rounded-lg text-muted hover:bg-danger/10 hover:text-danger"
-                aria-label={`Retirer ${nomComplet(v)}`}
-              >
-                <Trash2 size={16} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <Modal open={!!suppr} onClose={() => setSuppr(null)} title="Retirer de la liste" size="sm">
-        {suppr && (
-          <div className="p-6">
-            <p className="text-[15px] text-ink/85">
-              Retirer <strong>{nomComplet(suppr)}</strong> de la liste des volontaires ?
-            </p>
-            <div className="mt-6 flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setSuppr(null)}>
-                Annuler
-              </Button>
-              <Button
-                variant="danger"
-                onClick={() => {
-                  void onSupprimer(suppr);
-                  setSuppr(null);
-                }}
-              >
-                Retirer
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
-    </div>
   );
 }

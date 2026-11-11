@@ -1,7 +1,9 @@
-import { ArrowRight, Check, HandHeart, Users } from 'lucide-react';
+import { ArrowRight, Check, HandHeart, ShieldCheck, Users } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState, useSyncExternalStore, type FormEvent } from 'react';
+import { Link } from 'react-router';
 import { ApiError, api } from '../data/api';
+import { useNombreVolontaires } from '../pages/CoalitionAdmin';
 import { useIdentite } from '../data/identite';
 import { MASCOTTE_URL } from './cards/CardBack';
 import { Modal, useToast } from './ui/overlay';
@@ -55,8 +57,8 @@ export function RejoindreCoalition() {
   const [nom, setNom] = useState('');
   const [envoi, setEnvoi] = useState(false);
 
-  // L'administrateur fait déjà partie de la coalition.
-  if (codeAdmin && !identite) return null;
+  // L'administrateur ne remplit rien : l'encadré ouvre directement la liste des volontaires.
+  if (codeAdmin) return <CoalitionPourAdmin code={codeAdmin} />;
 
   const ouvrir = () => {
     setPrenom(identite?.prenom ?? '');
@@ -178,5 +180,47 @@ export function RejoindreCoalition() {
         </form>
       </Modal>
     </>
+  );
+}
+
+/** Version administrateur de l'encadré : accès direct à la liste des volontaires. */
+function CoalitionPourAdmin({ code }: { code: string }) {
+  const n = useNombreVolontaires(code);
+  return (
+    <Link
+      to="/coalition"
+      className="group relative flex w-full items-center gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-[#1F7A4D] to-[#0E4D31] p-5 pr-28 text-left text-white shadow-lift transition-transform hover:-translate-y-0.5 sm:pr-40"
+    >
+      <div
+        className="absolute inset-x-0 top-0 h-1.5"
+        style={{
+          background: 'repeating-linear-gradient(135deg, #F5C542 0 10px, #15171C 10px 20px)',
+        }}
+      />
+      <div className="relative min-w-0">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider">
+          <ShieldCheck size={12} /> Administrateur
+        </span>
+        <p className="mt-2 font-display text-xl font-extrabold leading-tight sm:text-2xl">
+          Coalition Team Ulysse
+        </p>
+        <p className="mt-1 text-sm text-white/80">
+          {n === null
+            ? 'Les personnes qui veulent rejoindre la coalition.'
+            : n === 0
+              ? 'Personne ne s’est encore porté volontaire.'
+              : `${n} volontaire${n > 1 ? 's' : ''} pour rejoindre la coalition.`}
+        </p>
+        <span className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-[#0E4D31] shadow-lg">
+          <Users size={16} /> Voir les volontaires
+          <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+        </span>
+      </div>
+      <img
+        src={MASCOTTE_URL}
+        alt=""
+        className="pointer-events-none absolute -bottom-6 right-0 h-40 w-auto drop-shadow-[0_10px_16px_rgba(0,0,0,0.4)] sm:right-4 sm:h-48"
+      />
+    </Link>
   );
 }

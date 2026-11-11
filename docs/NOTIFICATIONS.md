@@ -3,7 +3,7 @@
 > **Pour la personne qui configure Supabase :** tout se fait dans le tableau de bord Supabase du
 > projet, en suivant la partie « Mise en place » ci-dessous. Le fichier
 > `supabase/maj-coalition-et-rappels.sql` installe **en une fois** les rappels **et** la liste des
-> volontaires de la coalition Team Ulysse (onglet « Coalition » de l’espace administrateur).
+> volontaires de la coalition Team Ulysse (encadré « Coalition Team Ulysse » du menu, sur le téléphone de l’administrateur).
 > Il peut être relancé sans risque.
 
 Deux rappels, que chacun active ou coupe dans l’appli :

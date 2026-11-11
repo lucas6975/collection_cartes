@@ -3,6 +3,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { ToastProvider } from './components/ui/overlay';
 import { identiteStore, useIdentite } from './data/identite';
+import { CoalitionAdmin } from './pages/CoalitionAdmin';
 import { Admin } from './pages/Admin';
 import { Advent } from './pages/Advent';
 import { Bienvenue } from './pages/Bienvenue';
@@ -41,6 +42,7 @@ export function App() {
             <Route path="avent/:jour" element={<AdventDay />} />
             <Route path="moi" element={<MesInscriptions />} />
             <Route path="admin" element={<Admin />} />
+            <Route path="coalition" element={<CoalitionAdmin />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

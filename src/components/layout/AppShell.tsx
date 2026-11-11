@@ -34,7 +34,7 @@ export function AppShell() {
     ? 'avent'
     : chemin === '/'
       ? 'menu'
-      : chemin === '/moi' || chemin === '/admin'
+      : chemin === '/moi' || chemin === '/admin' || chemin === '/coalition'
         ? 'compte'
         : 'cartes';
   const etoiles = Object.values(avent).reduce((s, j) => s + j.etoiles, 0);

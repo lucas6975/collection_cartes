@@ -18,8 +18,8 @@ restent sur chaque téléphone et sont envoyées dès la connexion.
 ## Rejoindre la coalition
 
 Le menu invite chacun à rejoindre la coalition Team Ulysse : prénom et nom (pré-remplis avec
-l’inscription). L’administrateur retrouve les volontaires dans l’onglet **Coalition** de son
-espace, avec un export Excel. Table créée par `supabase/maj-coalition-et-rappels.sql`.
+l’inscription). Sur le téléphone de l’administrateur, cet encadré ouvre directement la liste des volontaires
+(page à part, avec export Excel), sans formulaire à remplir. Table créée par `supabase/maj-coalition-et-rappels.sql`.
 
 ## Rappels sur les téléphones
 
