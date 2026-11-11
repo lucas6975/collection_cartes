@@ -54,11 +54,11 @@ function commit(next: Etat) {
   listeners.forEach((l) => l());
 }
 
-const estIOS = () =>
+export const estIOS = () =>
   /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-const estInstallee = () =>
+export const estInstallee = () =>
   window.matchMedia('(display-mode: standalone)').matches ||
   (navigator as Navigator & { standalone?: boolean }).standalone === true;
 

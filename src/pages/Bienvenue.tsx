@@ -6,6 +6,7 @@ import { JoursSelection } from '../components/JoursSelection';
 import { Button } from '../components/ui/primitives';
 import { ApiError } from '../data/api';
 import { JOURS_OUVRES, identiteStore } from '../data/identite';
+import { estInstallee, estIOS } from '../data/rappels';
 
 const champ =
   'h-12 w-full rounded-xl border border-line bg-white px-4 text-[16px] text-ink outline-none transition-shadow placeholder:text-muted/70 focus:border-blue focus:ring-4 focus:ring-blue/10';
@@ -76,6 +77,29 @@ export function Bienvenue() {
             Dis-nous qui tu es pour participer aux jeux et aux tirages au sort.
           </p>
         </motion.div>
+
+        {estIOS() && !estInstallee() && (
+          <div className="mt-5 rounded-2xl border-2 border-sun bg-white p-4 text-sm text-navy-950 shadow-lift">
+            <p className="font-display text-base font-extrabold">
+              📲 D’abord, ajoute Ulysse à ton écran d’accueil
+            </p>
+            <ol className="mt-2 list-decimal space-y-1 pl-5 text-ink/85">
+              <li>
+                Touche <b>Partager</b> (le carré avec la flèche) en bas de Safari
+              </li>
+              <li>
+                Choisis <b>« Sur l’écran d’accueil »</b>, puis <b>Ajouter</b>
+              </li>
+              <li>
+                Ouvre Team Ulysse <b>depuis sa nouvelle icône</b> et inscris-toi là
+              </li>
+            </ol>
+            <p className="mt-2 text-xs text-muted">
+              Sur iPhone, l’appli de l’écran d’accueil garde ta collection à part : inscris-toi
+              directement dedans.
+            </p>
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           {modeAdmin ? (
