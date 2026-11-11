@@ -13,35 +13,43 @@ export const ANNEE_AVENT = 2026;
 export const JOURS: JourAvent[] = [
   {
     jour: 1,
-    titre: 'Trouve les 4 anomalies',
-    lsr: 'Selon nos LSR',
+    titre: 'Trouve les 5 anomalies',
+    lsr: 'Selon nos règles qui sauvent la vie',
     jeux: [
       {
         type: 'anomalies',
-        consigne: 'Touche l’image là où tu repères une erreur. Il y en a 4 à trouver !',
-        image: img('jour1-cariste.webp'),
-        ratio: 727 / 978,
+        mission: 'Le cariste pressé',
+        consigne:
+          'Ce matin, notre cariste démarre sa journée un peu trop vite… Selon nos LSR, 5 anomalies se cachent sur l’image. Touche chacune d’elles pour la signaler.',
+        image: img('jour1-cariste-v2.webp'),
+        ratio: 727 / 778,
         anomalies: [
-          { id: 'telephone', label: 'Utilisation du téléphone', cibles: [{ x: 69, y: 35, r: 8 }] },
+          {
+            id: 'telephone',
+            label: 'Téléphone en main pendant la conduite',
+            cibles: [{ x: 69, y: 18.3, r: 8 }],
+          },
           {
             id: 'epi',
-            label: 'Non port des EPI (gilet haute visibilité + chaussures de sécurité)',
-            cibles: [
-              { x: 62, y: 44, r: 8 },
-              { x: 55, y: 71, r: 7 },
-            ],
+            label: 'Pas de gilet haute visibilité (EPI)',
+            cibles: [{ x: 62, y: 29.6, r: 8 }],
           },
           {
             id: 'ceinture',
-            label: 'Non respect du port de la ceinture',
-            cibles: [{ x: 63, y: 55, r: 6 }],
+            label: 'Ceinture de sécurité non attachée',
+            cibles: [{ x: 63, y: 43.4, r: 6 }],
+          },
+          {
+            id: 'chaussures',
+            label: 'Baskets au lieu des chaussures de sécurité',
+            cibles: [{ x: 55, y: 63.5, r: 7 }],
           },
           {
             id: 'allee',
-            label: 'Allée encombrée',
+            label: 'Allée de circulation encombrée',
             cibles: [
-              { x: 89, y: 51, r: 11 },
-              { x: 90, y: 92, r: 9 },
+              { x: 89, y: 38.4, r: 11 },
+              { x: 90, y: 89.9, r: 9 },
             ],
           },
         ],

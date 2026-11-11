@@ -11,6 +11,8 @@ export interface Cible {
 export type Jeu =
   | {
       type: 'anomalies';
+      /** Titre de la mission, affiché par Ulysse au-dessus de l'image. */
+      mission?: string;
       consigne: string;
       image: string;
       /** Rapport largeur / hauteur de l'image. */

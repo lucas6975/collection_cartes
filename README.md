@@ -45,7 +45,7 @@ alternent pour ne jamais avoir deux jours de suite le même :
 
 | Jour | Défi                                                 | Origine       |
 | ---- | ---------------------------------------------------- | ------------- |
-| 1    | Trouver les 4 anomalies (cariste)                    | calendrier V1 |
+| 1    | Trouver les 5 anomalies (cariste)                    | calendrier V1 |
 | 2    | Remettre la consigne dans l’ordre (sous-traitant)    | calendrier V1 |
 | 3    | Quiz SST et premiers secours                         | calendrier V1 |
 | 4    | Associer les pictogrammes aux dangers                | calendrier V1 |

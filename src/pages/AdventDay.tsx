@@ -277,7 +277,7 @@ export function AdventDay() {
             {jeu.consigne}
           </p>
         </div>
-      ) : (
+      ) : jeu.type === 'anomalies' ? null : (
         <p className="flex items-center gap-2 rounded-2xl bg-blue-light px-4 py-3 text-[15px] font-medium text-navy">
           <Sparkles size={17} className="shrink-0 text-sun-dark" /> {jeu.consigne}
         </p>
