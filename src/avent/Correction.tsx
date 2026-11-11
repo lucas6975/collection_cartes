@@ -120,7 +120,7 @@ function PleinEcran({ jour, onClose }: { jour: number; onClose: () => void }) {
         <img
           src={imageCorrection(jour)}
           alt={`Correction de la case ${jour}`}
-          className="mx-auto block w-full max-w-3xl"
+          className="mx-auto block min-h-full w-full max-w-3xl object-cover object-top"
         />
       </div>
     </motion.div>,
