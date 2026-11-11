@@ -1,6 +1,7 @@
-import { Download, FileCheck2, Gift, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Download, FileCheck2, Gift, RefreshCw } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Modal } from '../components/ui/overlay';
+import { createPortal } from 'react-dom';
 import { Button } from '../components/ui/primitives';
 import { api } from '../data/api';
 import { useIdentite } from '../data/identite';
@@ -68,24 +69,61 @@ export function Correction({ jour }: { jour: number }) {
       <Button variant="secondary" onClick={() => setOuverte(true)}>
         <FileCheck2 size={17} /> Voir la correction
       </Button>
-      <Modal open={ouverte} onClose={() => setOuverte(false)} title="La correction" size="lg">
-        <div className="max-h-[75dvh] overflow-y-auto bg-[#0B2347]">
-          <img
-            src={imageCorrection(jour)}
-            alt={`Correction de la case ${jour}`}
-            className="block w-full"
-          />
-        </div>
-        <div className="flex justify-end p-3">
-          <a
-            href={imageCorrection(jour)}
-            download={`correction-case-${jour}.webp`}
-            className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-navy hover:bg-canvas"
-          >
-            <Download size={15} /> Enregistrer l’image
-          </a>
-        </div>
-      </Modal>
+      <AnimatePresence>
+        {ouverte && <PleinEcran jour={jour} onClose={() => setOuverte(false)} />}
+      </AnimatePresence>
     </>
+  );
+}
+
+/** La correction en plein écran, avec un bouton Retour toujours visible en haut. */
+function PleinEcran({ jour, onClose }: { jour: number; onClose: () => void }) {
+  useEffect(() => {
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const touche = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', touche);
+    return () => {
+      document.body.style.overflow = avant;
+      window.removeEventListener('keydown', touche);
+    };
+  }, [onClose]);
+
+  return createPortal(
+    <motion.div
+      className="fixed inset-0 z-[90] flex flex-col bg-[#0B2347]"
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 24 }}
+      transition={{ duration: 0.25 }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Correction de la case ${jour}`}
+    >
+      <div className="flex shrink-0 items-center justify-between gap-2 bg-[#0B2347]/95 px-3 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur">
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex h-11 items-center gap-1.5 rounded-xl bg-white px-4 text-sm font-bold text-navy-950 shadow"
+        >
+          <ArrowLeft size={18} /> Retour
+        </button>
+        <a
+          href={imageCorrection(jour)}
+          download={`correction-case-${jour}.webp`}
+          className="inline-flex h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold text-white/85 hover:bg-white/10"
+        >
+          <Download size={16} /> Enregistrer
+        </a>
+      </div>
+      <div className="flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
+        <img
+          src={imageCorrection(jour)}
+          alt={`Correction de la case ${jour}`}
+          className="mx-auto block w-full max-w-3xl"
+        />
+      </div>
+    </motion.div>,
+    document.body,
   );
 }
