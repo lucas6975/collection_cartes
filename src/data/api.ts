@@ -61,6 +61,14 @@ export interface Tirage {
   tire_le?: string;
 }
 
+export interface Volontaire {
+  id: string;
+  prenom: string;
+  nom: string;
+  participant_id: string | null;
+  le: string;
+}
+
 export const api = {
   inscrire: (prenom: string, nom: string, jours: number[], jeton?: string) =>
     rpc<Inscription>('inscrire', {
@@ -77,6 +85,18 @@ export const api = {
         p_jeton: jeton,
       },
     ),
+
+  rejoindreCoalition: (prenom: string, nom: string, jeton?: string) =>
+    rpc<{ deja: boolean }>('rejoindre_coalition', {
+      p_prenom: prenom,
+      p_nom: nom,
+      p_jeton: jeton ?? null,
+    }),
+
+  adminVolontaires: (code: string) => rpc<Volontaire[]>('admin_volontaires', { p_code: code }),
+
+  adminSupprimerVolontaire: (code: string, id: string) =>
+    rpc<null>('admin_supprimer_volontaire', { p_code: code, p_id: id }),
 
   adminVerifier: (code: string) => rpc<boolean>('admin_verifier', { p_code: code }),
 

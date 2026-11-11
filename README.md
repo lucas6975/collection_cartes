@@ -15,6 +15,12 @@ pour Excel. Les inscriptions sont centralisées dans une base Supabase : voir
 [`docs/SUPABASE.md`](docs/SUPABASE.md) pour la connecter. Tant qu'elle ne l'est pas, les inscriptions
 restent sur chaque téléphone et sont envoyées dès la connexion.
 
+## Rejoindre la coalition
+
+Le menu invite chacun à rejoindre la coalition Team Ulysse : prénom et nom (pré-remplis avec
+l’inscription). L’administrateur retrouve les volontaires dans l’onglet **Coalition** de son
+espace, avec un export Excel. Table créée par `supabase/maj-coalition.sql`.
+
 ## Les jeux
 
 Le site s’ouvre sur un **menu** avec deux jeux.

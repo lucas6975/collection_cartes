@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
+import { RejoindreCoalition } from '../components/Coalition';
 import { PackArt } from '../components/cards/Pack';
 import { ANNEE_AVENT, JOURS } from '../avent/jours';
 import { caseDuJour, joursAvantDebut } from '../avent/logic';
@@ -159,6 +160,8 @@ export function Menu() {
           </Link>
         </motion.div>
       </div>
+
+      <RejoindreCoalition />
     </div>
   );
 }

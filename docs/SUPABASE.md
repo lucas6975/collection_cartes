@@ -52,3 +52,10 @@ update public.admin_config set code_hash = extensions.crypt('NOUVEAU-CODE', exte
 
 Les noms sont des données personnelles : une fois l'opération terminée, supprime les inscriptions
 (**Table Editor** › `participants` › tout sélectionner › supprimer), ou le projet entier.
+
+## Mise à jour : volontaires de la coalition
+
+Le menu de l’appli propose « Rejoins la coalition Team Ulysse ». Pour enregistrer les réponses,
+exécuter **une fois** `supabase/maj-coalition.sql` (SQL Editor › nouvel onglet vide › coller ›
+Run). Les volontaires apparaissent ensuite dans l’espace administrateur, onglet **Coalition**,
+avec un export Excel.
