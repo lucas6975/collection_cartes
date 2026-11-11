@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { ToastProvider } from './components/ui/overlay';
@@ -7,6 +7,8 @@ import { CoalitionAdmin } from './pages/CoalitionAdmin';
 import { Admin } from './pages/Admin';
 import { Advent } from './pages/Advent';
 import { Bienvenue } from './pages/Bienvenue';
+import { Installer } from './pages/Installer';
+import { estInstallee } from './data/rappels';
 import { MesInscriptions } from './pages/MesInscriptions';
 import { AdventDay } from './pages/AdventDay';
 import { Collection } from './pages/Collection';
@@ -15,6 +17,8 @@ import { Menu } from './pages/Menu';
 
 export function App() {
   const { identite, codeAdmin } = useIdentite();
+  // Site ouvert dans le navigateur (pas depuis l'icône) : on explique d'abord l'installation.
+  const [navigateur, setNavigateur] = useState(() => !estInstallee());
 
   // Une inscription faite hors ligne est renvoyée à chaque ouverture, jusqu'à ce qu'elle passe.
   useEffect(() => {
@@ -22,6 +26,13 @@ export function App() {
   }, []);
 
   // Premier lancement : chacun indique son prénom et son nom (l'administrateur, son code).
+  if (!identite && !codeAdmin && navigateur) {
+    return (
+      <ToastProvider>
+        <Installer onContinuer={() => setNavigateur(false)} />
+      </ToastProvider>
+    );
+  }
   if (!identite && !codeAdmin) {
     return (
       <ToastProvider>
