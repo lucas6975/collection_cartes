@@ -61,6 +61,14 @@ export interface Tirage {
   tire_le?: string;
 }
 
+export interface AbonnementRappels {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  pack: boolean;
+  avent: boolean;
+}
+
 export const api = {
   inscrire: (prenom: string, nom: string, jours: number[], jeton?: string) =>
     rpc<Inscription>('inscrire', {
@@ -78,6 +86,16 @@ export const api = {
       },
     ),
 
+  rappelsEnregistrer: (abo: AbonnementRappels, jeton?: string) =>
+    rpc<null>('enregistrer_rappels', {
+      p_endpoint: abo.endpoint,
+      p_p256dh: abo.p256dh,
+      p_auth: abo.auth,
+      p_pack: abo.pack,
+      p_avent: abo.avent,
+      p_jeton: jeton ?? null,
+    }),
+  rappelsSupprimer: (endpoint: string) => rpc<null>('supprimer_rappels', { p_endpoint: endpoint }),
   adminVerifier: (code: string) => rpc<boolean>('admin_verifier', { p_code: code }),
 
   adminListe: (code: string) =>
