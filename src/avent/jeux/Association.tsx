@@ -1,8 +1,9 @@
-import { Check, Eye, MousePointerClick, X } from 'lucide-react';
-import { AnimatePresence, LayoutGroup, motion } from 'motion/react';
-import { useState } from 'react';
+import { Check, Eye, Hand } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useRef, useState, type PointerEvent as PE } from 'react';
+import { createPortal } from 'react-dom';
 import { Button, cx } from '../../components/ui/primitives';
-import { etoilesEssais, melanger } from '../logic';
+import { melanger } from '../logic';
 import type { Jeu, ResultatJeu } from '../types';
 import { Retour } from '../ui';
 
@@ -12,190 +13,277 @@ type Props = {
   onFini: (r: ResultatJeu) => void;
 };
 
+/** Étoiles selon le nombre de pictogrammes posés au mauvais endroit. */
+export function etoilesGlisser(erreurs: number, abandon: boolean): ResultatJeu {
+  if (abandon) return { etoiles: 0, resume: 'Correction affichée' };
+  const etoiles = erreurs <= 1 ? 3 : erreurs <= 3 ? 2 : 1;
+  return {
+    etoiles,
+    resume: erreurs === 0 ? 'Sans aucune erreur !' : `${erreurs} erreur${erreurs > 1 ? 's' : ''}`,
+  };
+}
+
+interface Glisse {
+  picto: number;
+  x: number;
+  y: number;
+  /** Décalage entre le doigt et le coin du pictogramme. */
+  dx: number;
+  dy: number;
+  departX: number;
+  departY: number;
+  bouge: boolean;
+}
+
+/**
+ * Glisser-déposer : on attrape un pictogramme et on le pose sur le danger qui lui correspond.
+ * Fonctionne au doigt comme à la souris. Toucher un pictogramme puis un danger marche aussi.
+ */
 export function Association({ jeu, graine, onFini }: Props) {
   const n = jeu.paires.length;
   const [ordrePictos] = useState(() => melanger([...Array(n).keys()], graine));
-  const [affect, setAffect] = useState<(string | null)[]>(() => Array(n).fill(null));
-  const [choisi, setChoisi] = useState<string | null>(null);
-  const [verifs, setVerifs] = useState<(boolean | null)[]>(() => Array(n).fill(null));
-  const [essais, setEssais] = useState(0);
+  const [ordreDangers] = useState(() => melanger([...Array(n).keys()], graine + 17));
+  const [places, setPlaces] = useState<boolean[]>(() => Array(n).fill(false));
+  const [erreurs, setErreurs] = useState(0);
+  const [glisse, setGlisse] = useState<Glisse | null>(null);
+  const [survol, setSurvol] = useState<number | null>(null);
+  const [choisi, setChoisi] = useState<number | null>(null);
+  const [rate, setRate] = useState<{ danger: number; picto: number; cle: number } | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
   const [fini, setFini] = useState<'gagne' | 'corrige' | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const cases = useRef<(HTMLDivElement | null)[]>([]);
 
-  const [ordreLabels] = useState(() =>
-    melanger(
-      jeu.paires.map((p) => p.label),
-      graine + 17,
-    ),
-  );
-  const reserve = ordreLabels.filter((l) => !affect.includes(l));
-  const toutPlace = affect.every(Boolean);
+  const restants = ordrePictos.filter((i) => !places[i]);
 
-  const toucherPicto = (i: number) => {
-    if (fini) return;
-    setMessage(null);
-    if (choisi) {
-      setAffect((a) => a.map((v, j) => (j === i ? choisi : v === choisi ? null : v)));
-      setVerifs((v) => v.map((x, j) => (j === i ? null : x)));
-      setChoisi(null);
-    } else if (affect[i]) {
-      // Retirer l'étiquette pour la replacer ailleurs.
-      setChoisi(affect[i]);
-      setAffect((a) => a.map((v, j) => (j === i ? null : v)));
-      setVerifs((v) => v.map((x, j) => (j === i ? null : x)));
+  const caseSous = (x: number, y: number): number | null => {
+    for (const d of ordreDangers) {
+      if (places[d]) continue;
+      const r = cases.current[d]?.getBoundingClientRect();
+      if (r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return d;
+    }
+    return null;
+  };
+
+  const poser = (picto: number, danger: number) => {
+    setChoisi(null);
+    if (picto === danger) {
+      const next = places.map((v, i) => (i === picto ? true : v));
+      setPlaces(next);
+      setMessage({ ok: true, texte: `Bien vu : ${jeu.paires[danger].label}` });
+      if (next.every(Boolean)) {
+        setFini('gagne');
+        setTimeout(() => onFini(etoilesGlisser(erreurs, false)), 600);
+      }
+    } else {
+      setErreurs((e) => e + 1);
+      setRate({ danger, picto, cle: erreurs + 1 });
+      setMessage({ ok: false, texte: 'Pas ici ! Ce pictogramme annonce un autre danger.' });
     }
   };
 
-  const valider = () => {
-    const nb = essais + 1;
-    setEssais(nb);
-    const res = affect.map((l, i) => l === jeu.paires[i].label);
-    setVerifs(res);
-    const bons = res.filter(Boolean).length;
-    if (bons === n) {
-      setFini('gagne');
-      onFini(etoilesEssais(nb, false));
+  // ───── Glisser au doigt ou à la souris ─────
+  const debut = (e: PE<HTMLButtonElement>, picto: number) => {
+    if (fini) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setGlisse({
+      picto,
+      x: e.clientX,
+      y: e.clientY,
+      dx: e.clientX - r.left,
+      dy: e.clientY - r.top,
+      departX: e.clientX,
+      departY: e.clientY,
+      bouge: false,
+    });
+  };
+
+  const deplacer = (e: PE<HTMLButtonElement>) => {
+    if (!glisse) return;
+    const bouge =
+      glisse.bouge || Math.hypot(e.clientX - glisse.departX, e.clientY - glisse.departY) > 8;
+    setGlisse({ ...glisse, x: e.clientX, y: e.clientY, bouge });
+    if (bouge) {
+      setSurvol(caseSous(e.clientX, e.clientY));
+      // Fait défiler la page quand on approche du haut ou du bas de l'écran.
+      if (e.clientY > window.innerHeight - 140) window.scrollBy(0, 14);
+      else if (e.clientY < 150) window.scrollBy(0, -14);
+    }
+  };
+
+  const fin = (e: PE<HTMLButtonElement>) => {
+    if (!glisse) return;
+    const g = glisse;
+    setGlisse(null);
+    setSurvol(null);
+    if (!g.bouge) {
+      // Simple toucher : on sélectionne le pictogramme, puis on touche un danger.
+      setChoisi((c) => (c === g.picto ? null : g.picto));
+      setMessage(null);
       return;
     }
-    setMessage(`${bons}/${n} bonnes associations. Les erreurs retournent dans la réserve.`);
-    // Les mauvaises réponses retournent dans la réserve après un court instant.
-    setTimeout(() => {
-      setAffect((a) => a.map((l, i) => (res[i] ? l : null)));
-      setVerifs((v) => v.map((x) => (x ? true : null)));
-    }, 1100);
+    const d = caseSous(e.clientX, e.clientY);
+    if (d !== null) poser(g.picto, d);
   };
 
   const voirCorrection = () => {
-    setAffect(jeu.paires.map((p) => p.label));
-    setVerifs(Array(n).fill(true));
+    setPlaces(Array(n).fill(true));
     setFini('corrige');
     setChoisi(null);
-    onFini(etoilesEssais(essais, true));
+    onFini(etoilesGlisser(erreurs, true));
   };
 
   return (
-    <LayoutGroup>
-      <div className="space-y-5">
-        {!fini && (
-          <p className="flex items-center justify-center gap-2 text-center text-sm font-semibold text-navy">
-            <MousePointerClick size={16} />
-            {choisi ? `Touche le pictogramme « ${choisi} »` : 'Choisis un danger dans la réserve'}
-          </p>
-        )}
-
-        <div className="grid grid-cols-2 gap-3 min-[520px]:grid-cols-3 md:grid-cols-4">
-          {ordrePictos.map((i) => {
-            const p = jeu.paires[i];
-            const label = affect[i];
-            const v = verifs[i];
-            return (
-              <motion.button
-                key={p.image}
-                type="button"
-                onClick={() => toucherPicto(i)}
-                whileTap={fini ? undefined : { scale: 0.97 }}
-                animate={v === false ? { x: [0, -6, 6, -4, 4, 0] } : {}}
-                className={cx(
-                  'flex flex-col items-center gap-2 rounded-2xl border-2 bg-white p-3 text-center shadow-soft transition-colors',
-                  v === true && 'border-success bg-success/[0.06]',
-                  v === false && 'border-danger bg-danger/[0.05]',
-                  v === null &&
-                    (choisi && !fini
-                      ? 'border-dashed border-blue/50 hover:border-blue hover:bg-blue-light/40'
-                      : 'border-line'),
-                )}
-                aria-label={label ? `Pictogramme associé à ${label}` : 'Pictogramme sans réponse'}
-              >
-                <img
-                  src={p.image}
-                  alt=""
-                  className="h-20 w-auto object-contain sm:h-24"
-                  draggable={false}
-                />
-                <div className="flex min-h-10 w-full items-center justify-center">
-                  <AnimatePresence mode="popLayout">
-                    {label ? (
-                      <motion.span
-                        layoutId={`etiquette-${label}`}
-                        key={label}
-                        className={cx(
-                          'inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold leading-tight',
-                          v === true
-                            ? 'bg-success text-white'
-                            : v === false
-                              ? 'bg-danger text-white'
-                              : 'bg-navy text-white',
-                        )}
-                      >
-                        {v === true && <Check size={12} strokeWidth={3} />}
-                        {v === false && <X size={12} strokeWidth={3} />}
-                        {label}
-                      </motion.span>
-                    ) : (
-                      <span className="rounded-lg border border-dashed border-navy/20 px-3 py-1 text-xs text-muted">
-                        ?
-                      </span>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
-
-        {!fini && (
-          <div className="rounded-2xl bg-canvas p-3">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">Réserve</p>
-            <div className="flex min-h-10 flex-wrap gap-2">
-              {reserve.length === 0 && !choisi && (
-                <span className="text-sm text-muted">Tout est placé : valide !</span>
-              )}
-              {reserve.map((l) => (
-                <motion.button
-                  layoutId={`etiquette-${l}`}
-                  key={l}
-                  type="button"
-                  onClick={() => setChoisi((c) => (c === l ? null : l))}
-                  whileTap={{ scale: 0.95 }}
-                  className={cx(
-                    'rounded-xl px-3 py-2 text-sm font-semibold shadow-sm transition-colors',
-                    choisi === l
-                      ? 'bg-sun text-navy-950 ring-2 ring-sun-dark'
-                      : 'bg-white text-navy-950 hover:bg-blue-light',
-                  )}
-                >
-                  {l}
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {message && !fini && <Retour ok={false}>{message}</Retour>}
-        {fini === 'gagne' && (
-          <Retour ok>Parfait, tous les pictogrammes sont bien associés !</Retour>
-        )}
-        {fini === 'corrige' && <Retour ok>Voici les bonnes associations.</Retour>}
-
-        {!fini && (
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button
-              variant="accent"
-              size="lg"
-              className="flex-1"
-              onClick={valider}
-              disabled={!toutPlace}
-            >
-              <Check size={18} /> Valider
-            </Button>
-            {essais >= 2 && (
-              <Button variant="ghost" size="lg" onClick={voirCorrection}>
-                <Eye size={17} /> Voir la correction
-              </Button>
-            )}
-          </div>
-        )}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-display text-lg font-extrabold text-navy-950">
+          {places.filter(Boolean).length} / {n} placés
+        </p>
+        <p className="text-xs font-semibold text-muted">
+          {erreurs > 0 ? `${erreurs} erreur${erreurs > 1 ? 's' : ''} · ` : ''}3 étoiles : 1 erreur
+          max
+        </p>
       </div>
-    </LayoutGroup>
+
+      {/* Réserve de pictogrammes (reste visible en faisant défiler) */}
+      {!fini && (
+        <div className="sticky top-[4.5rem] z-20 rounded-2xl border border-dashed border-navy/20 bg-white/95 p-3 shadow-soft backdrop-blur">
+          <p className="mb-2 flex items-center justify-center gap-1.5 text-center text-xs font-semibold text-navy">
+            <Hand size={14} />
+            {choisi !== null
+              ? 'Touche maintenant le bon danger'
+              : 'Glisse chaque pictogramme sur le bon danger'}
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            <AnimatePresence>
+              {restants.map((i) => {
+                const enMain = glisse?.picto === i && glisse.bouge;
+                return (
+                  <motion.button
+                    key={jeu.paires[i].image}
+                    type="button"
+                    layout
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={
+                      rate?.picto === i
+                        ? { scale: 1, opacity: 1, x: [0, -7, 7, -5, 5, 0] }
+                        : { scale: 1, opacity: enMain ? 0.25 : 1 }
+                    }
+                    exit={{ scale: 0.4, opacity: 0 }}
+                    transition={{ duration: 0.35 }}
+                    onPointerDown={(e) => debut(e, i)}
+                    onPointerMove={deplacer}
+                    onPointerUp={fin}
+                    onPointerCancel={() => {
+                      setGlisse(null);
+                      setSurvol(null);
+                    }}
+                    className={cx(
+                      'grid size-[68px] cursor-grab touch-none select-none place-items-center rounded-2xl border-2 bg-white shadow-soft active:cursor-grabbing',
+                      choisi === i ? 'border-sun ring-4 ring-sun/35' : 'border-line',
+                    )}
+                    aria-label={`Pictogramme ${ordrePictos.indexOf(i) + 1}`}
+                    aria-pressed={choisi === i}
+                  >
+                    <img
+                      src={jeu.paires[i].image}
+                      alt=""
+                      draggable={false}
+                      className="pointer-events-none h-12 w-auto"
+                    />
+                  </motion.button>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
+
+      {/* Les dangers : cases où poser les pictogrammes */}
+      <div className="grid gap-2 sm:grid-cols-2">
+        {ordreDangers.map((d) => {
+          const ok = places[d];
+          const vise = survol === d;
+          const erreur = rate?.danger === d;
+          return (
+            <motion.div
+              key={`${d}-${erreur ? rate.cle : 0}`}
+              ref={(el) => {
+                cases.current[d] = el;
+              }}
+              onClick={() => choisi !== null && !ok && poser(choisi, d)}
+              animate={erreur ? { x: [0, -8, 8, -6, 6, 0] } : {}}
+              transition={{ duration: 0.4 }}
+              className={cx(
+                'flex min-h-[64px] items-center gap-3 rounded-2xl border-2 p-2 pr-3 text-sm font-bold text-navy-950 transition-colors',
+                ok
+                  ? 'border-success bg-success/[0.07]'
+                  : vise
+                    ? 'border-sun bg-sun/15 ring-4 ring-sun/30'
+                    : erreur
+                      ? 'border-danger/60 bg-danger/[0.05]'
+                      : choisi !== null
+                        ? 'cursor-pointer border-dashed border-blue/40 bg-white'
+                        : 'border-line bg-white',
+              )}
+            >
+              <span
+                className={cx(
+                  'grid size-12 shrink-0 place-items-center rounded-xl',
+                  ok ? 'bg-white' : 'border-2 border-dashed border-navy/20 bg-canvas',
+                )}
+              >
+                <AnimatePresence>
+                  {ok && (
+                    <motion.img
+                      src={jeu.paires[d].image}
+                      alt=""
+                      className="h-10 w-auto"
+                      initial={{ scale: 1.6, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+                    />
+                  )}
+                </AnimatePresence>
+              </span>
+              <span className="flex-1 leading-tight">{jeu.paires[d].label}</span>
+              {ok ? (
+                <Check size={18} strokeWidth={3} className="shrink-0 text-success" />
+              ) : vise ? (
+                <span className="shrink-0 text-[11px] font-bold text-sun-dark">Lâche ici</span>
+              ) : null}
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {message && !fini && <Retour ok={message.ok}>{message.texte}</Retour>}
+      {fini === 'gagne' && (
+        <Retour ok>Parfait, tous les pictogrammes sont à la bonne place !</Retour>
+      )}
+      {fini === 'corrige' && <Retour ok>Voici les bonnes associations.</Retour>}
+
+      {!fini && erreurs >= 4 && (
+        <Button variant="ghost" size="lg" className="w-full" onClick={voirCorrection}>
+          <Eye size={17} /> Voir la correction
+        </Button>
+      )}
+
+      {/* Le pictogramme qui suit le doigt */}
+      {glisse?.bouge &&
+        createPortal(
+          <div
+            className="pointer-events-none fixed z-[90] grid size-[76px] place-items-center rounded-2xl border-2 border-sun bg-white shadow-[0_16px_32px_rgba(11,35,71,0.3)]"
+            style={{
+              left: glisse.x - glisse.dx,
+              top: glisse.y - glisse.dy,
+              transform: 'rotate(-6deg) scale(1.08)',
+            }}
+          >
+            <img src={jeu.paires[glisse.picto].image} alt="" className="h-14 w-auto" />
+          </div>,
+          document.body,
+        )}
+    </div>
   );
 }

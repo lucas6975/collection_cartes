@@ -124,7 +124,7 @@ export const JOURS: JourAvent[] = [
     jeux: [
       {
         type: 'association',
-        consigne: 'Touche un danger, puis le pictogramme qui lui correspond.',
+        consigne: 'Glisse chaque pictogramme sur le danger qu’il annonce.',
         paires: [
           { image: img('picto-comburant.webp'), label: 'Matières comburantes' },
           { image: img('picto-electrique.webp'), label: 'Risque électrique' },
