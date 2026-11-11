@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
+import { PropositionRappels } from '../components/Rappels';
 import { PackArt } from '../components/cards/Pack';
 import { ANNEE_AVENT, JOURS } from '../avent/jours';
 import { caseDuJour, joursAvantDebut } from '../avent/logic';
@@ -60,6 +61,8 @@ export function Menu() {
           </p>
         </div>
       </motion.section>
+
+      <PropositionRappels />
 
       <div className="grid gap-5 md:grid-cols-2">
         {/* Calendrier de l'Avent */}

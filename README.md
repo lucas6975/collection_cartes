@@ -19,7 +19,13 @@ restent sur chaque téléphone et sont envoyées dès la connexion.
 
 Le menu invite chacun à rejoindre la coalition Team Ulysse : prénom et nom (pré-remplis avec
 l’inscription). L’administrateur retrouve les volontaires dans l’onglet **Coalition** de son
-espace, avec un export Excel. Table créée par `supabase/maj-coalition.sql`.
+espace, avec un export Excel. Table créée par `supabase/maj-coalition-et-rappels.sql`.
+
+## Rappels sur les téléphones
+
+Chacun peut activer deux rappels : **pack du jour disponible** (lundi au vendredi, 8 h 30) et
+**case du jour à ouvrir** (calendrier de l’Avent, 7 h 30). Sur iPhone, l’appli doit être ajoutée à
+l’écran d’accueil. Mise en place côté Supabase : [`docs/NOTIFICATIONS.md`](docs/NOTIFICATIONS.md).
 
 ## Les jeux
 

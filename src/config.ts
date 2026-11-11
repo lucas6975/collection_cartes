@@ -12,3 +12,8 @@ export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL || URL_PRO
 export const SUPABASE_ANON_KEY: string = import.meta.env.VITE_SUPABASE_ANON_KEY || CLE_ANON;
 
 export const baseConfiguree = () => Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);
+
+// Rappels (notifications) : clé publique d'envoi. La clé privée correspondante n'est jamais
+// dans le site : elle est enregistrée dans les secrets de Supabase (voir docs/NOTIFICATIONS.md).
+export const CLE_PUBLIQUE_RAPPELS =
+  'BMSE3uoZJ2WkxDsOO00pz5Sa8v7WgGnsGTRh2LwjLOeg2TpK1H9yC2Qk5omcsazifocNDJd2N2ysnxXfCXY47HM';

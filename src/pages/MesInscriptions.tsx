@@ -2,6 +2,7 @@ import { CloudOff, Gift, KeyRound, LogOut, PartyPopper, Save, ShieldCheck } from
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
+import { ReglagesRappels } from '../components/Rappels';
 import { JoursSelection } from '../components/JoursSelection';
 import { useToast } from '../components/ui/overlay';
 import { Avatar, Button, PageHeader } from '../components/ui/primitives';
@@ -162,6 +163,8 @@ export function MesInscriptions() {
           Ce téléphone est utilisé en mode administrateur, sans inscription aux tirages.
         </p>
       )}
+
+      <ReglagesRappels />
 
       {/* Administration */}
       <section className="mt-6">

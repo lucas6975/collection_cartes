@@ -629,7 +629,8 @@ function OngletCoalition({
     return (
       <p className="panel p-6 text-sm text-muted">
         La liste des volontaires n’est pas encore disponible ({erreur}). Exécute une fois le fichier{' '}
-        <strong>supabase/maj-coalition.sql</strong> dans Supabase (SQL Editor, onglet vide).
+        <strong>supabase/maj-coalition-et-rappels.sql</strong> dans Supabase (SQL Editor, onglet
+        vide).
       </p>
     );
   }
