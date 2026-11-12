@@ -85,6 +85,12 @@ maquette pour toutes les cases, aussi dans `communication/corrections/`). Le tir
 la voit qu’après déblocage par l’administrateur (onglet Résultats). Migration :
 `supabase/maj-corrections.sql`.
 
+**Échanges, voix et carte perso :** dans la collection, « Échanger une carte » permet d'échanger un
+doublon en face à face par QR code (migration `supabase/maj-echanges.sql`). Pendant l'ouverture des
+packs, Ulysse commente les cartes à voix haute (`public/voix/`, bouton pour couper le son). Chacun
+reçoit une fois sa carte personnelle à son nom (hors des 36 cartes) dans son premier pack, ou dans
+le prochain pour ceux qui avaient déjà l'appli. L'administrateur a un bouton « Pack test ».
+
 **Ouverture :** pour les collaborateurs, les cases restent fermées jusqu’au N décembre, avec un
 compte à rebours avant la première. L’administrateur (code saisi sur son téléphone) a accès à toutes
 les cases en avance pour présenter le calendrier ; ses étoiles sont enregistrées à part (jamais

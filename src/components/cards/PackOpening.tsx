@@ -1,18 +1,21 @@
-import { ArrowRight, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Sparkles, Volume2, VolumeX, X } from 'lucide-react';
 import { AnimatePresence, motion, type PanInfo } from 'motion/react';
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { Confetti } from '../../avent/ui';
 import { RARITY_BY_ID } from '../../content/categories';
-import type { PackResult } from '../../domain/packs';
 import type { Card, Rarity } from '../../domain/types';
-import { useGame } from '../../data/store';
+import { useGame, type PackResultat } from '../../data/store';
+import { repliqueCarte, useVoix, voixStore, type Replique } from '../../data/voix';
 import { Button, cx } from '../ui/primitives';
 import { CardBack } from './CardBack';
+
+const AVATAR = `${import.meta.env.BASE_URL}ulysse-avatar.webp`;
+import { CartePerso } from './CartePerso';
 import { CardFace } from './GameCard';
 import { PackArt } from './Pack';
 
-type Phase = 'pack' | 'tear' | 'cards' | 'secrete' | 'recap';
+type Phase = 'pack' | 'tear' | 'cards' | 'secrete' | 'perso' | 'recap';
 
 /** Couleurs de la bannière et du halo selon la rareté (rare et au-delà). */
 const EFFET: Partial<Record<Rarity, { halo: string; banniere: string; texte: string }>> = {
@@ -46,7 +49,7 @@ export function PackOpening({
   onClose,
   onCollection,
 }: {
-  result: PackResult | null;
+  result: PackResultat | null;
   total: number;
   onClose: () => void;
   onCollection: () => void;
@@ -73,7 +76,7 @@ function Opening({
   onClose,
   onCollection,
 }: {
-  result: PackResult;
+  result: PackResultat;
   total: number;
   onClose: () => void;
   onCollection: () => void;
@@ -82,6 +85,7 @@ function Opening({
   const [index, setIndex] = useState(0);
   const [revelee, setRevelee] = useState(false);
   const n = result.cards.length;
+  const { parole, parler } = useParole();
 
   useEffect(() => {
     const prev = document.body.style.overflow;
@@ -97,9 +101,11 @@ function Opening({
   const tear = () => {
     if (phase !== 'pack') return;
     setPhase('tear');
+    parler('ouverture');
     setTimeout(() => setPhase('cards'), 900);
   };
-  const apresCartes = () => setPhase(result.debloquee ? 'secrete' : 'recap');
+  const apresSecrete = () => setPhase(result.perso ? 'perso' : 'recap');
+  const apresCartes = () => (result.debloquee ? setPhase('secrete') : apresSecrete());
   const suivante = () => {
     if (index < n - 1) {
       setIndex(index + 1);
@@ -134,6 +140,7 @@ function Opening({
       >
         <X size={20} />
       </button>
+      <BoutonSon />
 
       {(phase === 'pack' || phase === 'tear') && <OuverturePack phase={phase} onTear={tear} />}
 
@@ -146,15 +153,33 @@ function Opening({
           n={n}
           total={total}
           revelee={revelee}
-          onReveler={() => setRevelee(true)}
+          onReveler={() => {
+            setRevelee(true);
+            parler(repliqueCarte(result.cards[index].rarete, result.nouvelles[index]));
+          }}
           onSuivante={suivante}
           onToutReveler={apresCartes}
         />
       )}
 
       {phase === 'secrete' && result.debloquee && (
-        <CarteSecrete card={result.debloquee} total={total} onSuite={() => setPhase('recap')} />
+        <CarteSecrete
+          card={result.debloquee}
+          total={total}
+          onRevelee={() => parler('secrete')}
+          onSuite={apresSecrete}
+        />
       )}
+
+      {phase === 'perso' && (
+        <CarteBonusPerso
+          recueLe={result.progress.cartePerso ?? new Date().toISOString()}
+          onRevelee={() => parler('perso')}
+          onSuite={() => setPhase('recap')}
+        />
+      )}
+
+      {phase !== 'recap' && <UlysseBulle parole={parole} />}
 
       {phase === 'recap' && (
         <Recap result={result} total={total} onClose={onClose} onCollection={onCollection} />
@@ -416,17 +441,15 @@ function UneCarte({
 function CarteSecrete({
   card,
   total,
+  onRevelee,
   onSuite,
 }: {
   card: Card;
   total: number;
+  onRevelee: () => void;
   onSuite: () => void;
 }) {
-  const [revelee, setRevelee] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setRevelee(true), 1400);
-    return () => clearTimeout(t);
-  }, []);
+  const revelee = useRevelationAuto(onRevelee);
   return (
     <div className="relative flex w-full max-w-md flex-col items-center gap-4 text-center">
       {revelee && <Confetti count={90} />}
@@ -474,6 +497,162 @@ function CarteSecrete({
   );
 }
 
+// ───────────── Carte personnelle offerte (une seule fois) ─────────────
+
+/** Retourne la carte après un court suspense, et prévient au moment où elle est retournée. */
+function useRevelationAuto(onRevelee: () => void) {
+  const [revelee, setRevelee] = useState(false);
+  const cb = useRef(onRevelee);
+  useEffect(() => {
+    cb.current = onRevelee;
+  });
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setRevelee(true);
+      cb.current();
+    }, 1400);
+    return () => clearTimeout(t);
+  }, []);
+  return revelee;
+}
+
+function CarteBonusPerso({
+  recueLe,
+  onRevelee,
+  onSuite,
+}: {
+  recueLe: string;
+  onRevelee: () => void;
+  onSuite: () => void;
+}) {
+  const revelee = useRevelationAuto(onRevelee);
+  return (
+    <div className="relative flex w-full max-w-md flex-col items-center gap-4 text-center">
+      {revelee && <Confetti count={90} />}
+      <div>
+        <p className="eyebrow text-sun">Carte bonus · rien que pour toi</p>
+        <h2 className="mt-1 font-display text-2xl font-extrabold text-white">
+          Ta carte Team Ulysse !
+        </h2>
+        <p className="mt-1 text-sm text-white/70">
+          Elle ne compte pas dans les 36 cartes : elle est unique, à ton nom.
+        </p>
+      </div>
+      <div className="relative" style={GRANDE}>
+        <motion.div
+          className="pointer-events-none absolute -inset-12 rounded-full blur-2xl"
+          style={{
+            background: `radial-gradient(circle, ${EFFET.legendaire!.halo}, transparent 70%)`,
+          }}
+          animate={{ opacity: [0.4, 0.9, 0.6], scale: [0.9, 1.1, 1] }}
+          transition={{ duration: 1.6 }}
+        />
+        <motion.div
+          className="relative aspect-[5/7] w-full [perspective:1200px]"
+          initial={{ scale: 0.3, opacity: 0, rotate: -20 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 120, damping: 12 }}
+        >
+          <motion.div
+            className="relative size-full [transform-style:preserve-3d]"
+            animate={{ rotateY: revelee ? 180 : 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="absolute inset-0 [backface-visibility:hidden]">
+              <CardBack size="lg" />
+            </div>
+            <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+              <CartePerso recueLe={recueLe} />
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+      <Button variant="accent" size="lg" className="mt-2 w-full max-w-xs" onClick={onSuite}>
+        Voir mon pack <ArrowRight size={18} />
+      </Button>
+    </div>
+  );
+}
+
+// ───────────── Ulysse qui parle ─────────────
+
+interface Parole {
+  texte: string;
+  n: number;
+}
+
+/** Ulysse dit une réplique (voix + bulle) ; la bulle s'efface toute seule. */
+function useParole() {
+  const [parole, setParole] = useState<Parole | null>(null);
+  const n = useRef(0);
+  const minuteur = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(minuteur.current), []);
+  const parler = useCallback((r: Replique) => {
+    const texte = voixStore.dire(r);
+    setParole({ texte, n: ++n.current });
+    clearTimeout(minuteur.current);
+    minuteur.current = setTimeout(() => setParole(null), 3600);
+  }, []);
+  return { parole, parler };
+}
+
+function UlysseBulle({ parole }: { parole: Parole | null }) {
+  const son = useVoix();
+  return (
+    <AnimatePresence>
+      {parole && (
+        <motion.div
+          key={parole.n}
+          className="pointer-events-none fixed left-16 right-16 top-3 z-20 mx-auto flex max-w-sm items-start gap-2"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -14 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+          aria-live="polite"
+        >
+          <motion.img
+            src={AVATAR}
+            alt=""
+            className="size-11 shrink-0 rounded-full bg-white ring-2 ring-sun drop-shadow-[0_6px_10px_rgba(0,0,0,0.5)]"
+            animate={{ rotate: [0, -8, 8, -4, 0] }}
+            transition={{ duration: 0.8 }}
+          />
+          <div className="mt-1 rounded-[16px] rounded-tl-[4px] bg-white px-3 py-2 font-display text-[14px] font-extrabold leading-snug text-navy-950 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
+            « {parole.texte} »
+            {son && (
+              <span className="ml-1.5 inline-flex items-center gap-[2px] align-middle" aria-hidden>
+                {[8, 14, 10, 16, 7].map((h, i) => (
+                  <motion.i
+                    key={i}
+                    className="inline-block w-[3px] rounded-sm bg-sun"
+                    style={{ height: h }}
+                    animate={{ scaleY: [1, 0.4, 1] }}
+                    transition={{ duration: 0.5, repeat: 3, delay: i * 0.08 }}
+                  />
+                ))}
+              </span>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function BoutonSon() {
+  const son = useVoix();
+  return (
+    <button
+      onClick={() => voixStore.basculer()}
+      className="fixed left-4 top-4 z-10 grid size-11 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+      aria-label={son ? 'Couper la voix d’Ulysse' : 'Activer la voix d’Ulysse'}
+      title={son ? 'Couper la voix d’Ulysse' : 'Activer la voix d’Ulysse'}
+    >
+      {son ? <Volume2 size={20} /> : <VolumeX size={20} />}
+    </button>
+  );
+}
+
 // ───────────── 4. Le récap du pack ─────────────
 
 function Recap({
@@ -482,7 +661,7 @@ function Recap({
   onClose,
   onCollection,
 }: {
-  result: PackResult;
+  result: PackResultat;
   total: number;
   onClose: () => void;
   onCollection: () => void;

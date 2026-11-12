@@ -12,6 +12,7 @@ import { estInstallee, rappelsStore } from './data/rappels';
 import { MesInscriptions } from './pages/MesInscriptions';
 import { AdventDay } from './pages/AdventDay';
 import { Collection } from './pages/Collection';
+import { Echange } from './pages/Echange';
 import { Home } from './pages/Home';
 import { Menu } from './pages/Menu';
 
@@ -51,6 +52,7 @@ export function App() {
             <Route index element={<Menu />} />
             <Route path="cartes" element={<Home />} />
             <Route path="collection" element={<Collection />} />
+            <Route path="echange" element={<Echange />} />
             <Route path="avent" element={<Advent />} />
             <Route path="avent/:jour" element={<AdventDay />} />
             <Route path="moi" element={<MesInscriptions />} />

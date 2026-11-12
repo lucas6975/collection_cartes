@@ -77,4 +77,6 @@ export interface Progress {
   userId: string;
   cards: OwnedCard[];
   packs: PackOpening[];
+  /** Date de réception de la carte personnelle (offerte une seule fois, dans un pack). */
+  cartePerso?: string;
 }

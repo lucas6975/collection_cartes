@@ -68,3 +68,11 @@ partager). La personne tirée au sort ce jour-là ne la voit pas tant que l’ad
 débloquée (espace administrateur › onglet **Résultats** › « Débloquer sa correction »).
 Exécuter **une fois** `supabase/maj-corrections.sql` (SQL Editor › nouvel onglet vide › Run).
 Tant que ce n’est pas fait, la correction s’affiche pour tout le monde.
+
+## Mise à jour : échange de cartes en face à face
+
+Page **Collection › Échanger une carte** : chacun affiche son QR code d’échange, le collègue le
+scanne avec l’appli (ou tape le code à 6 caractères), choisit un doublon à donner et un doublon à
+recevoir, et le premier accepte. Seuls les doublons s’échangent ; la carte Ulysse jamais.
+Exécuter **une fois** `supabase/maj-echanges.sql` (SQL Editor › nouvel onglet vide › Run).
+Les échanges de plus d’un jour sont effacés automatiquement.

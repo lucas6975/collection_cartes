@@ -218,7 +218,12 @@ function BarreOnglets() {
       actif: pathname === '/cartes',
       pastille: packDispo ? '1' : null,
     },
-    { to: '/collection', label: 'Collection', icon: Layers, actif: pathname === '/collection' },
+    {
+      to: '/collection',
+      label: 'Collection',
+      icon: Layers,
+      actif: pathname === '/collection' || pathname === '/echange',
+    },
     {
       to: '/avent',
       label: 'Calendrier',

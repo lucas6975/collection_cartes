@@ -79,7 +79,43 @@ export interface AbonnementRappels {
   avent: boolean;
 }
 
+export type EtatEchange = 'ouvert' | 'propose' | 'accepte' | 'refuse' | 'annule';
+
+export interface Echange {
+  code: string;
+  etat: EtatEchange;
+  nom_a: string;
+  nom_b: string | null;
+  doublons_a: string[];
+  doublons_b: string[];
+  /** Carte que B donne et carte que B reçoit (prise dans les doublons de A). */
+  donne_b: string | null;
+  recoit_b: string | null;
+}
+
 export const api = {
+  echangeCreer: (nom: string, doublons: string[]) =>
+    rpc<{ code: string; cle: string }>('echange_creer', { p_nom: nom, p_doublons: doublons }),
+  echangeRejoindre: (code: string, nom: string, doublons: string[]) =>
+    rpc<Echange & { cle: string }>('echange_rejoindre', {
+      p_code: code,
+      p_nom: nom,
+      p_doublons: doublons,
+    }),
+  echangeProposer: (code: string, cle: string, donne: string, recoit: string) =>
+    rpc<Echange>('echange_proposer', {
+      p_code: code,
+      p_cle: cle,
+      p_donne: donne,
+      p_recoit: recoit,
+    }),
+  echangeRepondre: (code: string, cle: string, accepte: boolean) =>
+    rpc<Echange>('echange_repondre', { p_code: code, p_cle: cle, p_accepte: accepte }),
+  echangeVoir: (code: string, cle: string) =>
+    rpc<Echange | null>('echange_voir', { p_code: code, p_cle: cle }),
+  echangeAnnuler: (code: string, cle: string) =>
+    rpc<null>('echange_annuler', { p_code: code, p_cle: cle }),
+
   inscrire: (prenom: string, nom: string, jours: number[], jeton?: string) =>
     rpc<Inscription>('inscrire', {
       p_prenom: prenom,

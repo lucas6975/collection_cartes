@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronRight, Clock, Flame, Gift } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Clock, Flame, FlaskConical, Gift } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
@@ -10,8 +10,9 @@ import { PackOpening } from '../components/cards/PackOpening';
 import { useToast } from '../components/ui/overlay';
 import { Button, Reveal, Ring, SectionTitle } from '../components/ui/primitives';
 import { RARITIES } from '../content/categories';
-import { game, useGame } from '../data/store';
-import { PackIndisponible, packDuJourOuvert, serie, type PackResult } from '../domain/packs';
+import { useIdentite } from '../data/identite';
+import { game, useGame, type PackResultat } from '../data/store';
+import { PackIndisponible, packDuJourOuvert, serie } from '../domain/packs';
 import type { Card } from '../domain/types';
 
 /** Temps restant avant minuit (nouveau pack). */
@@ -38,9 +39,10 @@ export function Home() {
   const { progress, cards } = useGame();
   const navigate = useNavigate();
   const toast = useToast();
-  const [opening, setOpening] = useState<PackResult | null>(null);
+  const [opening, setOpening] = useState<PackResultat | null>(null);
   const [detail, setDetail] = useState<Card | null>(null);
   const { tempsRestant, now } = useHorloge();
+  const { codeAdmin } = useIdentite();
 
   const total = cards.length;
   const owned = new Map(progress.cards.map((c) => [c.cardId, c]));
@@ -111,6 +113,15 @@ export function Home() {
                   5 cartes sécurité, un nouveau pack chaque jour.
                 </p>
               </>
+            )}
+            {codeAdmin && (
+              <button
+                type="button"
+                onClick={() => setOpening(game.openPackTest())}
+                className="mx-auto flex items-center gap-1.5 rounded-full border border-dashed border-navy/30 px-4 py-2 text-sm font-semibold text-navy hover:bg-navy/5"
+              >
+                <FlaskConical size={15} /> Pack test (administrateur)
+              </button>
             )}
           </div>
         </section>

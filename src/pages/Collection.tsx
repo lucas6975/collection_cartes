@@ -1,13 +1,14 @@
-import { ArrowDownUp, Search, SearchX, Trophy } from 'lucide-react';
+import { ArrowDownUp, Repeat, Search, SearchX, Trophy } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
+import { CartePerso } from '../components/cards/CartePerso';
 import { CardDetail } from '../components/cards/CardDetail';
 import { GameCard } from '../components/cards/GameCard';
 import { Icon } from '../components/ui/Icon';
 import { Chip, PageHeader, ProgressBar, Ring, cx } from '../components/ui/primitives';
 import { CATEGORIES, RARITIES, RARITY_BY_ID } from '../content/categories';
-import { useGame } from '../data/store';
+import { doublons, useGame } from '../data/store';
 import type { Card, CategoryId, Rarity } from '../domain/types';
 
 type Sort = 'numero' | 'date' | 'rarete';
@@ -27,6 +28,7 @@ export function Collection() {
   const owned = new Map(progress.cards.map((c) => [c.cardId, c]));
   const total = cards.length;
   const ratio = owned.size / total;
+  const nDoublons = doublons(progress).length;
 
   const filtered = cards
     .filter((c) => !cat || c.categorie === cat)
@@ -88,6 +90,32 @@ export function Collection() {
           </div>
         </div>
       </PageHeader>
+
+      {/* ───── Ma carte perso et échanges ───── */}
+      <section className="panel mb-6 flex items-center gap-4 p-4 sm:p-5">
+        {progress.cartePerso && (
+          <div className="w-[96px] shrink-0 sm:w-[120px]">
+            <CartePerso recueLe={progress.cartePerso} />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          {progress.cartePerso && <p className="eyebrow mb-0.5">Ma carte Team Ulysse</p>}
+          <p className="font-display text-lg font-extrabold leading-tight text-navy-950">
+            Échange tes doublons
+          </p>
+          <p className="mt-1 text-sm text-muted">
+            {nDoublons
+              ? `${nDoublons} doublon${nDoublons > 1 ? 's' : ''} à échanger avec un collègue, en face à face.`
+              : 'Pas encore de doublon : ils arrivent vite en ouvrant tes packs !'}
+          </p>
+          <Link
+            to="/echange"
+            className="mt-3 inline-flex h-10 items-center gap-2 rounded-xl bg-sun px-4 text-sm font-bold text-navy-950 shadow-sm hover:bg-sun-light"
+          >
+            <Repeat size={16} /> Échanger une carte
+          </Link>
+        </div>
+      </section>
 
       {/* ───── Filtres ───── */}
       <div className="mb-6 space-y-3">
