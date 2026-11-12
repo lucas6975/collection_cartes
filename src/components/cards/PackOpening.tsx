@@ -578,6 +578,8 @@ function CarteBonusPerso({
 
 interface Parole {
   texte: string;
+  /** Vrai si la réplique est aussi dite à voix haute. */
+  vocale: boolean;
   n: number;
 }
 
@@ -588,8 +590,8 @@ function useParole() {
   const minuteur = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(minuteur.current), []);
   const parler = useCallback((r: Replique) => {
-    const texte = voixStore.dire(r);
-    setParole({ texte, n: ++n.current });
+    const { texte, vocale } = voixStore.dire(r);
+    setParole({ texte, vocale, n: ++n.current });
     clearTimeout(minuteur.current);
     minuteur.current = setTimeout(() => setParole(null), 3600);
   }, []);
@@ -619,7 +621,7 @@ function UlysseBulle({ parole }: { parole: Parole | null }) {
           />
           <div className="mt-1 rounded-[16px] rounded-tl-[4px] bg-white px-3 py-2 font-display text-[14px] font-extrabold leading-snug text-navy-950 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
             « {parole.texte} »
-            {son && (
+            {son && parole.vocale && (
               <span className="ml-1.5 inline-flex items-center gap-[2px] align-middle" aria-hidden>
                 {[8, 14, 10, 16, 7].map((h, i) => (
                   <motion.i

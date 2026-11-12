@@ -87,7 +87,8 @@ la voit qu’après déblocage par l’administrateur (onglet Résultats). Migra
 
 **Échanges, voix et carte perso :** dans la collection, « Échanger une carte » permet d'échanger un
 doublon en face à face par QR code (migration `supabase/maj-echanges.sql`). Pendant l'ouverture des
-packs, Ulysse commente les cartes à voix haute (`public/voix/`, bouton pour couper le son). Chacun
+packs, Ulysse commente les cartes dans une bulle ; « C'est parti, on ouvre ce pack ! » est dit à
+voix haute (`public/voix/`, bouton pour couper le son). Chacun
 reçoit une fois sa carte personnelle à son nom (hors des 36 cartes) dans son premier pack, ou dans
 le prochain pour ceux qui avaient déjà l'appli. L'administrateur a un bouton « Pack test ».
 

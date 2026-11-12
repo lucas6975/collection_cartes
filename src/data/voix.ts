@@ -1,6 +1,6 @@
-// Ulysse qui parle : petites phrases enregistrées (public/voix), jouées pendant l'ouverture
-// des packs et après un échange. Un seul lecteur audio est réutilisé : sur iPhone, une fois
-// débloqué par un appui sur l'écran, il peut rejouer ensuite sans nouvel appui.
+// Ulysse qui parle : bulles pendant l'ouverture des packs et après un échange. L'annonce
+// d'ouverture du pack est aussi dite à voix haute (public/voix). Un seul lecteur audio est
+// réutilisé : sur iPhone, une fois débloqué par un appui sur l'écran, il peut rejouer ensuite.
 
 import { useSyncExternalStore } from 'react';
 import type { Rarity } from '../domain/types';
@@ -36,6 +36,9 @@ const REPLIQUES: Record<Replique, string[]> = {
   perso: ['Et voici ta carte rien qu’à toi. Bienvenue dans la Team Ulysse !'],
   echange: ['Échange réussi ! Félicitations !'],
 };
+
+/** Répliques dites à voix haute (public/voix/<réplique>.mp3) ; les autres sont seulement écrites. */
+const VOCALES = new Set<Replique>(['ouverture']);
 
 /** Réplique d'Ulysse quand une carte est retournée. */
 export function repliqueCarte(rarete: Rarity, nouvelle: boolean): Replique {
@@ -75,21 +78,25 @@ export const voixStore = {
     if (!active) lecteur?.pause();
     listeners.forEach((l) => l());
   },
-  /** Joue une réplique (si le son est activé) et renvoie le texte à afficher dans la bulle. */
-  dire(r: Replique): string {
+  /**
+   * Renvoie le texte à afficher dans la bulle d'Ulysse. Seules les répliques enregistrées
+   * (VOCALES) sont aussi dites à voix haute, si le son est activé.
+   */
+  dire(r: Replique): { texte: string; vocale: boolean } {
     const variantes = REPLIQUES[r];
     const i = compteur++ % variantes.length;
-    if (active && typeof Audio !== 'undefined') {
+    const vocale = active && VOCALES.has(r) && typeof Audio !== 'undefined';
+    if (vocale) {
       try {
         lecteur ??= new Audio();
         lecteur.pause();
-        lecteur.src = `${import.meta.env.BASE_URL}voix/${r}${variantes.length > 1 ? `-${i + 1}` : ''}.mp3`;
+        lecteur.src = `${import.meta.env.BASE_URL}voix/${r}.mp3`;
         void lecteur.play().catch(() => undefined);
       } catch {
         // Son indisponible : la bulle suffit.
       }
     }
-    return variantes[i];
+    return { texte: variantes[i], vocale };
   },
 };
 
