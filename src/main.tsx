@@ -52,4 +52,12 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 );
 
+// L'appli est affichée : l'écran de lancement s'efface en fondu.
+requestAnimationFrame(() => {
+  const boot = document.getElementById('boot');
+  if (!boot) return;
+  boot.classList.add('fini');
+  setTimeout(() => boot.remove(), 400);
+});
+
 surveillerMisesAJour();

@@ -64,6 +64,7 @@
 
 @layer base {
   html {
+    @apply bg-canvas;
     -webkit-tap-highlight-color: transparent;
   }
   body {
