@@ -8,7 +8,7 @@ import { Admin } from './pages/Admin';
 import { Advent } from './pages/Advent';
 import { Bienvenue } from './pages/Bienvenue';
 import { Installer } from './pages/Installer';
-import { estInstallee } from './data/rappels';
+import { estInstallee, rappelsStore } from './data/rappels';
 import { MesInscriptions } from './pages/MesInscriptions';
 import { AdventDay } from './pages/AdventDay';
 import { Collection } from './pages/Collection';
@@ -23,6 +23,8 @@ export function App() {
   // Une inscription faite hors ligne est renvoyée à chaque ouverture, jusqu'à ce qu'elle passe.
   useEffect(() => {
     identiteStore.synchroniser().catch(() => undefined);
+    // Rappels actifs : on vérifie que ce téléphone est toujours bien inscrit.
+    rappelsStore.verifier().catch(() => undefined);
   }, []);
 
   // Premier lancement : chacun indique son prénom et son nom (l'administrateur, son code).

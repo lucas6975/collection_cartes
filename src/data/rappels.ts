@@ -72,11 +72,24 @@ export function disponibilite(): Disponibilite {
 
 const SW_URL = `${import.meta.env.BASE_URL}sw.js`;
 
-async function inscriptionPush(): Promise<PushSubscription> {
+const memeCle = (sub: PushSubscription) => {
+  const k = sub.options?.applicationServerKey;
+  if (!k) return true;
+  const a = new Uint8Array(k);
+  const b = base64EnOctets(CLE_PUBLIQUE_RAPPELS);
+  return a.length === b.length && a.every((x, i) => x === b[i]);
+};
+
+async function inscriptionPush(neuve = false): Promise<PushSubscription> {
   const reg = await navigator.serviceWorker.register(SW_URL, { scope: import.meta.env.BASE_URL });
   await navigator.serviceWorker.ready;
   const existante = await reg.pushManager.getSubscription();
-  if (existante) return existante;
+  if (existante && !neuve && memeCle(existante)) return existante;
+  // Inscription ancienne (autre clé) ou réparation demandée : on repart sur une inscription neuve.
+  if (existante) {
+    await api.rappelsSupprimer(existante.endpoint).catch(() => undefined);
+    await existante.unsubscribe().catch(() => undefined);
+  }
   return reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: base64EnOctets(CLE_PUBLIQUE_RAPPELS),
@@ -143,6 +156,35 @@ export const rappelsStore = {
       await sub.unsubscribe().catch(() => undefined);
     }
     commit({ ...etat, actifs: false });
+  },
+
+  /**
+   * À chaque ouverture : si les rappels sont actifs, on s'assure que le téléphone est toujours
+   * inscrit (programme de réception présent, bonne clé) et on renvoie l'inscription à la base.
+   */
+  async verifier() {
+    if (!etat.actifs || disponibilite() !== 'possible') return;
+    if (Notification.permission !== 'granted') return;
+    const sub = await inscriptionPush();
+    await envoyer(sub, { pack: etat.pack, avent: etat.avent });
+  },
+
+  /** Répare les rappels : nouvelle inscription du téléphone, renvoyée à la base. */
+  async reparer() {
+    const sub = await inscriptionPush(true);
+    await envoyer(sub, { pack: etat.pack, avent: etat.avent });
+    commit({ ...etat, actifs: true });
+  },
+
+  /** Affiche une notification directement sur ce téléphone, sans passer par le serveur. */
+  async tester() {
+    const reg = await navigator.serviceWorker.register(SW_URL, { scope: import.meta.env.BASE_URL });
+    await navigator.serviceWorker.ready;
+    await reg.showNotification('✅ Test Team Ulysse', {
+      body: 'Les notifications s’affichent bien sur ce téléphone.',
+      icon: `${import.meta.env.BASE_URL}icone-192.png`,
+      tag: 'test-local',
+    });
   },
 
   plusTard() {

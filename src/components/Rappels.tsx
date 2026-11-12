@@ -1,4 +1,4 @@
-import { Bell, BellOff, CalendarDays, Layers, Share, X } from 'lucide-react';
+import { Bell, BellOff, BellRing, RefreshCw, CalendarDays, Layers, Share, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -280,6 +280,29 @@ export function ReglagesRappels() {
             choix={{ pack: etat.pack, avent: etat.avent }}
             onChange={(c) => appliquer(() => rappelsStore.modifier(c), 'Rappels mis à jour.')}
           />
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={() =>
+                appliquer(
+                  () => rappelsStore.tester(),
+                  'Notification de test envoyée : elle doit apparaître sur ce téléphone.',
+                )
+              }
+            >
+              <BellRing size={16} /> Tester sur ce téléphone
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={() =>
+                appliquer(() => rappelsStore.reparer(), 'Rappels réactivés sur ce téléphone.')
+              }
+            >
+              <RefreshCw size={16} /> Réparer les rappels
+            </Button>
+          </div>
           <button
             type="button"
             onClick={() => appliquer(() => rappelsStore.desactiver(), 'Rappels désactivés.')}
