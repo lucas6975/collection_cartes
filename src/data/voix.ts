@@ -34,7 +34,7 @@ const REPLIQUES: Record<Replique, string[]> = {
   ],
   secrete: ['Incroyable ! Les 5 règles sont réunies. Je rejoins ta collection !'],
   perso: ['Et voici ta carte rien qu’à toi. Bienvenue dans la Team Ulysse !'],
-  echange: ['Échange réussi ! Bravo !'],
+  echange: ['Échange réussi ! Félicitations !'],
 };
 
 /** Réplique d'Ulysse quand une carte est retournée. */
