@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { salut, sousTitre } from './Menu';
+import { salut, sousTitre } from '../src/pages/Menu';
 
 const a = (h: number, m = 0) => new Date(2026, 10, 12, h, m);
 
