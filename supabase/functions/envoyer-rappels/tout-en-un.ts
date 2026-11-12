@@ -134,12 +134,22 @@ Deno.serve(async (req) => {
   const jour = `${m.annee}-${String(m.mois).padStart(2, '0')}-${String(m.jour).padStart(2, '0')}`;
 
   // Mode essai : { "essai": "<CLE_ESSAI>" } envoie tout de suite une notification de test
+  // (ou un message libre avec « titre » et « texte »)
   // aux abonnés du pack, pour vérifier l'installation. Sans le bon secret, rien ne se passe.
   const corps = await req.json().catch(() => ({}));
   const cleEssai = Deno.env.get('CLE_ESSAI');
   const essai = Boolean(cleEssai && corps?.essai === cleEssai);
 
-  const rappel = essai ? RAPPEL_ESSAI : choisirRappel(m);
+  // En mode essai, on peut aussi envoyer un message libre : { "essai": "…", "titre": "…", "texte": "…" }.
+  const libre = (v: unknown, max: number) =>
+    typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null;
+  const titre = libre(corps?.titre, 80);
+  const texte = libre(corps?.texte, 240);
+  const rappel: Rappel | null = essai
+    ? titre || texte
+      ? { ...RAPPEL_ESSAI, title: titre ?? RAPPEL_ESSAI.title, body: texte ?? '', tag: 'annonce' }
+      : RAPPEL_ESSAI
+    : choisirRappel(m);
   if (!rappel) return repondre({ envoyes: 0, raison: 'aucun rappel à cette heure' });
 
   // Un seul envoi par rappel et par jour (sauf en mode essai).
