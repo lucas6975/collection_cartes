@@ -4,12 +4,14 @@ import { AppShell } from './components/layout/AppShell';
 import { ToastProvider } from './components/ui/overlay';
 import { identiteStore, useIdentite } from './data/identite';
 import { inclinaisonStore } from './data/inclinaison';
+import { demarrerPastille } from './data/pastille';
 import { CoalitionAdmin } from './pages/CoalitionAdmin';
 import { Admin } from './pages/Admin';
 import { Advent } from './pages/Advent';
 import { Bienvenue } from './pages/Bienvenue';
 import { Installer } from './pages/Installer';
 import { estInstallee, rappelsStore } from './data/rappels';
+import { EtapeRappels, etapeRappels } from './components/Rappels';
 import { MesInscriptions } from './pages/MesInscriptions';
 import { AdventDay } from './pages/AdventDay';
 import { Collection } from './pages/Collection';
@@ -21,6 +23,8 @@ export function App() {
   const { identite, codeAdmin } = useIdentite();
   // Site ouvert dans le navigateur (pas depuis l'icône) : on explique d'abord l'installation.
   const [navigateur, setNavigateur] = useState(() => !estInstallee());
+  // Change quand l'écran des rappels est terminé, pour réafficher l'appli.
+  const [, setEtapeFinie] = useState(false);
 
   // Une inscription faite hors ligne est renvoyée à chaque ouverture, jusqu'à ce qu'elle passe.
   useEffect(() => {
@@ -29,6 +33,8 @@ export function App() {
     rappelsStore.verifier().catch(() => undefined);
     // Cartes holographiques : le reflet suit les mouvements du téléphone.
     inclinaisonStore.demarrer();
+    // Pastille « 1 » sur l'icône tant que le pack du jour n'est pas ouvert.
+    demarrerPastille();
   }, []);
 
   // Premier lancement : chacun indique son prénom et son nom (l'administrateur, son code).
@@ -43,6 +49,14 @@ export function App() {
     return (
       <ToastProvider>
         <Bienvenue />
+      </ToastProvider>
+    );
+  }
+  // Nouvel inscrit : l'écran des rappels avant le premier menu.
+  if (identite && etapeRappels.aAfficher()) {
+    return (
+      <ToastProvider>
+        <EtapeRappels onFin={() => setEtapeFinie(true)} />
       </ToastProvider>
     );
   }

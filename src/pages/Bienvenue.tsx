@@ -5,6 +5,7 @@ import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { Button } from '../components/ui/primitives';
 import { ApiError } from '../data/api';
 import { identiteStore } from '../data/identite';
+import { etapeRappels } from '../components/Rappels';
 
 const champ =
   'h-12 w-full rounded-xl border border-line bg-white px-4 text-[16px] text-ink outline-none transition-shadow placeholder:text-muted/70 focus:border-blue focus:ring-4 focus:ring-blue/10';
@@ -24,6 +25,8 @@ export function Bienvenue() {
     setErreur(null);
     setEnvoi(true);
     try {
+      // Juste après l'inscription, on propose les rappels avant d'arriver sur le menu.
+      etapeRappels.demander();
       // Même hors ligne, l'inscription est gardée et sera envoyée plus tard.
       await identiteStore.enregistrer(prenom, nom, [], false);
     } catch (err) {

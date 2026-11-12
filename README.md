@@ -94,6 +94,11 @@ le prochain pour ceux qui avaient déjà l'appli. L'administrateur a un bouton �
 holographiques : le reflet suit l'inclinaison du téléphone sur Android et la souris sur ordinateur
 (`src/data/inclinaison.ts`). Sur iPhone, aucune autorisation n'est demandée : reflet automatique.
 
+**Accueil :** Ulysse salue chacun par son prénom selon l'heure, avec ce qui l'attend (pack, case du
+jour). Une pastille « 1 » s'affiche sur l'icône de l'appli tant que le pack du jour n'est pas ouvert
+(`src/data/pastille.ts`). Juste après l'inscription, un écran propose d'activer les rappels avant le
+premier menu.
+
 **Ouverture :** pour les collaborateurs, les cases restent fermées jusqu’au N décembre, avec un
 compte à rebours avant la première. L’administrateur (code saisi sur son téléphone) a accès à toutes
 les cases en avance pour présenter le calendrier ; ses étoiles sont enregistrées à part (jamais

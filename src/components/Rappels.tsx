@@ -105,6 +105,137 @@ function AideEcranAccueil() {
   );
 }
 
+// ───────────── Étape « Active les rappels », juste après l'inscription ─────────────
+
+const CLE_ETAPE = 'team-ulysse-etape-rappels';
+
+/** Les nouveaux inscrits voient l'écran des rappels avant d'arriver sur le menu. */
+export const etapeRappels = {
+  demander() {
+    try {
+      localStorage.setItem(CLE_ETAPE, '1');
+    } catch {
+      // Stockage indisponible : la carte du menu reste proposée.
+    }
+  },
+  /** Vrai si l'écran doit être affiché (nouvel inscrit, notifications possibles, pas encore choisi). */
+  aAfficher() {
+    try {
+      if (localStorage.getItem(CLE_ETAPE) !== '1') return false;
+    } catch {
+      return false;
+    }
+    const etat = rappelsStore.get();
+    return !etat.actifs && !etat.ignore && disponibilite() === 'possible';
+  },
+  terminer() {
+    try {
+      localStorage.removeItem(CLE_ETAPE);
+    } catch {
+      // Rien à faire.
+    }
+  },
+};
+
+/** Écran plein, juste après l'inscription : activer les rappels avant d'arriver sur le menu. */
+export function EtapeRappels({ onFin }: { onFin: () => void }) {
+  const toast = useToast();
+  const [choix, setChoix] = useState<Choix>({ pack: true, avent: true });
+  const [envoi, setEnvoi] = useState(false);
+
+  const fin = () => {
+    etapeRappels.terminer();
+    onFin();
+  };
+  const activer = async () => {
+    setEnvoi(true);
+    try {
+      await rappelsStore.activer(choix);
+      toast('Rappels activés ! Ulysse te préviendra.', 'success');
+      fin();
+    } catch (e) {
+      toast(messageErreur(e), 'error');
+      setEnvoi(false);
+    }
+  };
+
+  return (
+    <div
+      className="min-h-dvh px-4 py-8 sm:py-12"
+      style={{ background: 'linear-gradient(170deg, #2563A6 0%, #153E75 45%, #0B2347 100%)' }}
+    >
+      <div className="mx-auto max-w-md">
+        <motion.div
+          className="flex flex-col items-center text-center text-white"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="relative">
+            <motion.img
+              src={MASCOTTE_URL}
+              alt="Ulysse, la mascotte"
+              className="h-36 w-auto drop-shadow-[0_12px_20px_rgba(0,0,0,0.45)]"
+              initial={{ y: 24, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.1 }}
+            />
+            <motion.span
+              className="absolute -right-5 top-1 grid size-12 place-items-center rounded-2xl bg-sun text-navy-950 shadow-lg"
+              animate={{ rotate: [0, -14, 14, -8, 0] }}
+              transition={{ duration: 0.9, repeat: Infinity, repeatDelay: 2 }}
+            >
+              <BellRing size={24} />
+            </motion.span>
+          </div>
+          <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-sun">
+            Dernière étape
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight">
+            Active les rappels 🔔
+          </h1>
+          <p className="mt-2 text-sm text-white/80">
+            Ulysse te prévient pour ne rater{' '}
+            <b className="text-white">ni ton pack, ni la case du jour</b> du calendrier. Jamais le
+            soir ni le week-end.
+          </p>
+        </motion.div>
+
+        <motion.div
+          className="mt-6 space-y-4 rounded-3xl bg-white p-5 shadow-lift sm:p-6"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <LignesChoix choix={choix} onChange={setChoix} />
+          <Button
+            variant="accent"
+            size="lg"
+            className="h-13 w-full text-base"
+            onClick={activer}
+            disabled={envoi || (!choix.pack && !choix.avent)}
+          >
+            <Bell size={18} /> {envoi ? 'Activation…' : 'Activer les rappels'}
+          </Button>
+          <p className="text-center text-xs text-muted">
+            Le téléphone va te demander l’autorisation : touche <b>Autoriser</b>.
+          </p>
+        </motion.div>
+
+        <button
+          type="button"
+          onClick={() => {
+            rappelsStore.plusTard();
+            fin();
+          }}
+          className="mx-auto mt-5 block text-sm font-semibold text-white/60 hover:text-white"
+        >
+          Plus tard
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ───────────── Proposition (menu d'accueil) ─────────────
 
 /** Carte « Active les rappels » affichée sur le menu tant que la personne n'a pas choisi. */

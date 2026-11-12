@@ -14,6 +14,10 @@ self.addEventListener('push', (event) => {
     data = { body: event.data ? event.data.text() : '' };
   }
   const base = self.registration.scope;
+  // Rappel du pack du jour : pastille « 1 » sur l'icône de l'appli (effacée à l'ouverture du pack).
+  if (data.tag === 'pack' && self.navigator.setAppBadge) {
+    self.navigator.setAppBadge(1).catch(() => undefined);
+  }
   event.waitUntil(
     self.registration.showNotification(data.title || 'Team Ulysse', {
       body: data.body || '',

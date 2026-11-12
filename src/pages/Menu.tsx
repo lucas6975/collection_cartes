@@ -10,13 +10,34 @@ import { ANNEE_AVENT, JOURS } from '../avent/jours';
 import { caseDuJour, joursAvantDebut } from '../avent/logic';
 import { useAvent } from '../avent/progress';
 import { NOEL, Neige } from '../avent/ui';
+import { useIdentite } from '../data/identite';
 import { useGame } from '../data/store';
 import { packDuJourOuvert } from '../domain/packs';
 
 const FOND_NOEL = `${import.meta.env.BASE_URL}avent/fond-noel.webp`;
 
+/** Salutation d'Ulysse selon l'heure de la journée. */
+export function salut(now: Date, prenom?: string) {
+  const h = now.getHours() + now.getMinutes() / 60;
+  const p = prenom ? ` ${prenom}` : '';
+  if (h >= 5 && h < 11.5) return `Bonjour${p} ! ☀️`;
+  if (h >= 11.5 && h < 14) return `Bon appétit${p} ! 🍽️`;
+  if (h >= 14 && h < 18) return `Bon après-midi${p} ! 😎`;
+  if (h >= 18 && h < 22) return `Bonsoir${p} ! 🌙`;
+  return `Encore debout${p} ? 🦉`;
+}
+
+/** Deuxième ligne de la bulle : ce qui attend la personne aujourd'hui. */
+export function sousTitre(o: { packOuvert: boolean; caseDuJour: boolean; caseFaite: boolean }) {
+  if (o.caseDuJour) return 'La case du jour est ouverte 🎄';
+  if (!o.packOuvert) return 'Ton pack du jour t’attend 🎁';
+  if (o.caseFaite) return 'Pack ouvert et case réussie, bravo ! 🏆';
+  return 'Pack ouvert, bien joué. À demain ! 👊';
+}
+
 export function Menu() {
   const { progress, cards } = useGame();
+  const { identite } = useIdentite();
   const avent = useAvent();
   const [now] = useState(() => new Date());
   const packOuvert = packDuJourOuvert(progress, now);
@@ -40,24 +61,43 @@ export function Menu() {
             backgroundSize: '18px 18px',
           }}
         />
-        <motion.img
-          src={MASCOTTE_URL}
-          alt="Ulysse, la mascotte"
-          className="relative h-28 w-auto shrink-0 drop-shadow-[0_10px_18px_rgba(0,0,0,0.45)] sm:h-40"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.1 }}
-        />
-        <div className="relative">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-sun">
-            Bienvenue dans la
-          </p>
+        <div className="relative shrink-0">
+          <motion.img
+            src={MASCOTTE_URL}
+            alt="Ulysse, la mascotte"
+            className="h-28 w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,0.45)] sm:h-40"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 140, damping: 14, delay: 0.1 }}
+          />
+          {/* Ulysse fait coucou */}
+          <motion.span
+            className="absolute -right-3 -top-1 origin-[70%_90%] text-3xl drop-shadow-[0_3px_4px_rgba(0,0,0,0.35)]"
+            aria-hidden
+            initial={{ rotate: 0 }}
+            animate={{ rotate: [0, 22, -8, 22, -8, 18, 0] }}
+            transition={{ duration: 1.6, delay: 0.5, repeat: Infinity, repeatDelay: 4 }}
+          >
+            👋
+          </motion.span>
+        </div>
+        <div className="relative min-w-0">
+          <motion.div
+            className="mb-2.5 rounded-[18px] rounded-bl-[4px] bg-white px-3.5 py-2.5 shadow-[0_8px_18px_rgba(0,0,0,0.25)]"
+            initial={{ opacity: 0, scale: 0.85, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 220, damping: 16, delay: 0.3 }}
+          >
+            <p className="font-display text-[17px] font-extrabold leading-tight text-navy-950 sm:text-xl">
+              {salut(now, identite?.prenom)}
+            </p>
+            <p className="mt-0.5 text-[13px] leading-snug text-ink/70">
+              {sousTitre({ packOuvert, caseDuJour: !!duJour && !caseFaite, caseFaite })}
+            </p>
+          </motion.div>
           <h1 className="font-display text-3xl font-extrabold sm:text-4xl">Team Ulysse</h1>
           <p className="font-display text-[15px] font-bold italic text-sun sm:text-lg">
             La sécurité, notre Odyssée
-          </p>
-          <p className="mt-1 max-w-md text-sm text-white/75 sm:text-[15px]">
-            Un peu de jeu chaque jour pour les bons réflexes. Choisis ton jeu !
           </p>
         </div>
       </motion.section>
