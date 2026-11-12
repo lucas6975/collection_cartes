@@ -1,5 +1,6 @@
 import { useIdentite } from '../../data/identite';
 import { MASCOTTE_URL } from './CardBack';
+import { Holo } from './Holo';
 
 const ARC_EN_CIEL =
   'conic-gradient(from 200deg, #FFE58A, #FF8FB1, #9B8CFF, #6FE3FF, #8CFFB4, #FFE58A)';
@@ -34,7 +35,7 @@ export function CartePerso({ recueLe }: { recueLe: string }) {
         style={{ background: ARC_EN_CIEL }}
       />
       <div
-        className="flex size-full flex-col overflow-hidden bg-white text-navy-950"
+        className="relative flex size-full flex-col overflow-hidden bg-white text-navy-950"
         style={{ borderRadius: '5.4cqw' }}
       >
         <div
@@ -104,6 +105,7 @@ export function CartePerso({ recueLe }: { recueLe: string }) {
           </span>
           <span className="text-[#97A3B5]">Carte perso</span>
         </div>
+        <Holo rarete="legendaire" />
       </div>
     </div>
   );

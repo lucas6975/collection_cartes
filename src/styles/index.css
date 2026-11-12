@@ -103,3 +103,90 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ───── Cartes holographiques (voir src/data/inclinaison.ts) ───── */
+:root {
+  --hx: 0;
+  --hy: 0;
+}
+.holo {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+[data-holo='actif'] .holo {
+  display: block;
+}
+[data-holo='actif'] .reflet-auto {
+  display: none;
+}
+.holo > i {
+  position: absolute;
+  inset: 0;
+}
+/* Bande de couleur qui glisse selon l'inclinaison. */
+.holo .bande {
+  mix-blend-mode: color-dodge;
+  background-size: 260% 260%;
+  background-position: calc(50% + var(--hx) * 50%) calc(50% + var(--hy) * 50%);
+}
+/* Point de lumière qui suit le mouvement. */
+.holo .eclat {
+  mix-blend-mode: soft-light;
+  opacity: 0.7;
+  background: radial-gradient(
+    circle at calc(50% + var(--hx) * 45%) calc(40% + var(--hy) * 45%),
+    rgba(255, 255, 255, 0.9),
+    transparent 46%
+  );
+}
+.holo .paillettes {
+  mix-blend-mode: overlay;
+  background-image:
+    radial-gradient(circle, #fff 0 1px, transparent 1.6px),
+    radial-gradient(circle, #fff 0 0.8px, transparent 1.3px);
+  background-size:
+    22px 22px,
+    13px 13px;
+  background-position:
+    calc(var(--hx) * 6px) calc(var(--hy) * 6px),
+    calc(6px - var(--hx) * 4px) calc(9px - var(--hy) * 4px);
+  opacity: calc(0.35 + (var(--hx) * var(--hx) + var(--hy) * var(--hy)) * 0.4);
+}
+.holo-rare .bande {
+  opacity: 0.45;
+  background-image: linear-gradient(
+    115deg,
+    transparent 30%,
+    #fff 47%,
+    #c9d3e3 52%,
+    transparent 66%
+  );
+}
+.holo-epique .bande {
+  opacity: 0.5;
+  background-image: linear-gradient(
+    115deg,
+    transparent 28%,
+    #ffe58a 44%,
+    #fff6d0 50%,
+    #d9a21b 56%,
+    transparent 70%
+  );
+}
+.holo-legendaire .bande {
+  opacity: 0.55;
+  background-image: linear-gradient(
+    115deg,
+    transparent 18%,
+    #ff8fb1 30%,
+    #ffe58a 39%,
+    #8cffb4 48%,
+    #6fe3ff 57%,
+    #9b8cff 66%,
+    transparent 80%
+  );
+}

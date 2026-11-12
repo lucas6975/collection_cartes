@@ -4,6 +4,7 @@ import type { CSSProperties, PointerEvent } from 'react';
 import { CATEGORY_BY_ID, RARITY_BY_ID } from '../../content/categories';
 import type { Card, Rarity } from '../../domain/types';
 import { Icon } from '../ui/Icon';
+import { Holo } from './Holo';
 import { cx } from '../ui/primitives';
 import { CardBack, MASCOTTE_URL } from './CardBack';
 
@@ -314,9 +315,10 @@ export function CardFace({
           )}
         </div>
       </div>
+      <Holo rarete={card.rarete} />
       {style.shimmer && (
         <div
-          className="pointer-events-none absolute inset-0 animate-shimmer rounded-[inherit] mix-blend-overlay"
+          className="reflet-auto pointer-events-none absolute inset-0 animate-shimmer rounded-[inherit] mix-blend-overlay"
           style={{
             backgroundImage:
               'linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.55) 48%, transparent 60%)',

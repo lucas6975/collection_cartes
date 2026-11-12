@@ -3,6 +3,7 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { ToastProvider } from './components/ui/overlay';
 import { identiteStore, useIdentite } from './data/identite';
+import { inclinaisonStore } from './data/inclinaison';
 import { CoalitionAdmin } from './pages/CoalitionAdmin';
 import { Admin } from './pages/Admin';
 import { Advent } from './pages/Advent';
@@ -26,6 +27,8 @@ export function App() {
     identiteStore.synchroniser().catch(() => undefined);
     // Rappels actifs : on vérifie que ce téléphone est toujours bien inscrit.
     rappelsStore.verifier().catch(() => undefined);
+    // Cartes holographiques : le reflet suit les mouvements du téléphone.
+    inclinaisonStore.demarrer();
   }, []);
 
   // Premier lancement : chacun indique son prénom et son nom (l'administrateur, son code).
