@@ -13,7 +13,6 @@ import { CARDS } from '../content/cards';
 import { RARITY_BY_ID } from '../content/categories';
 import { ApiError, api, type Echange as EchangeServeur } from '../data/api';
 import { doublons, game, useGame } from '../data/store';
-import { voixStore } from '../data/voix';
 import type { Card } from '../domain/types';
 
 const CARTE = new Map(CARDS.map((c) => [c.id, c]));
@@ -73,7 +72,6 @@ export function Echange() {
   const possedees = new Set(progress.cards.map((c) => c.cardId));
 
   const reussi = useCallback((donne: string, recoit: string, avec: string) => {
-    voixStore.dire('echange');
     setVue({ k: 'reussi', donne, recoit, avec });
   }, []);
 

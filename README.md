@@ -85,10 +85,9 @@ maquette pour toutes les cases, aussi dans `communication/corrections/`). Le tir
 la voit qu’après déblocage par l’administrateur (onglet Résultats). Migration :
 `supabase/maj-corrections.sql`.
 
-**Échanges, voix et carte perso :** dans la collection, « Échanger une carte » permet d'échanger un
+**Échanges, bulles d'Ulysse et carte perso :** dans la collection, « Échanger une carte » permet d'échanger un
 doublon en face à face par QR code (migration `supabase/maj-echanges.sql`). Pendant l'ouverture des
-packs, Ulysse commente les cartes dans une bulle ; « C'est parti, on ouvre ce pack ! » est dit à
-voix haute (`public/voix/`, bouton pour couper le son). Chacun
+packs, Ulysse commente les cartes dans une bulle (texte seulement, sans son). Chacun
 reçoit une fois sa carte personnelle à son nom (hors des 36 cartes) dans son premier pack, ou dans
 le prochain pour ceux qui avaient déjà l'appli. L'administrateur a un bouton « Pack test ». Les cartes rares, épiques et légendaires sont
 holographiques : le reflet suit l'inclinaison du téléphone sur Android et la souris sur ordinateur

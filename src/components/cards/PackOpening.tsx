@@ -1,4 +1,4 @@
-import { ArrowRight, Sparkles, Volume2, VolumeX, X } from 'lucide-react';
+import { ArrowRight, Sparkles, X } from 'lucide-react';
 import { AnimatePresence, motion, type PanInfo } from 'motion/react';
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
@@ -6,7 +6,7 @@ import { Confetti } from '../../avent/ui';
 import { RARITY_BY_ID } from '../../content/categories';
 import type { Card, Rarity } from '../../domain/types';
 import { useGame, type PackResultat } from '../../data/store';
-import { repliqueCarte, useVoix, voixStore, type Replique } from '../../data/voix';
+import { repliqueCarte, replique, type Replique } from '../../data/voix';
 import { Button, cx } from '../ui/primitives';
 import { CardBack } from './CardBack';
 
@@ -140,7 +140,6 @@ function Opening({
       >
         <X size={20} />
       </button>
-      <BoutonSon />
 
       {(phase === 'pack' || phase === 'tear') && <OuverturePack phase={phase} onTear={tear} />}
 
@@ -578,8 +577,6 @@ function CarteBonusPerso({
 
 interface Parole {
   texte: string;
-  /** Vrai si la réplique est aussi dite à voix haute. */
-  vocale: boolean;
   n: number;
 }
 
@@ -590,8 +587,7 @@ function useParole() {
   const minuteur = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => () => clearTimeout(minuteur.current), []);
   const parler = useCallback((r: Replique) => {
-    const { texte, vocale } = voixStore.dire(r);
-    setParole({ texte, vocale, n: ++n.current });
+    setParole({ texte: replique(r), n: ++n.current });
     clearTimeout(minuteur.current);
     minuteur.current = setTimeout(() => setParole(null), 3600);
   }, []);
@@ -599,7 +595,6 @@ function useParole() {
 }
 
 function UlysseBulle({ parole }: { parole: Parole | null }) {
-  const son = useVoix();
   return (
     <AnimatePresence>
       {parole && (
@@ -621,37 +616,10 @@ function UlysseBulle({ parole }: { parole: Parole | null }) {
           />
           <div className="mt-1 rounded-[16px] rounded-tl-[4px] bg-white px-3 py-2 font-display text-[14px] font-extrabold leading-snug text-navy-950 shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
             « {parole.texte} »
-            {son && parole.vocale && (
-              <span className="ml-1.5 inline-flex items-center gap-[2px] align-middle" aria-hidden>
-                {[8, 14, 10, 16, 7].map((h, i) => (
-                  <motion.i
-                    key={i}
-                    className="inline-block w-[3px] rounded-sm bg-sun"
-                    style={{ height: h }}
-                    animate={{ scaleY: [1, 0.4, 1] }}
-                    transition={{ duration: 0.5, repeat: 3, delay: i * 0.08 }}
-                  />
-                ))}
-              </span>
-            )}
           </div>
         </motion.div>
       )}
     </AnimatePresence>
-  );
-}
-
-function BoutonSon() {
-  const son = useVoix();
-  return (
-    <button
-      onClick={() => voixStore.basculer()}
-      className="fixed left-4 top-4 z-10 grid size-11 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
-      aria-label={son ? 'Couper la voix d’Ulysse' : 'Activer la voix d’Ulysse'}
-      title={son ? 'Couper la voix d’Ulysse' : 'Activer la voix d’Ulysse'}
-    >
-      {son ? <Volume2 size={20} /> : <VolumeX size={20} />}
-    </button>
   );
 }
 
