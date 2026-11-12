@@ -6,7 +6,13 @@
 
 import { useSyncExternalStore } from 'react';
 import { CARDS } from '../content/cards';
-import { carteADebloquer, ouvrirPack, progressionVide, type PackResult } from '../domain/packs';
+import {
+  carteADebloquer,
+  jourDe,
+  ouvrirPack,
+  progressionVide,
+  type PackResult,
+} from '../domain/packs';
 import type { Progress } from '../domain/types';
 
 export interface SavedGame {
@@ -91,6 +97,13 @@ class Game {
 
   /** Ouvre le pack du jour (un seul par jour, renouvelé à minuit). */
   openDailyPack = () => this.ouvrir(false);
+
+  /** Administrateur : rend le pack du jour de nouveau disponible (pour tester la pastille). */
+  remettrePackDuJour = () => {
+    const jour = jourDe(new Date());
+    const p = this.state.progress;
+    this.commit({ ...p, packs: p.packs.filter((x) => x.bonus || x.jour !== jour) });
+  };
 
   /** Pack supplémentaire, réservé à l'administrateur pour tester l'ouverture. */
   openPackTest = () => this.ouvrir(true);

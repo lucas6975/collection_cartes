@@ -1,4 +1,12 @@
-import { CheckCircle2, ChevronRight, Clock, Flame, FlaskConical, Gift } from 'lucide-react';
+import {
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  Flame,
+  FlaskConical,
+  Gift,
+  RotateCcw,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
@@ -113,6 +121,18 @@ export function Home() {
                   5 cartes sécurité, un nouveau pack chaque jour.
                 </p>
               </>
+            )}
+            {codeAdmin && ouvert && (
+              <button
+                type="button"
+                onClick={() => {
+                  game.remettrePackDuJour();
+                  toast('Pack du jour remis : la pastille « 1 » revient sur l’icône.', 'success');
+                }}
+                className="mx-auto flex items-center gap-1.5 rounded-full border border-dashed border-navy/30 px-4 py-2 text-sm font-semibold text-navy hover:bg-navy/5"
+              >
+                <RotateCcw size={15} /> Remettre le pack du jour (test)
+              </button>
             )}
             {codeAdmin && (
               <button
