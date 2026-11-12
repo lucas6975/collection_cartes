@@ -12,7 +12,6 @@ import { CardBack } from './CardBack';
 
 const AVATAR = `${import.meta.env.BASE_URL}ulysse-avatar.webp`;
 import { CartePerso } from './CartePerso';
-import { BoutonBrillant } from './Holo';
 import { CardFace } from './GameCard';
 import { PackArt } from './Pack';
 
@@ -142,9 +141,6 @@ function Opening({
         <X size={20} />
       </button>
       <BoutonSon />
-      {phase === 'pack' && (
-        <BoutonBrillant sombre className="fixed bottom-6 left-1/2 z-10 -translate-x-1/2" />
-      )}
 
       {(phase === 'pack' || phase === 'tear') && <OuverturePack phase={phase} onTear={tear} />}
 

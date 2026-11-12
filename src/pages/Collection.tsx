@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { CartePerso } from '../components/cards/CartePerso';
-import { BoutonBrillant } from '../components/cards/Holo';
 import { CardDetail } from '../components/cards/CardDetail';
 import { GameCard } from '../components/cards/GameCard';
 import { Icon } from '../components/ui/Icon';
@@ -91,8 +90,6 @@ export function Collection() {
           </div>
         </div>
       </PageHeader>
-
-      <BoutonBrillant className="mb-4" />
 
       {/* ───── Ma carte perso et échanges ───── */}
       <section className="panel mb-6 flex items-center gap-4 p-4 sm:p-5">

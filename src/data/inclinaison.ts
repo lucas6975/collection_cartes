@@ -2,11 +2,11 @@
 //
 // La position est publiée dans deux variables CSS globales, --hx et --hy (de -1 à 1), lues par
 // les calques .holo des cartes. Tant qu'aucun mouvement n'est reçu, l'attribut data-holo n'est
-// pas posé et les cartes gardent leur reflet automatique habituel.
+// pas posé et les cartes gardent leur reflet automatique habituel. Sur iPhone, les mouvements
+// demandent une autorisation d'Apple : on ne la demande pas, les cartes y gardent leur reflet
+// automatique (sur Android et ordinateur, l'effet suit les mouvements ou la souris).
 
 import { useSyncExternalStore } from 'react';
-
-type Permission = () => Promise<'granted' | 'denied'>;
 
 const racine = () => document.documentElement;
 const borne = (v: number) => Math.max(-1, Math.min(1, v));
@@ -45,12 +45,6 @@ function surSouris(e: PointerEvent) {
   publier((e.clientX / window.innerWidth) * 2 - 1, (e.clientY / window.innerHeight) * 2 - 1);
 }
 
-const permissionIOS = (): Permission | null => {
-  const ctor = (globalThis as { DeviceOrientationEvent?: { requestPermission?: Permission } })
-    .DeviceOrientationEvent;
-  return typeof ctor?.requestPermission === 'function' ? ctor.requestPermission : null;
-};
-
 export const inclinaisonStore = {
   subscribe(l: () => void) {
     listeners.add(l);
@@ -65,19 +59,6 @@ export const inclinaisonStore = {
     demarre = true;
     window.addEventListener('deviceorientation', surOrientation);
     window.addEventListener('pointermove', surSouris, { passive: true });
-  },
-
-  /** Sur iPhone, l'accès aux mouvements doit être autorisé après un appui sur l'écran. */
-  besoinAutorisation: () => !!permissionIOS(),
-
-  async autoriser() {
-    const demander = permissionIOS();
-    if (!demander) return true;
-    try {
-      return (await demander()) === 'granted';
-    } catch {
-      return false;
-    }
   },
 };
 

@@ -91,7 +91,8 @@ packs, Ulysse commente les cartes dans une bulle ; « C'est parti, on ouvre ce p
 voix haute (`public/voix/`, bouton pour couper le son). Chacun
 reçoit une fois sa carte personnelle à son nom (hors des 36 cartes) dans son premier pack, ou dans
 le prochain pour ceux qui avaient déjà l'appli. L'administrateur a un bouton « Pack test ». Les cartes rares, épiques et légendaires sont
-holographiques : le reflet suit l'inclinaison du téléphone (`src/data/inclinaison.ts`).
+holographiques : le reflet suit l'inclinaison du téléphone sur Android et la souris sur ordinateur
+(`src/data/inclinaison.ts`). Sur iPhone, aucune autorisation n'est demandée : reflet automatique.
 
 **Ouverture :** pour les collaborateurs, les cases restent fermées jusqu’au N décembre, avec un
 compte à rebours avant la première. L’administrateur (code saisi sur son téléphone) a accès à toutes
