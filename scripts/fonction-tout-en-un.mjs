@@ -8,10 +8,7 @@ const dossier = new URL('../supabase/functions/envoyer-rappels/', import.meta.ur
 export function toutEnUn() {
   const index = readFileSync(new URL('index.ts', dossier), 'utf8');
   const rappel = readFileSync(new URL('rappel.ts', dossier), 'utf8');
-  const sansImportLocal = index.replace(
-    /import \{ choisirRappel, momentParis, type Rappel \} from '\.\/rappel\.ts';\n/,
-    '',
-  );
+  const sansImportLocal = index.replace(/import \{[^}]*\} from '\.\/rappel\.ts';\n/, '');
   const i = sansImportLocal.indexOf('\nconst RAPPEL_ESSAI');
   return (
     '// FICHIER UNIQUE à coller dans Supabase › Edge Functions › envoyer-rappels › index.ts\n' +

@@ -12,7 +12,7 @@
 // SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont fournis automatiquement par Supabase.
 
 import webpush from 'npm:web-push@3.6.7';
-import { createClient } from 'npm:@supabase/supabase-js@2.45.4';
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2.45.4';
 
 // ───────────── Choix du rappel selon l’heure de Paris ─────────────
 
@@ -79,6 +79,26 @@ export function choisirRappel(m: MomentParis): Rappel | null {
   return null;
 }
 
+/**
+ * Faut-il prévenir maintenant la personne tirée au sort pour ce jour de décembre ?
+ * En décembre : le jour même (ou après, en rattrapage), jamais en avance.
+ * Hors décembre (essais de l'administrateur) : tout de suite.
+ */
+export function gagnantAPrevenir(jour: number, m: MomentParis): boolean {
+  if (m.mois !== 12) return true;
+  return jour <= m.jour;
+}
+
+/** Notification envoyée à la personne tirée au sort. */
+export function messageGagnant(jour: number) {
+  return {
+    title: '🎁 Tu as été tiré(e) au sort !',
+    body: `C’est toi le gagnant du ${jour === 1 ? '1er' : jour} décembre ! Réussis le défi du jour pour remporter ton cadeau.`,
+    url: `./#/avent/${jour}`,
+    tag: `gagnant-${jour}`,
+  };
+}
+
 /** Heure de Paris, quelle que soit l'heure du serveur. */
 export function momentParis(date: Date): MomentParis {
   const parts = Object.fromEntries(
@@ -125,55 +145,22 @@ webpush.setVapidDetails(
 const repondre = (corps: unknown) =>
   new Response(JSON.stringify(corps), { headers: { 'Content-Type': 'application/json' } });
 
-Deno.serve(async (req) => {
-  const m = momentParis(new Date());
-  const db = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  );
-  const jour = `${m.annee}-${String(m.mois).padStart(2, '0')}-${String(m.jour).padStart(2, '0')}`;
+interface Abonne {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}
 
-  // Mode essai : { "essai": "<CLE_ESSAI>" } envoie tout de suite une notification de test
-  // (ou un message libre avec « titre » et « texte »)
-  // aux abonnés du pack, pour vérifier l'installation. Sans le bon secret, rien ne se passe.
-  const corps = await req.json().catch(() => ({}));
-  const cleEssai = Deno.env.get('CLE_ESSAI');
-  const essai = Boolean(cleEssai && corps?.essai === cleEssai);
+// deno-lint-ignore no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Base = SupabaseClient<any, 'public', any>;
 
-  // En mode essai, on peut aussi envoyer un message libre : { "essai": "…", "titre": "…", "texte": "…" }.
-  const libre = (v: unknown, max: number) =>
-    typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null;
-  const titre = libre(corps?.titre, 80);
-  const texte = libre(corps?.texte, 240);
-  const rappel: Rappel | null = essai
-    ? titre || texte
-      ? { ...RAPPEL_ESSAI, title: titre ?? RAPPEL_ESSAI.title, body: texte ?? '', tag: 'annonce' }
-      : RAPPEL_ESSAI
-    : choisirRappel(m);
-  if (!rappel) return repondre({ envoyes: 0, raison: 'aucun rappel à cette heure' });
-
-  // Un seul envoi par rappel et par jour (sauf en mode essai).
-  if (!essai) {
-    const { error: deja } = await db.from('rappels_envois').insert({ type: rappel.type, jour });
-    if (deja) return repondre({ envoyes: 0, raison: 'déjà envoyé aujourd’hui' });
-  }
-
-  const { data: abonnes, error } = await db
-    .from('rappels_abonnes')
-    .select('endpoint, p256dh, auth')
-    .eq(rappel.type, true);
-  if (error) return repondre({ erreur: error.message });
-
-  const message = JSON.stringify({
-    title: rappel.title,
-    body: rappel.body,
-    url: rappel.url,
-    tag: rappel.tag,
-  });
+/** Envoie un message à des téléphones ; oublie ceux qui n'existent plus. */
+async function envoyerA(db: Base, abonnes: Abonne[], message: string) {
   let envoyes = 0;
   const expires: string[] = [];
-  for (let i = 0; i < (abonnes ?? []).length; i += 50) {
-    const lot = abonnes!.slice(i, i + 50);
+  for (let i = 0; i < abonnes.length; i += 50) {
+    const lot = abonnes.slice(i, i + 50);
     const res = await Promise.allSettled(
       lot.map((a) =>
         webpush.sendNotification(
@@ -193,8 +180,96 @@ Deno.serve(async (req) => {
     });
   }
   if (expires.length) await db.from('rappels_abonnes').delete().in('endpoint', expires);
+  return { envoyes, expires: expires.length };
+}
+
+/**
+ * Prévient les personnes tirées au sort (table notifs_gagnants, remplie à chaque tirage :
+ * supabase/maj-notif-gagnant.sql). En décembre, le message part le jour même du tirage
+ * (jamais en avance) ; il est envoyé sur tous les téléphones de la personne.
+ */
+async function prevenirGagnants(db: Base, m: MomentParis) {
+  const { data: dus, error } = await db
+    .from('notifs_gagnants')
+    .select('jour, participant_id')
+    .is('envoye_le', null);
+  if (error || !dus) return 0;
+  let total = 0;
+  for (const d of dus as { jour: number; participant_id: string }[]) {
+    if (!gagnantAPrevenir(d.jour, m)) continue;
+    const { data: abonnes } = await db
+      .from('rappels_abonnes')
+      .select('endpoint, p256dh, auth')
+      .eq('participant_id', d.participant_id);
+    const { envoyes } = await envoyerA(
+      db,
+      (abonnes ?? []) as Abonne[],
+      JSON.stringify(messageGagnant(d.jour)),
+    );
+    total += envoyes;
+    // Envoyé, ou journée passée sans téléphone joignable : on n'essaie plus.
+    if (envoyes > 0 || (m.mois === 12 && d.jour < m.jour))
+      await db
+        .from('notifs_gagnants')
+        .update({ envoye_le: new Date().toISOString() })
+        .eq('jour', d.jour);
+  }
+  return total;
+}
+
+Deno.serve(async (req) => {
+  const m = momentParis(new Date());
+  const db = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+  const jour = `${m.annee}-${String(m.mois).padStart(2, '0')}-${String(m.jour).padStart(2, '0')}`;
+
+  // Mode essai : { "essai": "<CLE_ESSAI>" } envoie tout de suite une notification de test
+  // (ou un message libre avec « titre » et « texte »)
+  // aux abonnés du pack, pour vérifier l'installation. Sans le bon secret, rien ne se passe.
+  const corps = await req.json().catch(() => ({}));
+
+  // Personnes tirées au sort à prévenir (à chaque appel ; appel dédié juste après un tirage).
+  const gagnants = await prevenirGagnants(db, m);
+  if (corps?.gagnants) return repondre({ gagnants });
+
+  const cleEssai = Deno.env.get('CLE_ESSAI');
+  const essai = Boolean(cleEssai && corps?.essai === cleEssai);
+
+  // En mode essai, on peut aussi envoyer un message libre : { "essai": "…", "titre": "…", "texte": "…" }.
+  const libre = (v: unknown, max: number) =>
+    typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null;
+  const titre = libre(corps?.titre, 80);
+  const texte = libre(corps?.texte, 240);
+  const rappel: Rappel | null = essai
+    ? titre || texte
+      ? { ...RAPPEL_ESSAI, title: titre ?? RAPPEL_ESSAI.title, body: texte ?? '', tag: 'annonce' }
+      : RAPPEL_ESSAI
+    : choisirRappel(m);
+  if (!rappel) return repondre({ envoyes: 0, gagnants, raison: 'aucun rappel à cette heure' });
+
+  // Un seul envoi par rappel et par jour (sauf en mode essai).
+  if (!essai) {
+    const { error: deja } = await db.from('rappels_envois').insert({ type: rappel.type, jour });
+    if (deja) return repondre({ envoyes: 0, raison: 'déjà envoyé aujourd’hui' });
+  }
+
+  const { data: abonnes, error } = await db
+    .from('rappels_abonnes')
+    .select('endpoint, p256dh, auth')
+    .eq(rappel.type, true);
+  if (error) return repondre({ erreur: error.message });
+
+  const message = JSON.stringify({
+    title: rappel.title,
+    body: rappel.body,
+    url: rappel.url,
+    tag: rappel.tag,
+  });
+  const { envoyes, expires } = await envoyerA(db, (abonnes ?? []) as Abonne[], message);
 
   if (!essai)
     await db.from('rappels_envois').update({ envoyes }).match({ type: rappel.type, jour });
-  return repondre({ rappel: rappel.type, envoyes, expires: expires.length });
+  return repondre({ rappel: rappel.type, envoyes, expires, gagnants });
 });

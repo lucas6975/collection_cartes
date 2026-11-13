@@ -47,3 +47,22 @@ describe('fonction Supabase en un seul fichier', () => {
     expect(fichier).not.toContain("from './rappel.ts'");
   });
 });
+
+import { gagnantAPrevenir, messageGagnant } from '../supabase/functions/envoyer-rappels/rappel';
+
+describe('notification de la personne tirée au sort', () => {
+  const dec = (jour: number) => momentParis(new Date(Date.UTC(2026, 11, jour, 7, 0)));
+  it('en décembre : le jour même, jamais en avance', () => {
+    expect(gagnantAPrevenir(8, dec(8))).toBe(true);
+    expect(gagnantAPrevenir(9, dec(8))).toBe(false);
+    expect(gagnantAPrevenir(7, dec(8))).toBe(true);
+  });
+  it('hors décembre (essai de l’administrateur) : tout de suite', () => {
+    expect(gagnantAPrevenir(3, momentParis(new Date(Date.UTC(2026, 10, 20, 10))))).toBe(true);
+  });
+  it('message et lien vers la case du jour', () => {
+    expect(messageGagnant(1).body).toContain('1er décembre');
+    expect(messageGagnant(17).url).toBe('./#/avent/17');
+    expect(messageGagnant(5).title).toContain('tiré(e) au sort');
+  });
+});

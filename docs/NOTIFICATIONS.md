@@ -83,3 +83,21 @@ Le mode essai envoie à **tous les téléphones abonnés** : à utiliser avant l
 - Textes et créneaux : `supabase/functions/envoyer-rappels/rappel.ts` (puis redéployer la fonction).
 - Heures d’appel (UTC) : la tâche `team-ulysse-rappels` à la fin de `supabase/maj-coalition-et-rappels.sql`.
 - Arrêter tous les rappels : `select cron.unschedule('team-ulysse-rappels');` dans le SQL Editor.
+
+## Notification de la personne tirée au sort
+
+À chaque tirage (espace administrateur › Tirage), la personne tirée au sort reçoit sur ses
+téléphones : « 🎁 Tu as été tiré(e) au sort ! C’est toi le gagnant du N décembre ! Réussis le défi
+du jour pour remporter ton cadeau. » Un appui ouvre la case du jour.
+
+- En décembre, le message part **le jour même** du tirage, jamais en avance (un tirage fait la veille
+  pour le lendemain part le lendemain matin, avec les rappels). Hors décembre, il part tout de
+  suite (pratique pour un essai).
+- Un nouveau tirage (« refaire ») prévient le nouveau gagnant ; une annulation retire l’envoi prévu.
+- Seules les personnes qui ont **activé les rappels** peuvent être prévenues ; leur téléphone est
+  relié à leur inscription automatiquement à l’ouverture de l’appli.
+
+Mise en place, une fois :
+1. Supabase › SQL Editor › nouvel onglet vide › coller `supabase/maj-notif-gagnant.sql` › **Run**.
+2. Supabase › Edge Functions › `envoyer-rappels` › remplacer tout le code par
+   `supabase/functions/envoyer-rappels/tout-en-un.ts` › **Deploy**.

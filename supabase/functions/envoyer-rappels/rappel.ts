@@ -61,6 +61,26 @@ export function choisirRappel(m: MomentParis): Rappel | null {
   return null;
 }
 
+/**
+ * Faut-il prévenir maintenant la personne tirée au sort pour ce jour de décembre ?
+ * En décembre : le jour même (ou après, en rattrapage), jamais en avance.
+ * Hors décembre (essais de l'administrateur) : tout de suite.
+ */
+export function gagnantAPrevenir(jour: number, m: MomentParis): boolean {
+  if (m.mois !== 12) return true;
+  return jour <= m.jour;
+}
+
+/** Notification envoyée à la personne tirée au sort. */
+export function messageGagnant(jour: number) {
+  return {
+    title: '🎁 Tu as été tiré(e) au sort !',
+    body: `C’est toi le gagnant du ${jour === 1 ? '1er' : jour} décembre ! Réussis le défi du jour pour remporter ton cadeau.`,
+    url: `./#/avent/${jour}`,
+    tag: `gagnant-${jour}`,
+  };
+}
+
 /** Heure de Paris, quelle que soit l'heure du serveur. */
 export function momentParis(date: Date): MomentParis {
   const parts = Object.fromEntries(

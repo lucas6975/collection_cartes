@@ -31,9 +31,12 @@ export function App() {
 
   // Une inscription faite hors ligne est renvoyée à chaque ouverture, jusqu'à ce qu'elle passe.
   useEffect(() => {
-    identiteStore.synchroniser().catch(() => undefined);
-    // Rappels actifs : on vérifie que ce téléphone est toujours bien inscrit.
-    rappelsStore.verifier().catch(() => undefined);
+    // Rappels actifs : on vérifie que ce téléphone est toujours bien inscrit, et on le relie à
+    // l'inscription (une fois celle-ci envoyée) pour prévenir la personne si elle est tirée au sort.
+    identiteStore
+      .synchroniser()
+      .catch(() => undefined)
+      .finally(() => rappelsStore.verifier().catch(() => undefined));
     // Cartes holographiques : le reflet suit les mouvements du téléphone.
     inclinaisonStore.demarrer();
     // Pastille « 1 » sur l'icône tant que le pack du jour n'est pas ouvert.

@@ -7,6 +7,7 @@ import { useToast } from '../components/ui/overlay';
 import { Button } from '../components/ui/primitives';
 import { ApiError } from '../data/api';
 import { JOURS_OUVRES, identiteStore, useIdentite } from '../data/identite';
+import { rappelsStore } from '../data/rappels';
 import { NOEL } from './ui';
 
 /**
@@ -57,6 +58,9 @@ export function TirageInscription() {
     setEnvoi(true);
     try {
       const ok = await identiteStore.choisirJours(choix);
+      // Relie les rappels de ce téléphone à l'inscription : la personne sera prévenue si elle
+      // est tirée au sort.
+      if (ok) rappelsStore.verifier().catch(() => undefined);
       toast(
         choix.length
           ? ok
