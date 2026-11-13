@@ -93,7 +93,35 @@ export interface Echange {
   recoit_b: string | null;
 }
 
+export interface ResultatAdmin {
+  jour: number;
+  participant_id: string;
+  prenom: string;
+  nom: string;
+  /** Étoiles du tout premier essai (la personne peut rejouer ensuite). */
+  premier_etoiles: number;
+  premier_le: string;
+  /** Meilleur résultat obtenu. */
+  etoiles: number;
+  details: { etoiles: number; resume: string }[];
+  maj_le: string;
+}
+
 export const api = {
+  envoyerResultat: (
+    jeton: string,
+    jour: number,
+    etoiles: number,
+    details: { etoiles: number; resume: string }[],
+  ) =>
+    rpc<null>('envoyer_resultat', {
+      p_jeton: jeton,
+      p_jour: jour,
+      p_etoiles: etoiles,
+      p_details: details,
+    }),
+  adminResultats: (code: string) => rpc<ResultatAdmin[]>('admin_resultats', { p_code: code }),
+
   echangeCreer: (nom: string, doublons: string[]) =>
     rpc<{ code: string; cle: string }>('echange_creer', { p_nom: nom, p_doublons: doublons }),
   echangeRejoindre: (code: string, nom: string, doublons: string[]) =>

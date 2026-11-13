@@ -6,6 +6,7 @@
 // zéro que lorsqu'il touche « Remettre à zéro ».
 
 import { useSyncExternalStore } from 'react';
+import { api } from '../data/api';
 import { identiteStore } from '../data/identite';
 import { ANNEE_AVENT } from './jours';
 import type { ResultatJeu } from './types';
@@ -14,6 +15,8 @@ export interface JourTermine {
   etoiles: 0 | 1 | 2 | 3;
   resultats: ResultatJeu[];
   at: string;
+  /** Vrai une fois le résultat envoyé à la base (pour l'administrateur). */
+  envoye?: boolean;
 }
 
 type Etat = Record<number, JourTermine>;
@@ -45,6 +48,7 @@ let etatAdmin: Etat = load(KEY_ADMIN);
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
 const estAdmin = () => !!identiteStore.get().codeAdmin;
+let envoiEnCours = false;
 
 export const aventStore = {
   subscribe(l: () => void) {
@@ -64,10 +68,36 @@ export const aventStore = {
       etatAdmin = { ...etatAdmin, [jour]: resultat };
       save(KEY_ADMIN, etatAdmin);
     } else {
-      etat = { ...etat, [jour]: resultat };
+      etat = { ...etat, [jour]: { ...resultat, envoye: false } };
       save(KEY, etat);
+      void aventStore.synchroniser();
     }
     notify();
+  },
+
+  /**
+   * Envoie à la base les résultats pas encore transmis (collaborateurs inscrits seulement) :
+   * l'administrateur voit ainsi si la personne tirée au sort a réussi son défi.
+   */
+  async synchroniser() {
+    const jeton = identiteStore.get().identite?.jeton;
+    if (!jeton || estAdmin() || envoiEnCours) return;
+    envoiEnCours = true;
+    try {
+      for (const [j, r] of Object.entries(etat)) {
+        if (r.envoye) continue;
+        try {
+          await api.envoyerResultat(jeton, Number(j), r.etoiles, r.resultats);
+          etat = { ...etat, [j]: { ...etat[Number(j)], envoye: true } };
+          save(KEY, etat);
+        } catch {
+          // Hors ligne ou base pas à jour : on réessaiera à la prochaine ouverture.
+          break;
+        }
+      }
+    } finally {
+      envoiEnCours = false;
+    }
   },
   /** Remet les étoiles de l'administrateur à zéro (avant une démonstration). */
   remettreAZeroAdmin() {

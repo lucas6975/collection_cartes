@@ -78,7 +78,7 @@ async function envoyerA(db: Base, abonnes: Abonne[], message: string) {
 
 /**
  * Prévient les personnes tirées au sort (table notifs_gagnants, remplie à chaque tirage :
- * supabase/maj-notif-gagnant.sql). En décembre, le message part le jour même du tirage
+ * supabase/maj-gagnant-et-resultats.sql). En décembre, le message part le jour même du tirage
  * (jamais en avance) ; il est envoyé sur tous les téléphones de la personne.
  */
 async function prevenirGagnants(db: Base, m: MomentParis) {

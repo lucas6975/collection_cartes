@@ -1,11 +1,15 @@
 import {
+  CheckCircle2,
+  ChevronDown,
+  Clock,
   Dices,
+  Gift,
+  XCircle,
   Download,
   Lock,
   RefreshCw,
   RotateCcw,
   Search,
-  ShieldCheck,
   Trash2,
   Trophy,
   Unlock,
@@ -14,11 +18,12 @@ import {
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate } from 'react-router';
-import { Confetti, NOEL } from '../avent/ui';
+import { JOURS } from '../avent/jours';
+import { Confetti, Etoiles, NOEL } from '../avent/ui';
 import { Modal, useToast } from '../components/ui/overlay';
 import { Avatar, Button, PageHeader, cx } from '../components/ui/primitives';
 import { baseConfiguree } from '../config';
-import { ApiError, api, type Participant, type Tirage } from '../data/api';
+import { ApiError, api, type Participant, type ResultatAdmin, type Tirage } from '../data/api';
 import { JOURS_OUVRES, useIdentite } from '../data/identite';
 
 type Onglet = 'tirage' | 'inscrits' | 'resultats';
@@ -157,6 +162,7 @@ export function Admin() {
       )}
       {onglet === 'resultats' && (
         <OngletResultats
+          code={codeAdmin}
           tirages={tirages}
           onDebloquer={async (jour, debloquer) => {
             try {
@@ -560,58 +566,182 @@ function OngletInscrits({
 
 // ───────────── Résultats ─────────────
 
+const heure = (iso: string) =>
+  new Date(iso).toLocaleString('fr-FR', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+/** Pastille du résultat d'un défi : réussi (1 étoile ou plus) ou raté. */
+function Verdict({ r }: { r: ResultatAdmin | undefined }) {
+  if (!r)
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-canvas px-2.5 py-1 text-xs font-bold text-muted">
+        <Clock size={12} /> Pas encore joué
+      </span>
+    );
+  const ok = r.etoiles > 0;
+  return (
+    <span
+      className={cx(
+        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold',
+        ok ? 'bg-success/12 text-success' : 'bg-danger/10 text-danger',
+      )}
+    >
+      {ok ? <CheckCircle2 size={13} /> : <XCircle size={13} />} {ok ? 'Défi réussi' : 'Défi raté'}
+      <Etoiles n={r.etoiles} size={12} clair />
+    </span>
+  );
+}
+
 function OngletResultats({
+  code,
   tirages,
   onDebloquer,
 }: {
+  code: string;
   tirages: Tirage[];
   onDebloquer: (jour: number, debloquer: boolean) => Promise<void>;
 }) {
+  const [resultats, setResultats] = useState<ResultatAdmin[] | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
+  const [ouvert, setOuvert] = useState<number | null>(null);
+
+  const charger = useCallback(async () => {
+    try {
+      setResultats(await api.adminResultats(code));
+      setErreur(null);
+    } catch (e) {
+      setErreur(
+        e instanceof ApiError
+          ? `${e.message} (as-tu lancé supabase/maj-gagnant-et-resultats.sql ?)`
+          : 'Erreur de chargement',
+      );
+    }
+  }, [code]);
+
+  useEffect(() => {
+    // Résultats de tout le monde, actualisés toutes les 30 secondes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void charger();
+    const t = setInterval(() => void charger(), 30_000);
+    return () => clearInterval(t);
+  }, [charger]);
+
   return (
-    <ul className="panel divide-y divide-line">
-      {JOURS_OUVRES.map((j) => {
-        const t = tirages.find((x) => x.jour === j);
-        return (
-          <li key={j} className="flex items-center gap-4 px-4 py-3">
-            <span
-              className={cx(
-                'grid size-10 shrink-0 place-items-center rounded-xl font-display font-extrabold',
-                t ? 'bg-success text-white' : 'bg-canvas text-navy/40',
-              )}
-            >
-              {j}
-            </span>
-            {t ? (
-              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
-                <p className="flex items-center gap-2 font-semibold text-navy-950">
-                  <ShieldCheck size={16} className="text-success" /> {nomComplet(t)}
-                </p>
-                {t.correction_debloquee ? (
-                  <button
-                    type="button"
-                    onClick={() => void onDebloquer(j, false)}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-success/12 px-3 py-1.5 text-xs font-bold text-success"
-                    title="Cacher à nouveau la correction pour le gagnant"
-                  >
-                    <Unlock size={13} /> Correction débloquée
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => void onDebloquer(j, true)}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-sun/25 px-3 py-1.5 text-xs font-bold text-navy-950 hover:bg-sun/40"
-                    title="Le gagnant ne voit pas encore la correction de cette case"
-                  >
-                    <Lock size={13} /> Débloquer sa correction
-                  </button>
-                )}
+    <div className="space-y-3">
+      {erreur && (
+        <p className="rounded-2xl bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
+          {erreur}
+        </p>
+      )}
+      <p className="text-sm text-muted">
+        Pour chaque jour : la personne tirée au sort et son résultat, puis les résultats de tout le
+        monde. <b className="text-navy-950">Défi réussi</b> = au moins 1 étoile. Le 1er essai est
+        indiqué : on peut rejouer pour améliorer son score.
+      </p>
+      <ul className="panel divide-y divide-line">
+        {JOURS_OUVRES.map((j) => {
+          const t = tirages.find((x) => x.jour === j);
+          const duJour = (resultats ?? []).filter((r) => r.jour === j);
+          const rg = t ? duJour.find((r) => r.participant_id === t.participant_id) : undefined;
+          const reussis = duJour.filter((r) => r.etoiles > 0).length;
+          const titre = JOURS.find((x) => x.jour === j)?.titre;
+          return (
+            <li key={j} className="px-4 py-3">
+              <div className="flex items-start gap-3">
+                <span
+                  className={cx(
+                    'grid size-10 shrink-0 place-items-center rounded-xl font-display font-extrabold',
+                    t ? 'bg-success text-white' : 'bg-canvas text-navy/40',
+                  )}
+                >
+                  {j}
+                </span>
+                <div className="min-w-0 flex-1 space-y-2">
+                  {titre && <p className="truncate text-xs font-semibold text-muted">{titre}</p>}
+                  {t ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="flex items-center gap-1.5 font-semibold text-navy-950">
+                        <Gift size={15} className="text-danger" /> {nomComplet(t)}
+                      </p>
+                      <Verdict r={rg} />
+                      {rg && rg.premier_etoiles !== rg.etoiles && (
+                        <span className="text-xs text-muted">
+                          1er essai : {rg.premier_etoiles} ★
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted">Pas encore tiré</p>
+                  )}
+                  {t &&
+                    (t.correction_debloquee ? (
+                      <button
+                        type="button"
+                        onClick={() => void onDebloquer(j, false)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-success/12 px-3 py-1.5 text-xs font-bold text-success"
+                        title="Cacher à nouveau la correction pour le gagnant"
+                      >
+                        <Unlock size={13} /> Correction débloquée
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => void onDebloquer(j, true)}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-sun/25 px-3 py-1.5 text-xs font-bold text-navy-950 hover:bg-sun/40"
+                        title="Le gagnant ne voit pas encore la correction de cette case"
+                      >
+                        <Lock size={13} /> Débloquer sa correction
+                      </button>
+                    ))}
+                  {duJour.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setOuvert(ouvert === j ? null : j)}
+                      className="flex items-center gap-1 text-xs font-bold text-blue hover:underline"
+                    >
+                      <Users size={13} /> {duJour.length} joueur{duJour.length > 1 ? 's' : ''} ·{' '}
+                      {reussis} réussi{reussis > 1 ? 's' : ''}
+                      <ChevronDown
+                        size={14}
+                        className={cx('transition-transform', ouvert === j && 'rotate-180')}
+                      />
+                    </button>
+                  )}
+                  {ouvert === j && (
+                    <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
+                      {duJour.map((r) => (
+                        <li
+                          key={r.participant_id}
+                          className={cx(
+                            'flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2 text-sm',
+                            t?.participant_id === r.participant_id && 'bg-sun/15',
+                          )}
+                        >
+                          <span className="min-w-0 flex-1 font-semibold text-navy-950">
+                            {t?.participant_id === r.participant_id && '🎁 '}
+                            {nomComplet(r)}
+                          </span>
+                          <Etoiles n={r.etoiles} size={13} clair />
+                          <span className="w-full text-xs text-muted">
+                            {r.details.map((d) => d.resume).join(' · ') || '—'} ·{' '}
+                            {heure(r.premier_le)}
+                            {r.premier_etoiles !== r.etoiles &&
+                              ` · 1er essai ${r.premier_etoiles} ★`}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
-            ) : (
-              <p className="text-sm text-muted">Pas encore tiré</p>
-            )}
-          </li>
-        );
-      })}
-    </ul>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

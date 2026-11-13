@@ -97,7 +97,14 @@ du jour pour remporter ton cadeau. » Un appui ouvre la case du jour.
 - Seules les personnes qui ont **activé les rappels** peuvent être prévenues ; leur téléphone est
   relié à leur inscription automatiquement à l’ouverture de l’appli.
 
+Le même fichier SQL ajoute les **résultats à distance** : quand un collaborateur termine la case
+d’un jour, son résultat (étoiles, détail de chaque jeu, 1er essai et meilleur score) est envoyé à la
+base. Espace administrateur › onglet **Résultats** : pour chaque jour, la personne tirée au sort et
+son verdict (« Défi réussi » dès 1 étoile, « Défi raté », « Pas encore joué »), puis la liste de tous
+les joueurs du jour. La page s’actualise toute seule toutes les 30 secondes.
+
 Mise en place, une fois :
-1. Supabase › SQL Editor › nouvel onglet vide › coller `supabase/maj-notif-gagnant.sql` › **Run**.
+
+1. Supabase › SQL Editor › nouvel onglet vide › coller `supabase/maj-gagnant-et-resultats.sql` › **Run**.
 2. Supabase › Edge Functions › `envoyer-rappels` › remplacer tout le code par
    `supabase/functions/envoyer-rappels/tout-en-un.ts` › **Deploy**.

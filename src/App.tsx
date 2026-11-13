@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { ToastProvider } from './components/ui/overlay';
+import { aventStore } from './avent/progress';
 import { identiteStore, useIdentite } from './data/identite';
 import { inclinaisonStore } from './data/inclinaison';
 import { demarrerPastille } from './data/pastille';
@@ -36,7 +37,11 @@ export function App() {
     identiteStore
       .synchroniser()
       .catch(() => undefined)
-      .finally(() => rappelsStore.verifier().catch(() => undefined));
+      .finally(() => {
+        rappelsStore.verifier().catch(() => undefined);
+        // Résultats du calendrier pas encore transmis à l'administrateur.
+        void aventStore.synchroniser();
+      });
     // Cartes holographiques : le reflet suit les mouvements du téléphone.
     inclinaisonStore.demarrer();
     // Pastille « 1 » sur l'icône tant que le pack du jour n'est pas ouvert.
