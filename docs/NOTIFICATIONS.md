@@ -108,3 +108,15 @@ Mise en place, une fois :
 1. Supabase › SQL Editor › nouvel onglet vide › coller `supabase/maj-gagnant-et-resultats.sql` › **Run**.
 2. Supabase › Edge Functions › `envoyer-rappels` › remplacer tout le code par
    `supabase/functions/envoyer-rappels/tout-en-un.ts` › **Deploy**.
+
+## Compte à rebours avant le calendrier
+
+De J-7 à J-1 avant le 1er décembre, à 7 h 30 (heure de Paris), les téléphones abonnés au rappel
+« Case du jour à ouvrir » reçoivent une notification (« ⏳ J-7 avant le calendrier de l’Avent ! »,
+« 🎄 J-6 : Ulysse prépare les cases… », etc.). Pas le week-end : en 2026, J-7 (mardi 24) à J-4
+(vendredi 27), puis J-1 (lundi 30). Le jour J, c’est la notification habituelle de la case du 1er.
+Rien à faire dans la base : c’est la fonction `envoyer-rappels` (tout-en-un.ts) qui s’en charge.
+
+**Test administrateur :** Espace administrateur › « Tester le compte à rebours » › « Recevoir le
+test ». Les 6 notifications arrivent d’un coup sur ce téléphone uniquement (rappels activés
+dessus), les collaborateurs ne reçoivent rien.

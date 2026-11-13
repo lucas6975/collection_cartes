@@ -66,3 +66,28 @@ describe('notification de la personne tirée au sort', () => {
     expect(messageGagnant(5).title).toContain('tiré(e) au sort');
   });
 });
+
+describe('compte à rebours avant le calendrier', () => {
+  // 6 h 30 UTC = 7 h 30 à Paris en novembre (heure d'hiver).
+  const matin = (mois: number, jour: number) =>
+    choisirRappel(momentParis(new Date(Date.UTC(2026, mois - 1, jour, 6, 30))));
+  it('J-7 à J-4 puis J-1, sans le week-end', () => {
+    expect(matin(11, 24)?.title).toContain('J-7');
+    expect(matin(11, 25)?.title).toContain('J-6');
+    expect(matin(11, 26)?.title).toContain('J-5');
+    expect(matin(11, 27)?.title).toContain('J-4');
+    expect(matin(11, 28)).toBeNull(); // samedi
+    expect(matin(11, 29)).toBeNull(); // dimanche
+    expect(matin(11, 30)?.title).toContain('J-1');
+    expect(matin(11, 30)?.url).toBe('./#/avent');
+  });
+  it('rien avant J-7, puis la case du 1er décembre le jour J', () => {
+    expect(matin(11, 23)).toBeNull();
+    expect(matin(11, 13)).toBeNull();
+    expect(matin(12, 1)?.title).toContain('1er décembre');
+  });
+  it('le rappel du pack ne change pas', () => {
+    const pack = choisirRappel(momentParis(new Date(Date.UTC(2026, 10, 24, 7, 30))));
+    expect(pack?.type).toBe('pack');
+  });
+});

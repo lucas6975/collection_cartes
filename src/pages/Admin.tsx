@@ -1,4 +1,5 @@
 import {
+  BellRing,
   CheckCircle2,
   ChevronDown,
   Clock,
@@ -25,6 +26,7 @@ import { Avatar, Button, PageHeader, cx } from '../components/ui/primitives';
 import { baseConfiguree } from '../config';
 import { ApiError, api, type Participant, type ResultatAdmin, type Tirage } from '../data/api';
 import { JOURS_OUVRES, useIdentite } from '../data/identite';
+import { endpointActuel, rappelsStore } from '../data/rappels';
 
 type Onglet = 'tirage' | 'inscrits' | 'resultats';
 
@@ -106,6 +108,8 @@ export function Admin() {
           {erreur}
         </p>
       )}
+
+      <TestNotifications code={codeAdmin} />
 
       <div
         className="mb-5 flex max-w-full overflow-x-auto rounded-2xl border border-line bg-white p-1 shadow-soft sm:inline-flex"
@@ -561,6 +565,52 @@ function OngletInscrits({
         )}
       </Modal>
     </div>
+  );
+}
+
+// ───────────── Test des notifications (ce téléphone seulement) ─────────────
+
+function TestNotifications({ code }: { code: string }) {
+  const toast = useToast();
+  const [envoi, setEnvoi] = useState(false);
+  const tester = async () => {
+    setEnvoi(true);
+    try {
+      const endpoint = await endpointActuel();
+      if (!endpoint) {
+        toast('Active d’abord les rappels sur ce téléphone (onglet Moi › Mes rappels).', 'error');
+        return;
+      }
+      await rappelsStore.verifier().catch(() => undefined);
+      const r = await api.adminTesterCompteARebours(code, endpoint);
+      toast(`${r.envoyes} notifications envoyées sur ce téléphone 🔔`, 'success');
+    } catch (e) {
+      toast(
+        e instanceof ApiError
+          ? `${e.message} (as-tu redéployé la fonction envoyer-rappels ?)`
+          : 'Erreur',
+        'error',
+      );
+    } finally {
+      setEnvoi(false);
+    }
+  };
+  return (
+    <section className="panel mb-5 flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+      <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-sun/25 text-navy-950">
+        <BellRing size={20} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-display font-extrabold text-navy-950">Tester le compte à rebours</p>
+        <p className="text-sm text-muted">
+          Reçois tout de suite, sur <b>ce téléphone uniquement</b>, les notifications J-7, J-6, J-5,
+          J-4, J-1 et celle du 1er décembre. Les collaborateurs ne reçoivent rien.
+        </p>
+      </div>
+      <Button variant="accent" onClick={() => void tester()} disabled={envoi}>
+        <BellRing size={16} /> {envoi ? 'Envoi…' : 'Recevoir le test'}
+      </Button>
+    </section>
   );
 }
 

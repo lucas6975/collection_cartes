@@ -40,7 +40,71 @@ export interface Rappel {
 
 const minutes = (m: MomentParis) => m.heure * 60 + m.minute;
 
+/** Compte à rebours avant l'ouverture du calendrier (J-7 à J-1), le matin à 7 h 30. */
+const COMPTE_A_REBOURS: Record<number, [string, string]> = {
+  7: [
+    '⏳ J-7 avant le calendrier de l’Avent !',
+    'Dans 7 jours, la 1re case s’ouvre. Inscris-toi au tirage au sort dans l’onglet Calendrier 🎁',
+  ],
+  6: [
+    '🎄 J-6 : Ulysse prépare les cases…',
+    'Plus que 6 jours avant le premier défi sécurité. Prêt(e) pour l’aventure ?',
+  ],
+  5: [
+    '🎁 J-5 : des goodies à gagner !',
+    'Chaque jour de décembre, un tirage au sort. Pense à t’inscrire dans le Calendrier !',
+  ],
+  4: [
+    '🔥 J-4 : ça chauffe !',
+    'Plus que 4 jours ! En attendant, ouvre ton pack du jour et complète ta collection.',
+  ],
+  3: [
+    '🎅 J-3 : bientôt l’ouverture !',
+    'Plus que 3 jours avant la 1re case du calendrier de l’Avent.',
+  ],
+  2: ['✨ J-2 : on y est presque !', 'Après-demain, la 1re case du calendrier de l’Avent s’ouvre.'],
+  1: [
+    '⏰ J-1 : c’est demain !',
+    'Demain matin, la 1re case du calendrier de l’Avent s’ouvre. Rendez-vous à 7 h 30 !',
+  ],
+};
+
+/** Nombre de jours avant le 1er décembre de la même année (négatif après). */
+export function joursAvantAvent(m: MomentParis): number {
+  return Math.round(
+    (Date.UTC(m.annee, 11, 1) - Date.UTC(m.annee, m.mois - 1, m.jour)) / 86_400_000,
+  );
+}
+
+/** Notification du compte à rebours pour J-n (n de 1 à 7). */
+export function rappelCompteARebours(n: number): Rappel | null {
+  const t = COMPTE_A_REBOURS[n];
+  if (!t) return null;
+  return { type: 'avent', title: t[0], body: t[1], url: './#/avent', tag: `compte-${n}` };
+}
+
+/** Notification de la case du jour (du 1er au 24 décembre). */
+export function rappelCase(jour: number): Rappel {
+  if (jour === 17) {
+    return {
+      type: 'avent',
+      title: '🎬 Jour 17 : scène choc à IMECA',
+      body: 'Pas de jeu aujourd’hui : place à une situation réelle. Ouvre la case du jour !',
+      url: './#/avent/17',
+      tag: `avent-${jour}`,
+    };
+  }
+  return {
+    type: 'avent',
+    title: `🎄 La case du ${jour === 1 ? '1er' : jour} décembre est ouverte !`,
+    body: 'Ton défi sécurité du jour t’attend dans le calendrier de l’Avent.',
+    url: `./#/avent/${jour}`,
+    tag: `avent-${jour}`,
+  };
+}
+
 /**
+ * Compte à rebours : de J-7 à J-1 avant le 1er décembre, de 7 h 30 à 8 h 29, en semaine.
  * Case du calendrier : de 7 h 30 à 8 h 29, du 1er au 24 décembre, en semaine.
  * Pack du jour : de 8 h 30 à 9 h 29, en semaine.
  * Les fenêtres d'une heure absorbent le changement d'heure été/hiver de la tâche programmée.
@@ -49,23 +113,9 @@ export function choisirRappel(m: MomentParis): Rappel | null {
   if (m.jourSemaine === 0 || m.jourSemaine === 6) return null;
   const t = minutes(m);
   if (t >= 7 * 60 + 30 && t < 8 * 60 + 30) {
+    if (m.mois === 11) return rappelCompteARebours(joursAvantAvent(m));
     if (m.mois !== 12 || m.jour > 24) return null;
-    if (m.jour === 17) {
-      return {
-        type: 'avent',
-        title: '🎬 Jour 17 : scène choc à IMECA',
-        body: 'Pas de jeu aujourd’hui : place à une situation réelle. Ouvre la case du jour !',
-        url: './#/avent/17',
-        tag: `avent-${m.jour}`,
-      };
-    }
-    return {
-      type: 'avent',
-      title: `🎄 La case du ${m.jour === 1 ? '1er' : m.jour} décembre est ouverte !`,
-      body: 'Ton défi sécurité du jour t’attend dans le calendrier de l’Avent.',
-      url: `./#/avent/${m.jour}`,
-      tag: `avent-${m.jour}`,
-    };
+    return rappelCase(m.jour);
   }
   if (t >= 8 * 60 + 30 && t < 9 * 60 + 30) {
     return {
@@ -142,8 +192,18 @@ webpush.setVapidDetails(
   Deno.env.get('VAPID_PRIVATE_KEY')!,
 );
 
-const repondre = (corps: unknown) =>
-  new Response(JSON.stringify(corps), { headers: { 'Content-Type': 'application/json' } });
+// L'appli de l'administrateur appelle aussi cette fonction (test des notifications).
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+const repondre = (corps: unknown, status = 200) =>
+  new Response(JSON.stringify(corps), {
+    status,
+    headers: { 'Content-Type': 'application/json', ...CORS },
+  });
 
 interface Abonne {
   endpoint: string;
@@ -218,6 +278,7 @@ async function prevenirGagnants(db: Base, m: MomentParis) {
 }
 
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
   const m = momentParis(new Date());
   const db = createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -229,6 +290,32 @@ Deno.serve(async (req) => {
   // (ou un message libre avec « titre » et « texte »)
   // aux abonnés du pack, pour vérifier l'installation. Sans le bon secret, rien ne se passe.
   const corps = await req.json().catch(() => ({}));
+
+  // Test de l'administrateur : toutes les notifications du compte à rebours (J-7 à J-1, puis
+  // la case du 1er décembre), d'un coup, sur SON téléphone uniquement. Code administrateur exigé.
+  if (corps?.test_compte_a_rebours) {
+    const { error: refus } = await db.rpc('admin_verifier', { p_code: String(corps.code ?? '') });
+    if (refus) return repondre({ erreur: 'Code administrateur incorrect' }, 403);
+    const { data: abo } = await db
+      .from('rappels_abonnes')
+      .select('endpoint, p256dh, auth')
+      .eq('endpoint', String(corps.endpoint ?? ''));
+    if (!abo?.length)
+      return repondre({ erreur: 'Ce téléphone n’est pas inscrit aux rappels' }, 404);
+    const liste = [7, 6, 5, 4, 1].map((n) => rappelCompteARebours(n)!);
+    liste.push(rappelCase(1));
+    let envoyes = 0;
+    for (const r of liste) {
+      const msg = JSON.stringify({
+        title: r.title,
+        body: r.body,
+        url: r.url,
+        tag: `test-${r.tag}`,
+      });
+      envoyes += (await envoyerA(db, abo as Abonne[], msg)).envoyes;
+    }
+    return repondre({ test: 'compte à rebours', envoyes });
+  }
 
   // Personnes tirées au sort à prévenir (à chaque appel ; appel dédié juste après un tirage).
   const gagnants = await prevenirGagnants(db, m);

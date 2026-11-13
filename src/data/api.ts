@@ -107,7 +107,32 @@ export interface ResultatAdmin {
   maj_le: string;
 }
 
+/** Appelle la fonction Supabase des rappels (test des notifications par l'administrateur). */
+async function fonctionRappels<T>(corps: Record<string, unknown>): Promise<T> {
+  if (!baseConfiguree()) throw new ApiError('La base de données n’est pas encore connectée.', true);
+  let res: Response;
+  try {
+    res = await fetch(`${SUPABASE_URL}/functions/v1/envoyer-rappels`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(corps),
+    });
+  } catch {
+    throw new ApiError('Connexion impossible. Vérifie ton réseau et réessaie.', true);
+  }
+  const r = (await res.json().catch(() => ({}))) as T & { erreur?: string };
+  if (!res.ok || r.erreur) throw new ApiError(r.erreur ?? `Erreur ${res.status}`);
+  return r;
+}
+
 export const api = {
+  adminTesterCompteARebours: (code: string, endpoint: string) =>
+    fonctionRappels<{ envoyes: number }>({ test_compte_a_rebours: true, code, endpoint }),
+
   envoyerResultat: (
     jeton: string,
     jour: number,

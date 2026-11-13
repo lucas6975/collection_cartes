@@ -117,6 +117,14 @@ async function envoyer(sub: PushSubscription, choix: Choix) {
   );
 }
 
+/** Adresse d'envoi des notifications de ce téléphone (null s'il n'est pas inscrit). */
+export async function endpointActuel(): Promise<string | null> {
+  if (!('serviceWorker' in navigator)) return null;
+  const reg = await navigator.serviceWorker.getRegistration(import.meta.env.BASE_URL);
+  const sub = await reg?.pushManager.getSubscription();
+  return sub?.endpoint ?? null;
+}
+
 export const rappelsStore = {
   get: () => etat,
   subscribe(l: () => void) {
