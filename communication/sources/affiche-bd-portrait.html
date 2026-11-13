@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Affiche BD portrait Team Ulysse</title>
+    <style>
+      @font-face { font-family: 'Manrope'; src: url('fonts/manrope-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; }
+      .page { width: 1080px; height: 1920px; background: #fff; padding: 10px;
+        display: grid; gap: 10px; grid-template-columns: 1fr 1fr; grid-template-rows: 560fr 430fr 400fr 560fr; }
+      .large { grid-column: span 2; }
+      .c { position: relative; overflow: hidden; background: #0b2347; }
+      .c img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .texte { display: flex; align-items: center; justify-content: center; gap: 46px; padding: 0 40px; color: #fff; font-family: 'Manrope', sans-serif;
+        background: radial-gradient(circle at 30% 50%, #2a6cb8 0%, #153e75 50%, #0b2347 100%); }
+      .texte::before { content: ''; position: absolute; inset: 0; opacity: .08; background-image: radial-gradient(#fff 1.4px, transparent 1.8px); background-size: 24px 24px; }
+      .texte h1 { position: relative; font-weight: 800; font-size: 68px; line-height: 1; letter-spacing: -0.02em; }
+      .texte h1 em { font-style: normal; color: #f5c542; }
+      .qr { position: relative; flex: none; padding: 16px; border-radius: 24px; background: #fff; box-shadow: 0 0 0 8px rgba(245,197,66,.6), 0 20px 40px rgba(0,0,0,.4); }
+      .qr img { display: block; width: 290px; height: 290px; object-fit: contain; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="c"><img src="img/ulysse-p1.jpg" style="object-position: 50% 45%" /></div>
+      <div class="c"><img src="img/ulysse-p2.jpg" style="object-position: 55% 50%" /></div>
+      <div class="c large"><img src="img/ulysse-p3.jpg" style="object-position: 50% 45%" /></div>
+      <div class="c large texte">
+        <h1>Team Ulysse<br />débarque<br /><em>dans votre<br />poche !</em></h1>
+        <div class="qr"><img src="img/qrcode.png" alt="QR code Team Ulysse" /></div>
+      </div>
+      <div class="c"><img src="img/ulysse-p4.jpg" style="object-position: 45% 35%" /></div>
+      <div class="c"><img src="img/ulysse-p5.jpg" style="object-position: 55% 50%" /></div>
+    </div>
+  </body>
+</html>
