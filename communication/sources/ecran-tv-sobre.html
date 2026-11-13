@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Écran TV sobre Team Ulysse</title>
+    <style>
+      @font-face { font-family: 'Manrope'; src: url('fonts/manrope-latin-wght-normal.woff2') format('woff2'); font-weight: 200 800; }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; }
+      .page { position: relative; width: 1920px; height: 1080px; overflow: hidden; color: #fff; font-family: 'Manrope', sans-serif;
+        background: radial-gradient(circle at 70% 50%, #1f5aa6 0%, #153e75 40%, #0b2347 80%); }
+      .planche { position: absolute; left: 110px; top: 50px; height: 980px; border: 10px solid #fff; border-radius: 18px;
+        box-shadow: 0 30px 70px rgba(0,0,0,.5); }
+      .droite { position: absolute; left: 780px; right: 90px; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+      h1 { font-weight: 800; font-size: 104px; line-height: .98; letter-spacing: -0.02em; }
+      h1 em { font-style: normal; color: #f5c542; }
+      .qr { margin-top: 60px; padding: 26px; border-radius: 36px; background: #fff; box-shadow: 0 0 0 10px rgba(245,197,66,.55), 0 30px 60px rgba(0,0,0,.45); }
+      .qr img { display: block; width: 360px; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <img class="planche" src="img/ulysse-planche.jpg" alt="Ulysse court et plonge dans le téléphone" />
+      <div class="droite">
+        <h1>Team Ulysse<br />débarque<br /><em>dans votre poche !</em></h1>
+        <div class="qr"><img src="img/qrcode.png" alt="QR code Team Ulysse" /></div>
+      </div>
+    </div>
+  </body>
+</html>
