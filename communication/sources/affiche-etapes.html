@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Affiche étapes Team Ulysse</title>
+    <link rel="stylesheet" href="commun.css" />
+    <style>
+      @page {
+        size: A3;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 297mm;
+      }
+      .page {
+        width: 297mm;
+        height: 420mm;
+        background: #eef3f9;
+      }
+      .hazard {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 4mm;
+        background: repeating-linear-gradient(135deg, var(--sun) 0 6mm, #15171c 6mm 12mm);
+        z-index: 6;
+      }
+      .carte {
+        position: absolute;
+        background: #fff;
+        border-radius: 7mm;
+        box-shadow: 0 2mm 6mm rgba(11, 35, 71, 0.12);
+        overflow: hidden;
+      }
+      .tete {
+        display: flex;
+        align-items: center;
+        gap: 3.4mm;
+        padding: 5mm 6mm 0;
+      }
+      .tete .n {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 13mm;
+        height: 13mm;
+        border-radius: 50%;
+        background: var(--navy);
+        color: #fff;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: 22pt;
+      }
+      .tete h2 {
+        font-size: 20pt;
+        line-height: 1.05;
+        color: var(--navy-950);
+      }
+      .tete p {
+        font-size: 10.5pt;
+        color: var(--muted);
+        margin-top: 0.8mm;
+      }
+      .rangee {
+        position: absolute;
+        display: flex;
+        gap: 5mm;
+        align-items: flex-start;
+      }
+      .ph {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2.6mm;
+      }
+      .ph .iphone {
+        position: relative;
+      }
+      .leg {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.6mm;
+        font-size: 10pt;
+        font-weight: 600;
+        line-height: 1.25;
+        color: var(--ink);
+        text-align: left;
+      }
+      .leg b {
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 6mm;
+        height: 6mm;
+        border-radius: 50%;
+        background: var(--sun);
+        color: var(--navy-950);
+        font-size: 9.5pt;
+      }
+      .os {
+        display: inline-flex;
+        align-items: center;
+        gap: 2mm;
+        padding: 1.6mm 4mm;
+        border-radius: 10mm;
+        font-weight: 800;
+        font-size: 11.5pt;
+      }
+      .fleche {
+        align-self: center;
+        margin-top: -14mm;
+        font-size: 18pt;
+        color: var(--sun);
+        font-weight: 800;
+      }
+      /* iPhone réaliste : cadre métal, verre noir, Dynamic Island, barre d'état */
+      .iphone {
+        position: absolute;
+        aspect-ratio: 1 / 2.057;
+        container-type: inline-size;
+      }
+      /* Les unités cqw se rapportent à .iphone : le cadre est donc un élément enfant. */
+      .iphone .cadre {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 17cqw;
+        padding: 1.5cqw;
+        background: linear-gradient(
+          140deg,
+          #e6e8eb 0%,
+          #9ba0a8 22%,
+          #f4f5f7 46%,
+          #7f848c 70%,
+          #d4d7db 100%
+        );
+        box-shadow:
+          0 0 0 0.25cqw rgba(0, 0, 0, 0.35),
+          0 6mm 14mm rgba(0, 0, 0, 0.45),
+          0 2mm 4mm rgba(0, 0, 0, 0.3);
+      }
+      .iphone .bouton {
+        position: absolute;
+        width: 1.4cqw;
+        border-radius: 1cqw;
+        background: linear-gradient(90deg, #8b9098, #d8dbdf, #8b9098);
+      }
+      .iphone .verre {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 15.6cqw;
+        background: #050608;
+        padding: 3.1cqw;
+      }
+      .iphone .ecran {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 12.6cqw;
+        overflow: hidden;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+      }
+      .iphone .etat {
+        flex: none;
+        height: 11.4cqw;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.6cqw 7cqw 0 9.5cqw;
+        color: #0b0c0f;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 4.4cqw;
+        letter-spacing: -0.02em;
+      }
+      .iphone .etat svg {
+        height: 3.4cqw;
+        width: auto;
+      }
+      .iphone .ecran img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .iphone .ilot {
+        position: absolute;
+        top: 5.2cqw;
+        left: 50%;
+        width: 30cqw;
+        height: 8.6cqw;
+        margin-left: -15cqw;
+        border-radius: 5cqw;
+        background: #000;
+        z-index: 2;
+      }
+      .iphone .reflet {
+        position: absolute;
+        inset: 3.1cqw;
+        border-radius: 12.6cqw;
+        background: linear-gradient(
+          115deg,
+          rgba(255, 255, 255, 0.16) 0%,
+          rgba(255, 255, 255, 0) 32%
+        );
+        pointer-events: none;
+        z-index: 3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- ═════════ EN-TÊTE : LE CONCEPT ═════════ -->
+      <section
+        style="
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          height: 78mm;
+          background: linear-gradient(160deg, #2a6cb8 0%, #153e75 50%, #0b2347 100%);
+          color: #fff;
+          overflow: hidden;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            inset: 0;
+            opacity: 0.08;
+            background-image: radial-gradient(#fff 0.4mm, transparent 0.5mm);
+            background-size: 6mm 6mm;
+          "
+        ></div>
+        <img
+          src="img/mascotte.png"
+          alt="Ulysse"
+          style="
+            position: absolute;
+            right: 10mm;
+            top: 5mm;
+            height: 72mm;
+            filter: drop-shadow(0 5mm 6mm rgba(0, 0, 0, 0.45));
+          "
+        />
+        <div style="position: absolute; left: 14mm; top: 10mm; width: 220mm">
+          <span
+            class="eyebrow"
+            style="
+              display: inline-block;
+              padding: 1.8mm 4.4mm;
+              border-radius: 10mm;
+              background: var(--sun);
+              color: var(--navy-950);
+              font-size: 11pt;
+            "
+            >Mode d’emploi</span
+          >
+          <h1 class="display" style="margin-top: 3mm; font-size: 32pt; line-height: 1">
+            Rejoins la <span style="color: var(--sun)">Team Ulysse</span> en 6 étapes !
+          </h1>
+          <div style="display: flex; gap: 5mm; margin-top: 5mm">
+            <div
+              style="
+                flex: 1;
+                border-radius: 5mm;
+                padding: 4mm 5mm;
+                background: linear-gradient(135deg, #c8283a, #8e1f2a);
+                box-shadow: 0 3mm 7mm rgba(0, 0, 0, 0.3);
+              "
+            >
+              <p class="display" style="font-size: 15pt">🎄 Le calendrier de l’Avent</p>
+              <p
+                style="
+                  margin-top: 1.6mm;
+                  font-size: 10.5pt;
+                  line-height: 1.35;
+                  color: rgba(255, 255, 255, 0.92);
+                "
+              >
+                <b style="color: var(--sun)">Ouverture le 1er décembre</b> : un défi sécurité chaque
+                jour ouvré jusqu’au 24, et un tirage au sort pour gagner des goodies 🎁
+              </p>
+            </div>
+            <div
+              style="
+                flex: 1;
+                border-radius: 5mm;
+                padding: 4mm 5mm;
+                background: #15171c;
+                box-shadow: 0 3mm 7mm rgba(0, 0, 0, 0.3);
+                position: relative;
+                overflow: hidden;
+              "
+            >
+              <div
+                style="
+                  position: absolute;
+                  inset: 0;
+                  opacity: 0.16;
+                  background: repeating-linear-gradient(
+                    135deg,
+                    var(--sun) 0 8mm,
+                    transparent 8mm 16mm
+                  );
+                "
+              ></div>
+              <p class="display" style="position: relative; font-size: 15pt">
+                🃏 Les cartes à collectionner
+              </p>
+              <p
+                style="
+                  position: relative;
+                  margin-top: 1.6mm;
+                  font-size: 10.5pt;
+                  line-height: 1.35;
+                  color: rgba(255, 255, 255, 0.92);
+                "
+              >
+                <b style="color: var(--sun)">Dès maintenant, tous les jours</b> : un pack de 5
+                cartes sécurité à ouvrir et à échanger avec tes collègues.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="hazard" style="top: 78mm"></div>
+
+      <!-- ═════════ ÉTAPE 1 ═════════ -->
+      <div class="carte" style="left: 8mm; top: 87mm; width: 86mm; height: 112mm">
+        <div class="tete">
+          <span class="n">1</span>
+          <div>
+            <h2 class="display" style="font-size: 18pt">Scanne le QR code</h2>
+            <p>avec l’appareil photo</p>
+          </div>
+        </div>
+        <div
+          style="
+            position: absolute;
+            left: 7mm;
+            top: 30mm;
+            width: 34mm;
+            padding: 1.6mm;
+            border: 0.6mm dashed var(--navy);
+            border-radius: 4mm;
+            background: #fff;
+          "
+        >
+          <img src="img/qrcode.png" alt="QR code" style="display: block; width: 100%" />
+        </div>
+        <p
+          style="
+            position: absolute;
+            left: 7mm;
+            top: 70mm;
+            width: 36mm;
+            font-size: 10pt;
+            line-height: 1.3;
+            color: var(--ink);
+          "
+        >
+          Vise le QR code, puis touche le lien <b>Team Ulysse</b> qui apparaît en haut.
+        </p>
+        <div
+          class="iphone"
+          data-ecran="img/e-camera.jpg"
+          data-plein="1"
+          data-fond="#000"
+          style="left: 47mm; top: 27mm; width: 36mm"
+        ></div>
+      </div>
+
+      <!-- ═════════ ÉTAPE 2 : iPhone ═════════ -->
+      <div class="carte" style="left: 99mm; top: 87mm; width: 190mm; height: 112mm">
+        <div class="tete">
+          <span class="n">2</span>
+          <div>
+            <h2 class="display">Ajoute l’appli à ton écran d’accueil</h2>
+            <p>Tout de suite, depuis le site qui s’ouvre</p>
+          </div>
+          <span class="os" style="margin-left: auto; background: #111; color: #fff"
+            >🍏 iPhone · Safari</span
+          >
+        </div>
+        <div class="rangee" style="left: 8mm; top: 29mm">
+          <div class="ph">
+            <div
+              class="iphone"
+              data-ecran="img/e-ios-partager.jpg"
+              data-plein="1"
+              style="width: 33mm"
+            ></div>
+            <p class="leg" style="width: 44mm">
+              <b>1</b>Touche <span>« Partager » ⬆️ en bas</span>
+            </p>
+          </div>
+          <span class="fleche">➜</span>
+          <div class="ph">
+            <div
+              class="iphone"
+              data-ecran="img/e-ios-ecran.jpg"
+              data-plein="1"
+              style="width: 33mm"
+            ></div>
+            <p class="leg" style="width: 44mm">
+              <b>2</b>Fais défiler et touche « Sur l’écran d’accueil »
+            </p>
+          </div>
+          <span class="fleche">➜</span>
+          <div class="ph">
+            <div
+              class="iphone"
+              data-ecran="img/e-ios-ajouter.jpg"
+              data-plein="1"
+              data-fond="#F2F2F7"
+              style="width: 33mm"
+            ></div>
+            <p class="leg" style="width: 44mm"><b>3</b>Touche « Ajouter » en haut à droite</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════════ ÉTAPE 2 : Android ═════════ -->
+      <div class="carte" style="left: 8mm; top: 203mm; width: 128mm; height: 106mm">
+        <div class="tete">
+          <span class="n" style="background: #2e7d32">2</span>
+          <div>
+            <h2 class="display">Sur Android</h2>
+            <p>même chose, avec Chrome</p>
+          </div>
+          <span
+            class="os"
+            style="margin-left: auto; background: #2e7d32; color: #fff; white-space: nowrap"
+            >🤖 Android</span
+          >
+        </div>
+        <div class="rangee" style="left: 10mm; top: 28mm">
+          <div class="ph">
+            <div
+              class="iphone"
+              data-ecran="img/e-and-menu.jpg"
+              data-plein="1"
+              style="width: 32mm"
+            ></div>
+            <p class="leg" style="width: 44mm"><b>1</b>Touche ⋮ en haut à droite</p>
+          </div>
+          <span class="fleche">➜</span>
+          <div class="ph">
+            <div
+              class="iphone"
+              data-ecran="img/e-and-ajouter.jpg"
+              data-plein="1"
+              style="width: 32mm"
+            ></div>
+            <p class="leg" style="width: 48mm">
+              <b>2</b>« Ajouter à l’écran d’accueil », puis confirme
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════════ ÉTAPE 3 ═════════ -->
+      <div class="carte" style="left: 141mm; top: 203mm; width: 148mm; height: 106mm">
+        <div class="tete">
+          <span class="n">3</span>
+          <div>
+            <h2 class="display">Ouvre l’appli depuis son icône</h2>
+            <p>et présente-toi : pas de mot de passe !</p>
+          </div>
+        </div>
+        <div class="rangee" style="left: 12mm; top: 28mm">
+          <div class="ph">
+            <div
+              class="iphone"
+              data-ecran="img/e-icone.jpg"
+              data-plein="1"
+              data-fond="#3B5BA9"
+              style="width: 32mm"
+            ></div>
+            <p class="leg" style="width: 46mm"><b>1</b>Touche l’icône Team Ulysse</p>
+          </div>
+          <span class="fleche">➜</span>
+          <div class="ph">
+            <div
+              class="iphone"
+              data-ecran="img/hd-nom.jpg"
+              data-fond="#2563A6"
+              style="width: 32mm"
+            ></div>
+            <p class="leg" style="width: 46mm">
+              <b>2</b>Ton prénom, ton nom, puis « C’est parti ! »
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═════════ ÉTAPES 4, 5, 6 ═════════ -->
+      <div class="carte" style="left: 8mm; top: 313mm; width: 91mm; height: 93mm">
+        <div class="tete" style="padding-top: 4.4mm">
+          <span class="n">4</span>
+          <div>
+            <h2 class="display" style="font-size: 16pt">Active les rappels</h2>
+            <p>Ulysse te prévient chaque matin</p>
+          </div>
+        </div>
+        <div
+          class="iphone"
+          data-ecran="img/hd-rappels.jpg"
+          data-fond="#2563A6"
+          style="left: 53mm; top: 20mm; width: 31mm"
+        ></div>
+        <p
+          style="
+            position: absolute;
+            left: 7mm;
+            top: 27mm;
+            width: 42mm;
+            font-size: 10pt;
+            line-height: 1.35;
+          "
+        >
+          Touche <b>« Activer les rappels »</b>, puis <b>Autoriser</b> : ton pack et la case du
+          jour, sans rien rater 🔔
+        </p>
+      </div>
+      <div class="carte" style="left: 103mm; top: 313mm; width: 91mm; height: 93mm">
+        <div class="tete" style="padding-top: 4.4mm">
+          <span class="n" style="background: var(--rouge)">5</span>
+          <div>
+            <h2 class="display" style="font-size: 16pt">Inscris-toi au tirage</h2>
+            <p>dans l’onglet Calendrier</p>
+          </div>
+        </div>
+        <div
+          class="iphone"
+          data-ecran="img/hd-tirage.jpg"
+          style="left: 53mm; top: 20mm; width: 31mm"
+        ></div>
+        <p
+          style="
+            position: absolute;
+            left: 7mm;
+            top: 27mm;
+            width: 42mm;
+            font-size: 10pt;
+            line-height: 1.35;
+          "
+        >
+          Décoche tes jours d’absence, puis <b>« Je participe »</b>. Chaque jour, la Team Ulysse
+          tire au sort <b>une personne</b> : défi réussi = <b>goodies</b> 🎁
+        </p>
+      </div>
+      <div class="carte" style="left: 198mm; top: 313mm; width: 91mm; height: 93mm">
+        <div class="tete" style="padding-top: 4.4mm">
+          <span class="n" style="background: #15171c; color: var(--sun)">6</span>
+          <div>
+            <h2 class="display" style="font-size: 16pt">Ouvre ton pack !</h2>
+            <p>tous les jours, dès maintenant</p>
+          </div>
+        </div>
+        <div
+          class="iphone"
+          data-ecran="img/hd-pack.jpg"
+          style="left: 53mm; top: 20mm; width: 31mm"
+        ></div>
+        <p
+          style="
+            position: absolute;
+            left: 7mm;
+            top: 27mm;
+            width: 42mm;
+            font-size: 10pt;
+            line-height: 1.35;
+          "
+        >
+          Onglet <b>Pack</b> : 5 cartes sécurité à collectionner chaque jour. Échange tes
+          <b>doublons</b> avec tes collègues 🔁
+        </p>
+      </div>
+
+      <!-- ═════════ PIED ═════════ -->
+      <div class="hazard" style="top: 410mm"></div>
+      <p
+        class="display"
+        style="
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 414.2mm;
+          text-align: center;
+          font-size: 11pt;
+          color: var(--navy);
+          font-style: italic;
+        "
+      >
+        Team Ulysse · <span style="color: var(--rouge)">La sécurité, notre Odyssée</span>
+      </p>
+    </div>
+    <script>
+      // Construit chaque iPhone : boutons, verre, barre d'état (9:41, réseau, wifi, batterie), écran.
+      const ETAT = `<span>9:41</span><span style="display:flex;gap:1.4cqw;align-items:center">
+        <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="0.8" fill="currentColor"/><rect x="5" y="5.5" width="3" height="6.5" rx="0.8" fill="currentColor"/><rect x="10" y="3" width="3" height="9" rx="0.8" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="0.8" fill="currentColor"/></svg>
+        <svg viewBox="0 0 16 12"><path d="M8 11.2 5.6 8.6a3.4 3.4 0 0 1 4.8 0z" fill="currentColor"/><path d="M3.4 6.4a6.5 6.5 0 0 1 9.2 0l-1.4 1.5a4.5 4.5 0 0 0-6.4 0z" fill="currentColor"/><path d="M1.1 4.1a9.8 9.8 0 0 1 13.8 0l-1.4 1.5a7.8 7.8 0 0 0-11 0z" fill="currentColor"/></svg>
+        <svg viewBox="0 0 27 12"><rect x="0.6" y="0.6" width="22.8" height="10.8" rx="3.2" fill="none" stroke="currentColor" stroke-opacity=".4" stroke-width="1.2"/><rect x="2.4" y="2.4" width="16.6" height="7.2" rx="1.8" fill="currentColor"/><path d="M25 4v4a2.2 2.2 0 0 0 0-4z" fill="currentColor" fill-opacity=".45"/></svg></span>`;
+      for (const t of document.querySelectorAll('.iphone')) {
+        t.innerHTML = `<div class="cadre"><span class="bouton" style="left:-1cqw;top:20cqw;height:7cqw"></span>
+          <span class="bouton" style="left:-1cqw;top:32cqw;height:13cqw"></span>
+          <span class="bouton" style="left:-1cqw;top:48cqw;height:13cqw"></span>
+          <span class="bouton" style="right:-1cqw;top:36cqw;height:20cqw"></span>
+          <div class="verre"><div class="ecran" style="background:${t.dataset.fond || '#fff'}">${t.dataset.plein ? '' : `<div class="etat" style="background:${t.dataset.fond || '#fff'};color:${t.dataset.fond ? '#fff' : '#0b0c0f'}">${ETAT}</div>`}<img src="${t.dataset.ecran}" alt="" style="${t.dataset.plein ? 'height:100%;object-fit:cover;object-position:top' : ''}"></div>
+          <span class="ilot"></span><span class="reflet"></span></div></div>`;
+      }
+    </script>
+  </body>
+</html>
