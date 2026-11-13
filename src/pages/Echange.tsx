@@ -41,15 +41,25 @@ function appliquer(code: string, donne: string, recoit: string) {
   return true;
 }
 
-/** Lit le code d'échange dans le texte d'un QR code (lien de l'appli ou code seul). */
+/**
+ * Lit le code d'échange dans le texte d'un QR code : « TEAM ULYSSE ECHANGE ABC123 », un ancien
+ * lien de l'appli (…?code=ABC123) ou le code seul.
+ */
 export function lireCode(texte: string): string | null {
   const t = texte.trim();
-  const m = /[?&]code=([A-Za-z0-9]{6})/.exec(t) ?? /^([A-Za-z0-9]{6})$/.exec(t);
+  const m =
+    /ECHANGE[\s:-]*([A-Za-z0-9]{6})\b/i.exec(t) ??
+    /[?&]code=([A-Za-z0-9]{6})/.exec(t) ??
+    /^([A-Za-z0-9]{6})$/.exec(t);
   return m ? m[1].toUpperCase() : null;
 }
 
-const lienEchange = (code: string) =>
-  `${location.origin}${location.pathname}#/echange?code=${code}`;
+/**
+ * Contenu du QR code : du texte, pas un lien. Ainsi, scanné par erreur avec l'appareil photo du
+ * téléphone, il n'ouvre pas le site web (sur iPhone, un lien ne peut pas ouvrir l'appli installée).
+ * Il se lit avec le scanner de l'appli.
+ */
+export const texteQR = (code: string) => `TEAM ULYSSE ECHANGE ${code}`;
 
 const message = (e: unknown) => (e instanceof ApiError ? e.message : 'Erreur, réessaie.');
 
@@ -345,7 +355,7 @@ function MonCode({
               {mon ? (
                 <>
                   <img
-                    src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(lienEchange(mon.code), { ecc: 'Q', border: 0 }))}`}
+                    src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(texteQR(mon.code), { ecc: 'Q', border: 0 }))}`}
                     alt={`QR code d’échange ${mon.code}`}
                     className="block w-full [image-rendering:pixelated]"
                   />
@@ -366,7 +376,11 @@ function MonCode({
                 {mon.code}
               </p>
             )}
-            <p className="mt-1 text-sm text-white/75">
+            <p className="mx-auto mt-2 max-w-xs rounded-xl bg-white/10 px-3 py-2 text-xs text-white/85">
+              📲 Ton collègue scanne ce code <b className="text-sun">depuis l’appli Team Ulysse</b>{' '}
+              (Collection › Échanger une carte › Scanner), pas avec l’appareil photo.
+            </p>
+            <p className="mt-2 text-sm text-white/75">
               {etat?.nom_b ? (
                 <span className="inline-flex items-center gap-1.5 font-semibold text-white">
                   <Hourglass size={14} className="text-sun" /> {etat.nom_b} choisit les cartes…
@@ -697,5 +711,43 @@ function Reussi({
         </div>
       </motion.section>
     </AnimatePresence>
+  );
+}
+
+/**
+ * Lien d'échange ouvert dans le navigateur (et non dans l'appli installée) : on explique comment
+ * faire l'échange depuis l'appli, avec le code à taper.
+ */
+export function EchangeHorsAppli({ code, onContinuer }: { code: string; onContinuer: () => void }) {
+  return (
+    <div
+      className="flex min-h-dvh flex-col items-center justify-center px-5 py-10 text-center text-white"
+      style={{ background: 'linear-gradient(170deg, #2563A6 0%, #153E75 45%, #0B2347 100%)' }}
+    >
+      <img src={AVATAR} alt="" className="size-20 rounded-full ring-4 ring-sun" />
+      <p className="eyebrow mt-5 text-sun">Échange de cartes</p>
+      <h1 className="mt-1 font-display text-2xl font-extrabold">Fais l’échange dans l’appli 📲</h1>
+      <div className="mt-5 w-full max-w-sm rounded-3xl bg-white p-5 text-left text-sm text-navy-950 shadow-lift">
+        <ol className="space-y-2.5">
+          <li>
+            1. Ouvre <b>Team Ulysse</b> depuis son <b>icône</b> sur ton écran d’accueil.
+          </li>
+          <li>
+            2. Va dans <b>Collection › Échanger une carte</b>.
+          </li>
+          <li>3. Tape ce code (ou scanne le QR code avec le bouton de l’appli) :</li>
+        </ol>
+        <p className="mt-3 rounded-2xl bg-navy-950 py-3 text-center font-mono text-3xl font-bold tracking-[0.3em] text-sun">
+          {code}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={onContinuer}
+        className="mt-6 text-sm font-semibold text-white/60 hover:text-white"
+      >
+        Je n’ai pas encore l’appli
+      </button>
+    </div>
   );
 }

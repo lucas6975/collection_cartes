@@ -15,7 +15,7 @@ import { EtapeRappels, etapeRappels } from './components/Rappels';
 import { MesInscriptions } from './pages/MesInscriptions';
 import { AdventDay } from './pages/AdventDay';
 import { Collection } from './pages/Collection';
-import { Echange } from './pages/Echange';
+import { Echange, EchangeHorsAppli, lireCode } from './pages/Echange';
 import { Home } from './pages/Home';
 import { Menu } from './pages/Menu';
 
@@ -23,6 +23,9 @@ export function App() {
   const { identite, codeAdmin } = useIdentite();
   // Site ouvert dans le navigateur (pas depuis l'icône) : on explique d'abord l'installation.
   const [navigateur, setNavigateur] = useState(() => !estInstallee());
+  const [codeEchangeNavigateur, setCodeEchangeNavigateur] = useState(() =>
+    /#\/echange\?/.test(location.hash) ? lireCode(location.hash) : null,
+  );
   // Change quand l'écran des rappels est terminé, pour réafficher l'appli.
   const [, setEtapeFinie] = useState(false);
 
@@ -37,6 +40,18 @@ export function App() {
     demarrerPastille();
   }, []);
 
+  // Lien d'échange ouvert dans le navigateur : l'échange se fait dans l'appli installée.
+  if (navigateur && codeEchangeNavigateur) {
+    return (
+      <EchangeHorsAppli
+        code={codeEchangeNavigateur}
+        onContinuer={() => {
+          history.replaceState(null, '', location.pathname);
+          setCodeEchangeNavigateur(null);
+        }}
+      />
+    );
+  }
   // Premier lancement : chacun indique son prénom et son nom (l'administrateur, son code).
   if (!identite && !codeAdmin && navigateur) {
     return (
