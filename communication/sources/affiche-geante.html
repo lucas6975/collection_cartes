@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Affiche géante Team Ulysse</title>
+    <link rel="stylesheet" href="commun.css" />
+    <style>
+      @page {
+        size: A3;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 297mm;
+      }
+      .page {
+        width: 297mm;
+        height: 420mm;
+        background: #0b2347;
+        color: #fff;
+      }
+      .bloc {
+        position: absolute;
+        left: 0;
+        right: 0;
+        overflow: hidden;
+      }
+      .rayons {
+        position: absolute;
+        border-radius: 50%;
+        background: repeating-conic-gradient(rgba(245, 197, 66, 0.13) 0 8deg, transparent 8deg 20deg);
+        -webkit-mask: radial-gradient(circle, #000 18%, transparent 68%);
+        mask: radial-gradient(circle, #000 18%, transparent 68%);
+      }
+      .points {
+        position: absolute;
+        inset: 0;
+        opacity: 0.08;
+        background-image: radial-gradient(#fff 0.4mm, transparent 0.5mm);
+        background-size: 6mm 6mm;
+      }
+      .hazard {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 5mm;
+        background: repeating-linear-gradient(135deg, var(--sun) 0 6mm, #15171c 6mm 12mm);
+        z-index: 6;
+      }
+      .num {
+        display: inline-grid;
+        place-items: center;
+        width: 15mm;
+        height: 15mm;
+        border-radius: 50%;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: 26pt;
+        box-shadow: 0 2mm 5mm rgba(0, 0, 0, 0.35);
+      }
+      .titre-part {
+        display: flex;
+        align-items: center;
+        gap: 4mm;
+      }
+      .titre-part h2 {
+        font-size: 40pt;
+        line-height: 0.95;
+      }
+      .sticker {
+        position: absolute;
+        z-index: 5;
+        padding: 2.6mm 4.4mm;
+        border-radius: 4mm;
+        font-weight: 800;
+        font-size: 13pt;
+        line-height: 1.15;
+        box-shadow: 0 3mm 7mm rgba(0, 0, 0, 0.35);
+      }
+      .sticker b {
+        display: block;
+        font-family: 'Manrope', sans-serif;
+        font-size: 19pt;
+      }
+      .boum {
+        position: absolute;
+        z-index: 5;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        clip-path: polygon(50% 0, 61% 18%, 82% 8%, 80% 30%, 100% 36%, 85% 52%, 98% 70%, 76% 72%, 76% 95%, 58% 82%, 45% 100%, 37% 80%, 15% 92%, 18% 70%, 0 62%, 16% 48%, 4% 28%, 25% 26%, 22% 4%, 40% 16%);
+      }
+      .phone {
+        position: absolute;
+      }
+      .puce {
+        display: flex;
+        gap: 3.5mm;
+        align-items: flex-start;
+        font-size: 12.5pt;
+        line-height: 1.3;
+      }
+      .puce i {
+        flex: none;
+        font-style: normal;
+        display: grid;
+        place-items: center;
+        width: 11mm;
+        height: 11mm;
+        border-radius: 3.4mm;
+        font-size: 17pt;
+      }
+      .puce b {
+        display: block;
+        font-family: 'Manrope', sans-serif;
+        font-size: 15pt;
+        line-height: 1.15;
+      }
+      .confettis span {
+        position: absolute;
+        width: 3mm;
+        height: 1.8mm;
+        border-radius: 0.4mm;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <!-- ═════════════ 1. ULYSSE DÉBARQUE ═════════════ -->
+      <section
+        class="bloc"
+        style="top: 0; height: 140mm; background: linear-gradient(160deg, #2a6cb8 0%, #153e75 45%, #0b2347 100%)"
+      >
+        <div class="points"></div>
+        <div class="rayons" style="left: 168mm; top: 78mm; width: 300mm; height: 300mm; margin: -150mm 0 0 -150mm"></div>
+        <div class="confettis" id="conf1"></div>
+
+        <div style="position: absolute; left: 14mm; top: 9mm; width: 160mm; z-index: 4">
+          <span class="num" style="background: var(--sun); color: var(--navy-950); width: 12mm; height: 12mm; font-size: 20pt; vertical-align: middle">1</span>
+          <span class="eyebrow" style="display: inline-block; margin-left: 3mm; padding: 2mm 5mm; border-radius: 10mm; background: #fff; color: var(--navy-950); font-size: 12pt; vertical-align: middle">⚡ Nouveau à IMECA</span>
+          <h1 class="display" style="margin-top: 5mm; font-size: 54pt; line-height: 0.9">
+            Ulysse<br />débarque<br /><span style="color: var(--sun)">dans ta<br />poche !</span>
+          </h1>
+          <p style="margin-top: 5mm; font-size: 13.5pt; line-height: 1.38; color: rgba(255, 255, 255, 0.9); max-width: 125mm">
+            <b style="color: #fff">Team Ulysse</b>, c’est <b style="color: var(--sun)">l’appli sécurité</b> de toute l’équipe : quelques minutes de jeu par jour sur ton téléphone pour garder les <b style="color: #fff">bons réflexes</b>.
+          </p>
+          <div style="display: flex; gap: 2.4mm; margin-top: 4mm">
+            <span style="padding: 2.4mm 4mm; border-radius: 3mm; background: rgba(255, 255, 255, 0.14); font-weight: 700; font-size: 11pt">📲 Sans téléchargement</span>
+            <span style="padding: 2.4mm 4mm; border-radius: 3mm; background: rgba(255, 255, 255, 0.14); font-weight: 700; font-size: 11pt">🔓 Pas de mot de passe</span>
+            <span style="padding: 2.4mm 4mm; border-radius: 3mm; background: rgba(255, 255, 255, 0.14); font-weight: 700; font-size: 11pt">⏱️ 2 min par jour</span>
+          </div>
+        </div>
+
+        <div class="phone" style="left: 178mm; top: 14mm; width: 62mm; transform: rotate(6deg); z-index: 2"><img class="ecran" src="img/p-menu.jpg" alt="" /></div>
+        <img src="img/mascotte.png" alt="Ulysse" style="position: absolute; left: 196mm; top: 38mm; height: 100mm; z-index: 3; filter: drop-shadow(0 6mm 7mm rgba(0, 0, 0, 0.5))" />
+        <div class="boum" style="left: 228mm; top: 8mm; width: 58mm; height: 52mm; background: var(--rouge); color: #fff; font-size: 17pt; line-height: 1.05; transform: rotate(8deg)">
+          <span>C’EST<br /><span style="font-size: 25pt; color: var(--sun)">PARTI !</span></span>
+        </div>
+        <div class="sticker" style="left: 176mm; top: 110mm; background: #fff; color: var(--navy-950); transform: rotate(-4deg)">
+          👋 « Bonjour Léa ! »<b>Ulysse te salue</b>
+        </div>
+      </section>
+
+      <div class="hazard" style="top: 140mm"></div>
+
+      <!-- ═════════════ 2. CALENDRIER DE L'AVENT ═════════════ -->
+      <section
+        class="bloc"
+        style="top: 145mm; height: 123mm; background: radial-gradient(circle at 75% 40%, #b8323f 0%, #8e1f2a 45%, #4a0d14 100%)"
+      >
+        <div class="points"></div>
+        <div class="confettis" id="neige"></div>
+        <div style="position: absolute; left: 14mm; top: 10mm; width: 142mm; z-index: 4">
+          <div class="titre-part">
+            <span class="num" style="background: #fff; color: var(--rouge)">2</span>
+            <h2 class="display">Le calendrier<br /><span style="color: var(--sun)">de l’Avent 🎄</span></h2>
+          </div>
+          <div style="display: grid; gap: 4mm; margin-top: 7mm">
+            <div class="puce"><i style="background: var(--sun)">📅</i><div><b>18 défis sécurité</b>1 case à ouvrir chaque jour ouvré, du 1er au 24 décembre.</div></div>
+            <div class="puce"><i style="background: #fff">🎟️</i><div><b>Un tirage au sort par jour</b>Inscris-toi dans l’onglet <b style="display: inline; font-size: 12.5pt; color: var(--sun)">Calendrier</b> : défi réussi = <b style="display: inline; font-size: 12.5pt; color: var(--sun)">goodies</b> à gagner 🎁</div></div>
+            <div class="puce"><i style="background: #2fb36f">✅</i><div><b>Tout le monde joue !</b>Pas tiré au sort ? Tu fais quand même tous les défis.</div></div>
+          </div>
+          <div style="display: inline-flex; align-items: center; gap: 4mm; margin-top: 7mm; padding: 3.4mm 6mm 3.4mm 4mm; border-radius: 5mm; background: var(--sun); color: var(--navy-950); box-shadow: 0 3mm 8mm rgba(0, 0, 0, 0.35); transform: rotate(-1.5deg)">
+            <span style="font-size: 30pt">🎁</span>
+            <span style="font-size: 12pt; font-weight: 700; line-height: 1.25">Le <b class="display" style="font-size: 17pt">17 décembre</b><br />le plus gros cadeau, à la soirée de Noël IMECA !</span>
+          </div>
+        </div>
+        <div class="phone" style="left: 184mm; top: 12mm; width: 52mm; transform: rotate(-5deg); z-index: 2"><img class="ecran" src="img/p-avent.jpg" alt="" /></div>
+        <div class="phone" style="left: 228mm; top: 32mm; width: 50mm; transform: rotate(6deg); z-index: 3"><img class="ecran" src="img/p-tirage.jpg" alt="" /></div>
+        <img src="img/ulysse-noel.png" alt="" style="position: absolute; left: 150mm; top: 66mm; height: 58mm; z-index: 4; filter: drop-shadow(0 4mm 5mm rgba(0, 0, 0, 0.5))" />
+        <div class="boum" style="left: 243mm; top: 2mm; width: 46mm; height: 40mm; background: var(--sun); color: var(--rouge); font-size: 15pt; transform: rotate(-10deg); z-index: 4">
+          <span>1 CADEAU<br />PAR JOUR</span>
+        </div>
+      </section>
+
+      <div class="hazard" style="top: 268mm"></div>
+
+      <!-- ═════════════ 3. CARTES À COLLECTIONNER ═════════════ -->
+      <section
+        class="bloc"
+        style="top: 273mm; height: 102mm; background: #15171c"
+      >
+        <div style="position: absolute; inset: 0; opacity: 0.13; background: repeating-linear-gradient(135deg, var(--sun) 0 14mm, transparent 14mm 28mm)"></div>
+        <div class="rayons" style="left: 40mm; top: 50mm; width: 170mm; height: 170mm; margin: -85mm 0 0 -85mm; opacity: 0.9"></div>
+        <img src="img/p-carte-crop.jpg" alt="" style="position: absolute; left: 7mm; top: 10mm; width: 66mm; border-radius: 6mm; transform: rotate(-6deg); z-index: 3; box-shadow: 0 6mm 12mm rgba(0, 0, 0, 0.55)" />
+        <div style="position: absolute; left: 80mm; top: 10mm; width: 130mm; z-index: 4">
+          <div class="titre-part">
+            <span class="num" style="background: var(--sun); color: #15171c">3</span>
+            <h2 class="display" style="font-size: 36pt">Les cartes à<br /><span style="color: var(--sun)">collectionner</span> 🃏</h2>
+          </div>
+          <div style="display: grid; gap: 3.4mm; margin-top: 6mm">
+            <div class="puce"><i style="background: var(--sun)">🎁</i><div><b>1 pack par jour</b>5 cartes sécurité à ouvrir chaque jour</div></div>
+            <div class="puce"><i style="background: linear-gradient(135deg, #ffe58a, #ff8fb1, #9b8cff, #6fe3ff)">✨</i><div><b>36 cartes à réunir</b>de la commune à la légendaire</div></div>
+            <div class="puce"><i style="background: #2fb36f">🔁</i><div><b>Échange tes doublons</b>avec tes collègues, en face à face</div></div>
+            <div class="puce"><i style="background: #fff">🪪</i><div><b>Ta carte perso</b>à ton nom, rien qu’à toi</div></div>
+          </div>
+        </div>
+        <div class="phone" style="left: 210mm; top: 12mm; width: 40mm; transform: rotate(-4deg); z-index: 2"><img class="ecran" src="img/p-pack.jpg" alt="" /></div>
+        <div class="phone" style="left: 248mm; top: 22mm; width: 40mm; transform: rotate(5deg); z-index: 3"><img class="ecran" src="img/p-echange.jpg" alt="" /></div>
+      </section>
+
+      <div class="hazard" style="top: 375mm"></div>
+
+      <!-- ═════════════ QR CODE ═════════════ -->
+      <section class="bloc" style="top: 380mm; height: 40mm; background: #fff; color: var(--ink)">
+        <div style="position: absolute; left: 12mm; top: 4mm; width: 34mm; padding: 1.6mm; border: 0.6mm dashed var(--navy); border-radius: 4mm; background: #fff">
+          <img src="img/qrcode.png" alt="QR code Team Ulysse" style="display: block; width: 100%" />
+        </div>
+        <div style="position: absolute; left: 53mm; top: 5mm; right: 50mm">
+          <p class="display" style="font-size: 23pt; color: var(--navy-950); line-height: 1">📷 Scanne-moi et rejoins la Team !</p>
+          <div style="display: flex; gap: 6mm; margin-top: 4mm; font-size: 11pt; font-weight: 600">
+            <span><b style="color: var(--rouge)">1.</b> Scanne avec l’appareil photo</span>
+            <span><b style="color: var(--rouge)">2.</b> Ajoute l’appli à ton écran d’accueil</span>
+            <span><b style="color: var(--rouge)">3.</b> Ouvre-la depuis son icône</span>
+          </div>
+          <p class="display" style="margin-top: 3.6mm; font-size: 14pt; font-style: italic; color: var(--navy)">Team Ulysse · <span style="color: var(--rouge)">La sécurité, notre Odyssée</span></p>
+        </div>
+        <img src="img/mascotte.png" alt="" style="position: absolute; right: 12mm; bottom: 0; height: 46mm" />
+      </section>
+    </div>
+    <script>
+      // Confettis (partie 1) et flocons (partie 2), placés de façon fixe.
+      const r = (i, n) => { const x = Math.sin(i * 12.9898 + n * 78.233) * 43758.5453; return x - Math.floor(x); };
+      const c1 = document.getElementById('conf1');
+      for (let i = 0; i < 46; i++) {
+        const s = document.createElement('span');
+        s.style.cssText = `left:${150 + r(i, 1) * 140}mm;top:${r(i, 2) * 135}mm;background:${['#F5C542', '#E5484D', '#6FE3FF', '#FFFFFF', '#22A06B'][i % 5]};transform:rotate(${r(i, 3) * 360}deg);opacity:.9`;
+        c1.appendChild(s);
+      }
+      const n = document.getElementById('neige');
+      for (let i = 0; i < 60; i++) {
+        const s = document.createElement('span');
+        const d = 1 + r(i, 4) * 1.8;
+        s.style.cssText = `left:${r(i, 5) * 297}mm;top:${r(i, 6) * 123}mm;width:${d}mm;height:${d}mm;border-radius:50%;background:#fff;opacity:${0.25 + r(i, 7) * 0.5}`;
+        n.appendChild(s);
+      }
+    </script>
+  </body>
+</html>
