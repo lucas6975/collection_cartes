@@ -124,6 +124,91 @@
         height: 1.8mm;
         border-radius: 0.4mm;
       }
+
+      /* iPhone réaliste : cadre métal, verre noir, Dynamic Island, barre d'état */
+      .iphone {
+        position: absolute;
+        aspect-ratio: 1 / 2.057;
+        container-type: inline-size;
+      }
+      /* Les unités cqw se rapportent à .iphone : le cadre est donc un élément enfant. */
+      .iphone .cadre {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 17cqw;
+        padding: 1.5cqw;
+        background: linear-gradient(140deg, #e6e8eb 0%, #9ba0a8 22%, #f4f5f7 46%, #7f848c 70%, #d4d7db 100%);
+        box-shadow:
+          0 0 0 0.25cqw rgba(0, 0, 0, 0.35),
+          0 6mm 14mm rgba(0, 0, 0, 0.45),
+          0 2mm 4mm rgba(0, 0, 0, 0.3);
+      }
+      .iphone .bouton {
+        position: absolute;
+        width: 1.4cqw;
+        border-radius: 1cqw;
+        background: linear-gradient(90deg, #8b9098, #d8dbdf, #8b9098);
+      }
+      .iphone .verre {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 15.6cqw;
+        background: #050608;
+        padding: 3.1cqw;
+      }
+      .iphone .ecran {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 12.6cqw;
+        overflow: hidden;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+      }
+      .iphone .etat {
+        flex: none;
+        height: 11.4cqw;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.6cqw 7cqw 0 9.5cqw;
+        color: #0b0c0f;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 4.4cqw;
+        letter-spacing: -0.02em;
+      }
+      .iphone .etat svg {
+        height: 3.4cqw;
+        width: auto;
+      }
+      .iphone .ecran img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      .iphone .ilot {
+        position: absolute;
+        top: 5.2cqw;
+        left: 50%;
+        width: 30cqw;
+        height: 8.6cqw;
+        margin-left: -15cqw;
+        border-radius: 5cqw;
+        background: #000;
+        z-index: 2;
+      }
+      .iphone .reflet {
+        position: absolute;
+        inset: 3.1cqw;
+        border-radius: 12.6cqw;
+        background: linear-gradient(115deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 32%);
+        pointer-events: none;
+        z-index: 3;
+      }
     </style>
   </head>
   <body>
@@ -153,7 +238,7 @@
           </div>
         </div>
 
-        <div class="phone" style="left: 178mm; top: 14mm; width: 62mm; transform: rotate(6deg); z-index: 2"><img class="ecran" src="img/p-menu.jpg" alt="" /></div>
+        <div class="iphone" data-ecran="img/hd-menu.jpg" style="left: 180mm; top: 9mm; width: 58mm; transform: rotate(6deg); z-index: 2"></div>
         <img src="img/mascotte.png" alt="Ulysse" style="position: absolute; left: 196mm; top: 38mm; height: 100mm; z-index: 3; filter: drop-shadow(0 6mm 7mm rgba(0, 0, 0, 0.5))" />
         <div class="boum" style="left: 228mm; top: 8mm; width: 58mm; height: 52mm; background: var(--rouge); color: #fff; font-size: 17pt; line-height: 1.05; transform: rotate(8deg)">
           <span>C’EST<br /><span style="font-size: 25pt; color: var(--sun)">PARTI !</span></span>
@@ -187,10 +272,10 @@
             <span style="font-size: 12pt; font-weight: 700; line-height: 1.25">Le <b class="display" style="font-size: 17pt">17 décembre</b><br />le plus gros cadeau, à la soirée de Noël IMECA !</span>
           </div>
         </div>
-        <div class="phone" style="left: 184mm; top: 12mm; width: 52mm; transform: rotate(-5deg); z-index: 2"><img class="ecran" src="img/p-avent.jpg" alt="" /></div>
-        <div class="phone" style="left: 228mm; top: 32mm; width: 50mm; transform: rotate(6deg); z-index: 3"><img class="ecran" src="img/p-tirage.jpg" alt="" /></div>
+        <div class="iphone" data-ecran="img/hd-avent.jpg" style="left: 184mm; top: 8mm; width: 48mm; transform: rotate(-5deg); z-index: 2"></div>
+        <div class="iphone" data-ecran="img/hd-tirage.jpg" style="left: 232mm; top: 19mm; width: 46mm; transform: rotate(6deg); z-index: 3"></div>
         <img src="img/ulysse-noel.png" alt="" style="position: absolute; left: 150mm; top: 66mm; height: 58mm; z-index: 4; filter: drop-shadow(0 4mm 5mm rgba(0, 0, 0, 0.5))" />
-        <div class="boum" style="left: 243mm; top: 2mm; width: 46mm; height: 40mm; background: var(--sun); color: var(--rouge); font-size: 15pt; transform: rotate(-10deg); z-index: 4">
+        <div class="boum" style="left: 136mm; top: 3mm; width: 46mm; height: 40mm; background: var(--sun); color: var(--rouge); font-size: 15pt; transform: rotate(-10deg); z-index: 4">
           <span>1 GAGNANT<br />PAR JOUR</span>
         </div>
       </section>
@@ -219,8 +304,8 @@
             <div class="puce"><i style="background: #fff">🪪</i><div><b>Ta carte perso</b>à ton nom, rien qu’à toi</div></div>
           </div>
         </div>
-        <div class="phone" style="left: 210mm; top: 12mm; width: 40mm; transform: rotate(-4deg); z-index: 2"><img class="ecran" src="img/p-pack.jpg" alt="" /></div>
-        <div class="phone" style="left: 248mm; top: 22mm; width: 40mm; transform: rotate(5deg); z-index: 3"><img class="ecran" src="img/p-echange.jpg" alt="" /></div>
+        <div class="iphone" data-ecran="img/hd-pack.jpg" style="left: 212mm; top: 8mm; width: 38mm; transform: rotate(-4deg); z-index: 2"></div>
+        <div class="iphone" data-ecran="img/hd-echange.jpg" style="left: 251mm; top: 13mm; width: 38mm; transform: rotate(5deg); z-index: 3"></div>
       </section>
 
       <div class="hazard" style="top: 375mm"></div>
@@ -243,6 +328,20 @@
       </section>
     </div>
     <script>
+
+      // Construit chaque iPhone : boutons, verre, barre d'état (9:41, réseau, wifi, batterie), écran.
+      const ETAT = `<span>9:41</span><span style="display:flex;gap:1.4cqw;align-items:center">
+        <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="0.8" fill="#0b0c0f"/><rect x="5" y="5.5" width="3" height="6.5" rx="0.8" fill="#0b0c0f"/><rect x="10" y="3" width="3" height="9" rx="0.8" fill="#0b0c0f"/><rect x="15" y="0" width="3" height="12" rx="0.8" fill="#0b0c0f"/></svg>
+        <svg viewBox="0 0 16 12"><path d="M8 11.2 5.6 8.6a3.4 3.4 0 0 1 4.8 0z" fill="#0b0c0f"/><path d="M3.4 6.4a6.5 6.5 0 0 1 9.2 0l-1.4 1.5a4.5 4.5 0 0 0-6.4 0z" fill="#0b0c0f"/><path d="M1.1 4.1a9.8 9.8 0 0 1 13.8 0l-1.4 1.5a7.8 7.8 0 0 0-11 0z" fill="#0b0c0f"/></svg>
+        <svg viewBox="0 0 27 12"><rect x="0.6" y="0.6" width="22.8" height="10.8" rx="3.2" fill="none" stroke="#0b0c0f" stroke-opacity=".4" stroke-width="1.2"/><rect x="2.4" y="2.4" width="16.6" height="7.2" rx="1.8" fill="#0b0c0f"/><path d="M25 4v4a2.2 2.2 0 0 0 0-4z" fill="#0b0c0f" fill-opacity=".45"/></svg></span>`;
+      for (const t of document.querySelectorAll('.iphone')) {
+        t.innerHTML = `<div class="cadre"><span class="bouton" style="left:-1cqw;top:20cqw;height:7cqw"></span>
+          <span class="bouton" style="left:-1cqw;top:32cqw;height:13cqw"></span>
+          <span class="bouton" style="left:-1cqw;top:48cqw;height:13cqw"></span>
+          <span class="bouton" style="right:-1cqw;top:36cqw;height:20cqw"></span>
+          <div class="verre"><div class="ecran"><div class="etat">${ETAT}</div><img src="${t.dataset.ecran}" alt=""></div>
+          <span class="ilot"></span><span class="reflet"></span></div></div>`;
+      }
       // Confettis (partie 1) et flocons (partie 2), placés de façon fixe.
       const r = (i, n) => { const x = Math.sin(i * 12.9898 + n * 78.233) * 43758.5453; return x - Math.floor(x); };
       const c1 = document.getElementById('conf1');
