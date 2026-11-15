@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Bandeau annonce Teams</title>
+<style>
+@font-face{font-family:Manrope;src:url(fonts/manrope-latin-wght-normal.woff2);font-weight:200 800}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:640px;overflow:hidden}
+.b{position:relative;width:1920px;height:640px;overflow:hidden;
+  background:radial-gradient(circle at 78% 45%,#3d7fd6 0%,#1f5aa6 25%,#153e75 55%,#0b2347 100%)}
+.ray{position:absolute;left:1500px;top:300px;width:2600px;height:2600px;margin:-1300px 0 0 -1300px;border-radius:50%;
+  background:repeating-conic-gradient(rgba(245,197,66,.12) 0 6deg,transparent 6deg 16deg);
+  -webkit-mask:radial-gradient(circle,#000 8%,transparent 45%);mask:radial-gradient(circle,#000 8%,transparent 45%)}
+.pts{position:absolute;inset:0;opacity:.08;background-image:radial-gradient(#fff 2px,transparent 2.6px);background-size:34px 34px}
+.ombre{position:absolute;inset:0;background:linear-gradient(90deg,rgba(11,35,71,.85) 0%,rgba(11,35,71,.5) 40%,transparent 62%)}
+.u{position:absolute;right:170px;top:-10px;height:640px;filter:drop-shadow(0 30px 40px rgba(0,0,0,.45))}
+.bande{position:absolute;left:0;right:0;bottom:0;height:34px;background:repeating-linear-gradient(135deg,#f5c542 0 46px,#15171c 46px 92px)}
+.tag{position:absolute;right:60px;top:44px;font-family:Manrope;font-weight:800;font-size:30px;color:#0b2347;background:#f5c542;padding:10px 26px;border-radius:99px;letter-spacing:.06em}
+</style></head><body>
+<div class="b"><div class="ray"></div><div class="pts"></div><div class="ombre"></div>
+<img class="u" src="img/ulysse-saut-detoure.png">
+<span class="tag">NOUVEAU</span>
+<div class="bande"></div></div>
+</body></html>
