@@ -87,7 +87,11 @@ export function Installer({ onContinuer }: { onContinuer: () => void }) {
 
           {(ios || !android) && (
             <Etapes
-              titre="🍏 Sur iPhone (Safari)"
+              titre={
+                <>
+                  <LogoApple /> Sur iPhone (Safari)
+                </>
+              }
               etapes={[
                 <>
                   Touche <Share size={16} className="inline align-[-3px] text-blue" />{' '}
@@ -106,7 +110,11 @@ export function Installer({ onContinuer }: { onContinuer: () => void }) {
           )}
           {(android || !ios) && (
             <Etapes
-              titre="🤖 Sur Android (Chrome)"
+              titre={
+                <>
+                  <LogoAndroid /> Sur Android (Chrome)
+                </>
+              }
               etapes={[
                 <>
                   Touche <MoreVertical size={16} className="inline align-[-3px] text-blue" /> en
@@ -147,7 +155,25 @@ export function Installer({ onContinuer }: { onContinuer: () => void }) {
   );
 }
 
-function Etapes({ titre, etapes }: { titre: string; etapes: React.ReactNode[] }) {
+/** Logo Apple (pomme), en noir. */
+function LogoApple() {
+  return (
+    <svg viewBox="0 0 384 512" className="inline size-4 align-[-2px]" aria-hidden fill="#000">
+      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+    </svg>
+  );
+}
+
+/** Robot Android, en vert. */
+function LogoAndroid() {
+  return (
+    <svg viewBox="0 0 24 24" className="inline size-[18px] align-[-3px]" aria-hidden fill="#3DDC84">
+      <path d="M17.6 9.48l1.84-3.18a.38.38 0 0 0-.65-.38l-1.86 3.22a11.4 11.4 0 0 0-9.86 0L5.21 5.92a.38.38 0 0 0-.65.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z" />
+    </svg>
+  );
+}
+
+function Etapes({ titre, etapes }: { titre: React.ReactNode; etapes: React.ReactNode[] }) {
   return (
     <div className="mt-4 rounded-2xl bg-blue-light p-4">
       <p className="font-display text-sm font-extrabold text-navy-950">{titre}</p>
