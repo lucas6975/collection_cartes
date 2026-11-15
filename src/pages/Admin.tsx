@@ -9,6 +9,7 @@ import {
   Download,
   Lock,
   RefreshCw,
+  Rocket,
   RotateCcw,
   Search,
   Trash2,
@@ -27,8 +28,9 @@ import { baseConfiguree } from '../config';
 import { ApiError, api, type Participant, type ResultatAdmin, type Tirage } from '../data/api';
 import { JOURS_OUVRES, useIdentite } from '../data/identite';
 import { endpointActuel, rappelsStore } from '../data/rappels';
+import { OngletLancement } from './AdminLancement';
 
-type Onglet = 'tirage' | 'inscrits' | 'resultats';
+type Onglet = 'lancement' | 'tirage' | 'inscrits' | 'resultats';
 
 /** [1,2,3,5,7,8] → « 1–3, 5, 7–8 » */
 export function plages(jours: number[]): string {
@@ -56,7 +58,7 @@ const nomComplet = (p: { prenom: string; nom: string }) => `${p.prenom} ${p.nom}
 export function Admin() {
   const { codeAdmin } = useIdentite();
   const toast = useToast();
-  const [onglet, setOnglet] = useState<Onglet>('tirage');
+  const [onglet, setOnglet] = useState<Onglet>('lancement');
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [tirages, setTirages] = useState<Tirage[]>([]);
   const [chargement, setChargement] = useState(true);
@@ -89,8 +91,8 @@ export function Admin() {
     <div className="mx-auto max-w-4xl">
       <PageHeader
         eyebrow="Administration"
-        title="Tirages au sort"
-        description="Les inscrits du calendrier de l’Avent et le tirage de chaque jour."
+        title="Espace administrateur"
+        description="Le suivi du lancement, les inscrits et le tirage de chaque jour."
       >
         <Button variant="secondary" onClick={() => void charger()} disabled={chargement}>
           <RefreshCw size={16} className={cx(chargement && 'animate-spin')} /> Actualiser
@@ -117,6 +119,7 @@ export function Admin() {
       >
         {(
           [
+            ['lancement', 'Lancement', Rocket],
             ['tirage', 'Tirage', Dices],
             ['inscrits', `Inscrits (${participants.length})`, Users],
             ['resultats', 'Résultats', Trophy],
@@ -141,6 +144,9 @@ export function Admin() {
         ))}
       </div>
 
+      {onglet === 'lancement' && (
+        <OngletLancement code={codeAdmin} participants={participants} onActualiser={charger} />
+      )}
       {onglet === 'tirage' && (
         <OngletTirage
           code={codeAdmin}

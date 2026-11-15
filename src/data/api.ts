@@ -53,6 +53,13 @@ export interface Participant {
   inscrit_le: string;
 }
 
+/** Chiffres du lancement (onglet « Lancement » de l'espace admin). */
+export interface ChiffresLancement {
+  rappels: number;
+  avec_rappels: string[];
+  echanges: number;
+}
+
 export interface Tirage {
   jour: number;
   participant_id: string | null;
@@ -146,6 +153,8 @@ export const api = {
       p_details: details,
     }),
   adminResultats: (code: string) => rpc<ResultatAdmin[]>('admin_resultats', { p_code: code }),
+
+  adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 
   echangeCreer: (nom: string, doublons: string[]) =>
     rpc<{ code: string; cle: string }>('echange_creer', { p_nom: nom, p_doublons: doublons }),
