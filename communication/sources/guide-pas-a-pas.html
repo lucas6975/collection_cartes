@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Guide pas à pas Team Ulysse</title>
+<style>
+@font-face{font-family:Manrope;src:url(fonts/manrope-latin-wght-normal.woff2);font-weight:200 800}
+@font-face{font-family:Inter;src:url(fonts/inter-latin-wght-normal.woff2);font-weight:100 900}
+@page{size:210mm 297mm;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:Inter,sans-serif;color:#0b2347;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:3.35mm;line-height:1.45}
+.page{position:relative;width:210mm;height:297mm;overflow:hidden;padding:13mm 13mm 16mm;page-break-after:always;break-after:page}
+.page:last-child{page-break-after:auto;break-after:auto}
+.pied{position:absolute;left:13mm;right:13mm;bottom:7mm;display:flex;justify-content:space-between;font-size:2.8mm;color:#7d8aa0;border-top:.3mm solid #e3e8ef;padding-top:2mm}
+.d{font-family:Manrope;font-weight:800;letter-spacing:-.01em}
+.j{color:#f5c542}
+h1{font-family:Manrope;font-weight:800;font-size:11mm;line-height:1.05}
+h2{font-family:Manrope;font-weight:800;font-size:6.6mm;display:flex;align-items:center;gap:3mm;margin-bottom:1mm}
+h2 .l{flex:none;width:10mm;height:10mm;border-radius:2.5mm;background:#153e75;color:#f5c542;display:grid;place-items:center;font-size:5.4mm}
+h3{font-family:Manrope;font-weight:800;font-size:4.3mm;margin:4mm 0 1.5mm}
+.intro{color:#4a5a70;margin-bottom:2mm}
+ol.p{list-style:none;counter-reset:p;display:grid;gap:1.8mm}
+ol.p>li{counter-increment:p;position:relative;padding-left:8mm}
+ol.p>li::before{content:counter(p);position:absolute;left:0;top:.2mm;width:5.6mm;height:5.6mm;border-radius:50%;background:#e8eef7;color:#153e75;font-family:Manrope;font-weight:800;font-size:3.1mm;display:grid;place-items:center}
+.c{display:inline-block;font-weight:700;font-size:3.05mm;background:#0b2347;color:#fff;border-radius:1.4mm;padding:.1mm 1.8mm;white-space:nowrap}
+.f{color:#7d8aa0;font-weight:700;margin:0 .6mm}
+code,.m{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:3mm;background:#eef2f7;border-radius:1mm;padding:0 1.2mm}
+.box{border-radius:3.5mm;padding:3mm 4mm;margin-top:3mm}
+.info{background:#eef4fc}
+.ok{background:#e3f6ec}
+.att{background:#fff4d9}
+.dan{background:#fde8ea;color:#7a1522}
+.dan b{color:#c8283a}
+.prompt{background:#0d1b33;color:#d6e2f5;border-radius:3.5mm;padding:3mm 4mm;margin-top:2mm;font-size:3.15mm;line-height:1.5}
+.prompt b{color:#f5c542}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+.carte{border:.3mm solid #e3e8ef;border-radius:3.5mm;padding:3mm 4mm}
+.carte b.t{font-family:Manrope;font-size:4mm;display:block;margin-bottom:.6mm}
+header.cov{margin:-13mm -13mm 6mm;padding:14mm 13mm 10mm;color:#fff;background:radial-gradient(circle at 85% 30%,#3d7fd6,#153e75 55%,#0b2347);position:relative;overflow:hidden}
+header.cov p{font-size:4.2mm;margin-top:3mm;max-width:130mm;opacity:.92;line-height:1.4}
+header.cov img{position:absolute;right:6mm;bottom:-5mm;height:58mm}
+.eye{font-family:Manrope;font-weight:800;font-size:3.4mm;letter-spacing:.14em;background:#f5c542;color:#0b2347;display:inline-block;padding:1mm 3.5mm;border-radius:99px;margin-bottom:3mm}
+.bande{height:3mm;background:repeating-linear-gradient(135deg,#f5c542 0 5mm,#15171c 5mm 10mm);margin:0 -13mm 5mm}
+.flux{display:flex;align-items:stretch;gap:2mm;margin:3mm 0}
+.flux div{flex:1;border-radius:3mm;padding:2.5mm;text-align:center;font-size:2.95mm;line-height:1.35}
+.flux div b{display:block;font-family:Manrope;font-size:3.6mm}
+.flux span{align-self:center;font-weight:800;color:#153e75}
+table{width:100%;border-collapse:collapse;margin-top:2mm;font-size:3.1mm}
+td,th{border-bottom:.3mm solid #e3e8ef;padding:1.6mm 2mm;text-align:left;vertical-align:top}
+th{font-family:Manrope;font-size:3.2mm;background:#f4f7fb}
+</style></head><body>
+
+<!-- ═════════ PAGE 1 ═════════ -->
+<section class="page">
+  <header class="cov">
+    <span class="eye">GUIDE PAS À PAS</span>
+    <h1>Créer son appli<br><span class="j">comme Team Ulysse</span></h1>
+    <p>Tout ce que j’ai fait, dans l’ordre, avec les boutons à cliquer : pour repartir de zéro avec <b>ton propre projet</b>.</p>
+    <img src="img/ulysse-face-detoure.png" alt="">
+  </header>
+
+  <h3 style="margin-top:0">Le principe en une ligne</h3>
+  <div class="flux">
+    <div style="background:#efe9ff"><b>Toi</b>tu décris ton idée</div><span>➜</span>
+    <div style="background:#efe9ff"><b>Claude Code</b>écrit le code</div><span>➜</span>
+    <div style="background:#e8eef7"><b>GitHub</b>garde le code</div><span>➜</span>
+    <div style="background:#e3f6ec"><b>GitHub Pages</b>met le site en ligne</div><span>➜</span>
+    <div style="background:#fff3d6"><b>Téléphone</b>« ajouter à l’écran d’accueil »</div>
+  </div>
+  <p>Et si l’appli doit <b>garder des données communes</b> (inscriptions, scores…) ou <b>envoyer des notifications</b> : <b>Supabase</b>, une base de données gratuite en ligne.</p>
+
+  <h3>Ce qu’il te faut</h3>
+  <table>
+    <tr><th>Compte</th><th>Où</th><th>Prix</th><th>À quoi ça sert</th></tr>
+    <tr><td><b>GitHub</b></td><td><code>github.com</code></td><td>gratuit</td><td>ranger le code et publier le site</td></tr>
+    <tr><td><b>Claude</b></td><td><code>claude.ai</code></td><td>abonnement payant</td><td>Claude Code : l’assistant qui écrit le code</td></tr>
+    <tr><td><b>Supabase</b></td><td><code>supabase.com</code></td><td>gratuit</td><td>base de données + notifications (si besoin)</td></tr>
+  </table>
+  <p style="margin-top:2mm">Pas besoin de savoir programmer ni d’installer quoi que ce soit : <b>tout se fait dans le navigateur</b>.</p>
+
+  <h3>Le plan du guide</h3>
+  <div class="grid2">
+    <div class="carte"><b class="t">A · GitHub</b>Créer son compte et son dépôt (le « dossier » du projet).</div>
+    <div class="carte"><b class="t">B · Claude Code</b>Le relier à GitHub et lui décrire son appli.</div>
+    <div class="carte"><b class="t">C · GitHub Pages</b>Mettre le site en ligne, avec une adresse fixe.</div>
+    <div class="carte"><b class="t">D · Supabase</b>Créer la base et copier-coller les codes SQL.</div>
+    <div class="carte"><b class="t">E · Notifications</b>Les rappels sur les téléphones (optionnel).</div>
+    <div class="carte"><b class="t">F · Au quotidien</b>Demander une modif, valider, publier.</div>
+  </div>
+  <p class="box att">⚠️ Les sites changent parfois le nom ou la place de leurs boutons. Si un bouton n’est pas exactement là, cherche un nom proche — ou demande à Claude Code : « où est le réglage X sur GitHub ? ».</p>
+  <div class="pied"><span>Team Ulysse · guide pas à pas</span><span>1 / 4</span></div>
+</section>
+
+<!-- ═════════ PAGE 2 ═════════ -->
+<section class="page">
+  <h2><span class="l">A</span>GitHub : le dossier du projet</h2>
+  <p class="intro">GitHub garde tout le code de l’appli et l’historique de chaque modification.</p>
+  <ol class="p">
+    <li>Va sur <code>github.com</code> <span class="f">›</span> <span class="c">Sign up</span> : e-mail, mot de passe, nom d’utilisateur (il apparaîtra dans l’adresse du site, ex. <code>lucas6975</code>).</li>
+    <li>Une fois connecté : bouton <span class="c">+</span> en haut à droite <span class="f">›</span> <span class="c">New repository</span>.</li>
+    <li><b>Repository name</b> : le nom du projet, sans espace ni accent (ex. <code>collection_cartes</code>). Il sera aussi dans l’adresse du site.</li>
+    <li>Choisis <span class="c">Public</span> (GitHub Pages est gratuit pour un dépôt public) et coche <span class="c">Add a README file</span>.</li>
+    <li><span class="c">Create repository</span>. Ton dépôt existe : <code>github.com/ton-pseudo/nom-du-projet</code>.</li>
+  </ol>
+  <p class="box info">💡 Un dépôt <b>public</b> veut dire que tout le monde peut lire le code. C’est sans danger <b>tant qu’aucun secret n’y est écrit</b> (mot de passe, code admin, clé privée).</p>
+
+  <h2 style="margin-top:6mm"><span class="l">B</span>Claude Code : l’assistant qui code</h2>
+  <p class="intro">C’est lui qui écrit tout le code, le teste et l’envoie sur GitHub. Toi, tu décris et tu valides.</p>
+  <ol class="p">
+    <li>Va sur <code>claude.ai/code</code> et connecte-toi avec ton compte Claude (abonnement nécessaire).</li>
+    <li>Relie GitHub : <span class="c">Connect GitHub</span> <span class="f">›</span> autorise l’appli <b>Claude</b> sur GitHub <span class="f">›</span> choisis <b>ton dépôt</b> (ou « All repositories »).</li>
+    <li>Choisis le dépôt dans la liste, puis écris ta demande dans la zone de texte et envoie.</li>
+    <li>Claude travaille dans une <b>copie du projet dans le cloud</b>, montre ce qu’il fait, puis envoie le code sur GitHub (un « commit » sur une « branche »).</li>
+    <li>Tu peux suivre et répondre depuis l’ordinateur ou <b>l’appli Claude sur ton téléphone</b>.</li>
+  </ol>
+  <h3>Exemple de première demande</h3>
+  <div class="prompt">« Crée une <b>appli web pour téléphone</b> (installable sur l’écran d’accueil) pour sensibiliser mes collègues à <b>[ton sujet]</b>. Chaque jour, les gens <b>[ce qu’ils font]</b>. Style : couleurs <b>[tes couleurs]</b>, mascotte <b>[ton personnage]</b>.<br><b>Fais-moi d’abord une maquette</b> avant de programmer. Publie le site sur <b>GitHub Pages</b>. »</div>
+  <h3>Mes règles qui marchent</h3>
+  <div class="grid2">
+    <div class="carte">🖼️ <b>Toujours une maquette d’abord</b>, puis « vas-y, programme ».</div>
+    <div class="carte">🎯 <b>Une demande à la fois</b>, précise : « mets le bouton en bas », « couleur jaune ».</div>
+    <div class="carte">📸 <b>Envoie des captures d’écran</b> quand quelque chose ne va pas.</div>
+    <div class="carte">🔒 <b>Ne colle jamais un secret</b> dans la conversation (code admin, mot de passe).</div>
+  </div>
+  <div class="pied"><span>Team Ulysse · guide pas à pas</span><span>2 / 4</span></div>
+</section>
+
+<!-- ═════════ PAGE 3 ═════════ -->
+<section class="page">
+  <h2><span class="l">C</span>GitHub Pages : le site en ligne</h2>
+  <p class="intro">GitHub publie le site gratuitement, à chaque modification, à une adresse qui ne change jamais (celle du QR code).</p>
+  <ol class="p">
+    <li>Demande à Claude : <i>« Ajoute la publication automatique sur GitHub Pages avec GitHub Actions »</i>. Il crée un fichier <code>.github/workflows/deploy.yml</code>.</li>
+    <li>Sur GitHub, dans ton dépôt : onglet <span class="c">Settings</span> <span class="f">›</span> menu de gauche <span class="c">Pages</span>.</li>
+    <li>Rubrique <b>Build and deployment</b> <span class="f">›</span> <b>Source</b> : choisis <span class="c">GitHub Actions</span>.</li>
+    <li>Onglet <span class="c">Actions</span> du dépôt : chaque publication apparaît. <b>Rond vert ✅</b> = en ligne (environ 2 minutes). <b>Croix rouge ❌</b> = envoie la capture à Claude.</li>
+    <li>Ton site : <code>https://ton-pseudo.github.io/nom-du-projet/</code>. C’est ce lien qu’on met dans le QR code.</li>
+  </ol>
+  <p class="box att">⚠️ Si la publication refuse la branche de Claude (« not allowed to deploy ») : <span class="c">Settings</span> <span class="f">›</span> <span class="c">Environments</span> <span class="f">›</span> <span class="c">github-pages</span> <span class="f">›</span> <b>Deployment branches</b> : ajoute la branche indiquée, ou demande à Claude de fusionner dans <code>main</code>.</p>
+
+  <h2 style="margin-top:6mm"><span class="l">D</span>Supabase : la base de données</h2>
+  <p class="intro">Seulement si l’appli doit partager des données entre téléphones (inscriptions, tirages, résultats…).</p>
+  <ol class="p">
+    <li><code>supabase.com</code> <span class="f">›</span> <span class="c">Start your project</span> <span class="f">›</span> <span class="c">Continue with GitHub</span> (le plus simple).</li>
+    <li><span class="c">New project</span> : <b>Name</b> (ex. <code>team-ulysse</code>), <b>Database Password</b> (note-le et garde-le pour toi), <b>Region</b> : Europe (Paris) <span class="f">›</span> <span class="c">Create new project</span>. Attendre 1 à 2 minutes.</li>
+    <li>Demande à Claude les <b>fichiers SQL</b> pour ton appli : il les crée dans le dossier <code>supabase/</code> du dépôt.</li>
+    <li>Pour chaque fichier, dans l’ordre : menu de gauche <span class="c">SQL Editor</span> <span class="f">›</span> <span class="c">New query</span> (onglet vide) <span class="f">›</span> colle <b>tout</b> le fichier <span class="f">›</span> <span class="c">Run</span>. Message attendu : <b>« Success. No rows returned »</b>.</li>
+    <li>Récupère les deux infos de connexion : roue dentée <span class="c">Project Settings</span> <span class="f">›</span> <span class="c">API Keys</span> / <span class="c">Data API</span> : <b>Project URL</b> et la clé <b>publishable</b> (ou « anon public »). Donne-les à Claude : il les met dans le code.</li>
+    <li>Pour voir les données : <span class="c">Table Editor</span> <span class="f">›</span> clique sur une table.</li>
+  </ol>
+  <div class="grid2" style="margin-top:3mm">
+    <p class="box ok" style="margin:0">✅ <b>Publiques, sans danger</b> : la Project URL et la clé <b>publishable / anon</b> (elles sont dans le site).</p>
+    <p class="box dan" style="margin:0">🔒 <b>À garder secret</b> : le Database Password, la clé <b>secret / service_role</b>, ton code admin.</p>
+  </div>
+  <p class="box att">⏸️ Offre gratuite : le projet se met <b>en pause après 7 jours sans activité</b> (e-mail d’avertissement). Rien n’est perdu : ouvrir le projet <span class="f">›</span> <span class="c">Restore project</span>.</p>
+  <div class="pied"><span>Team Ulysse · guide pas à pas</span><span>3 / 4</span></div>
+</section>
+
+<!-- ═════════ PAGE 4 ═════════ -->
+<section class="page">
+  <h2><span class="l">E</span>Les notifications (optionnel)</h2>
+  <p class="intro">Pour envoyer un rappel chaque matin sur les téléphones. Demande à Claude : <i>« Ajoute des rappels par notification, et explique-moi la mise en place dans Supabase »</i>.</p>
+  <ol class="p">
+    <li><b>Les clés VAPID</b> (une paire de clés pour signer les notifications) : Claude peut les générer. La <b>publique</b> va dans le site ; la <b>privée</b> reste secrète.</li>
+    <li>Supabase <span class="f">›</span> <span class="c">Edge Functions</span> <span class="f">›</span> <span class="c">Deploy a new function</span> <span class="f">›</span> <span class="c">Via Editor</span>. Nom : celui donné par Claude (chez moi <code>envoyer-rappels</code>).</li>
+    <li>Remplace <b>tout</b> le code par le fichier « tout-en-un » préparé par Claude <span class="f">›</span> <span class="c">Deploy function</span>.</li>
+    <li>Dans les réglages de la fonction : <b>désactive</b> « Verify JWT » / « Enforce JWT verification » <span class="f">›</span> enregistrer.</li>
+    <li><span class="c">Edge Functions</span> <span class="f">›</span> <span class="c">Secrets</span> <span class="f">›</span> ajoute chaque secret (nom + valeur), ex. <code>VAPID_PUBLIC_KEY</code>, <code>VAPID_PRIVATE_KEY</code>.</li>
+    <li>Lance le fichier SQL des rappels (SQL Editor › New query › Run) : il crée la <b>tâche programmée</b> (pg_cron) qui appelle la fonction chaque matin.</li>
+    <li>Sur le téléphone : ouvre l’appli <b>depuis son icône</b> (obligatoire sur iPhone) <span class="f">›</span> active les rappels <span class="f">›</span> fais envoyer une notif de test.</li>
+  </ol>
+
+  <h2 style="margin-top:6mm"><span class="l">F</span>Au quotidien : la boucle</h2>
+  <div class="flux" style="margin-top:2mm">
+    <div style="background:#efe9ff"><b>1. Demander</b>« Ajoute un compteur dans l’admin »</div><span>➜</span>
+    <div style="background:#efe9ff"><b>2. Maquette</b>tu regardes, tu corriges</div><span>➜</span>
+    <div style="background:#efe9ff"><b>3. « Vas-y »</b>Claude code et teste</div><span>➜</span>
+    <div style="background:#e3f6ec"><b>4. En ligne</b>~2 min, onglet Actions ✅</div><span>➜</span>
+    <div style="background:#fff3d6"><b>5. Rafraîchir</b>fermer et rouvrir l’appli</div>
+  </div>
+  <p>Si la modif a besoin de la base : Claude te donne un <b>nouveau fichier SQL</b> à lancer une fois (SQL Editor › New query › Run), ou une fonction à redéployer.</p>
+
+  <h3>Mémo des menus</h3>
+  <table>
+    <tr><th>Je veux…</th><th>Où cliquer</th></tr>
+    <tr><td>Créer le projet</td><td>GitHub <span class="f">›</span> <b>+</b> <span class="f">›</span> New repository</td></tr>
+    <tr><td>Voir si le site est publié</td><td>GitHub <span class="f">›</span> mon dépôt <span class="f">›</span> <b>Actions</b></td></tr>
+    <tr><td>Régler la publication</td><td>GitHub <span class="f">›</span> <b>Settings</b> <span class="f">›</span> <b>Pages</b> (Source : GitHub Actions)</td></tr>
+    <tr><td>Lancer un code SQL</td><td>Supabase <span class="f">›</span> <b>SQL Editor</b> <span class="f">›</span> New query <span class="f">›</span> Run</td></tr>
+    <tr><td>Voir les données</td><td>Supabase <span class="f">›</span> <b>Table Editor</b></td></tr>
+    <tr><td>URL et clé publique</td><td>Supabase <span class="f">›</span> <b>Project Settings</b> <span class="f">›</span> API Keys / Data API</td></tr>
+    <tr><td>Fonction de notifications</td><td>Supabase <span class="f">›</span> <b>Edge Functions</b> (et <b>Secrets</b>)</td></tr>
+    <tr><td>Relancer un projet en pause</td><td>Supabase <span class="f">›</span> le projet <span class="f">›</span> <b>Restore project</b></td></tr>
+  </table>
+  <p class="box info">📂 Pour t’inspirer : le code de Team Ulysse est sur <code>github.com/lucas6975/collection_cartes</code> (dossier <code>supabase/</code> pour les SQL, <code>docs/</code> pour les explications).</p>
+  <div class="pied"><span>Team Ulysse · <b style="color:#153e75">La sécurité, notre Odyssée</b></span><span>4 / 4</span></div>
+</section>
+</body></html>
