@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Comment j'ai créé Team Ulysse</title>
+<style>
+@font-face{font-family:Manrope;src:url(fonts/manrope-latin-wght-normal.woff2);font-weight:200 800}
+@font-face{font-family:Inter;src:url(fonts/inter-latin-wght-normal.woff2);font-weight:100 900}
+@page{size:297mm 420mm;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:297mm;height:420mm;overflow:hidden;font-family:Inter,sans-serif;color:#0b2347;background:#f4f7fb;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.d{font-family:Manrope;font-weight:800;letter-spacing:-.01em}
+.j{color:#f5c542}
+header{position:relative;height:60mm;padding:8mm 14mm 0;color:#fff;background:radial-gradient(circle at 85% 30%,#3d7fd6,#153e75 55%,#0b2347);overflow:hidden}
+header .eye{font-family:Manrope;font-weight:800;font-size:4mm;letter-spacing:.14em;background:#f5c542;color:#0b2347;display:inline-block;padding:1.2mm 4mm;border-radius:99px}
+header h1{font-size:13mm;line-height:1;margin-top:3mm}
+header p{font-size:4.2mm;margin-top:2.5mm;opacity:.92;max-width:200mm;line-height:1.35}
+header img{position:absolute;right:8mm;bottom:-6mm;height:68mm;filter:drop-shadow(0 3mm 4mm rgba(0,0,0,.4))}
+.bande{height:4mm;background:repeating-linear-gradient(135deg,#f5c542 0 6mm,#15171c 6mm 12mm)}
+main{padding:5mm 12mm 0;display:grid;gap:4mm}
+h2{font-family:Manrope;font-weight:800;font-size:6.2mm;display:flex;align-items:center;gap:3mm}
+h2 .n{width:9mm;height:9mm;border-radius:50%;background:#153e75;color:#fff;display:grid;place-items:center;font-size:4.6mm;flex:none}
+.panel{background:#fff;border-radius:5mm;padding:4mm 5mm;box-shadow:0 1mm 3mm rgba(11,35,71,.08)}
+/* schéma */
+.schema{display:grid;grid-template-columns:1fr 9mm 1fr 9mm 1fr 9mm 1fr;align-items:center;margin-top:3mm}
+.bloc{border-radius:4mm;padding:3.5mm 3mm;text-align:center;font-size:3.3mm;line-height:1.3;min-height:27mm;display:flex;flex-direction:column;justify-content:center;gap:1mm}
+.bloc b{font-family:Manrope;font-size:4.4mm;display:block}
+.bloc i{font-style:normal;font-size:8mm;line-height:1}
+.fl{text-align:center;font-size:6mm;color:#153e75;font-weight:800}
+.sous{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-top:3mm}
+.sous .bloc{min-height:0;flex-direction:row;align-items:center;justify-content:flex-start;text-align:left;gap:3mm;padding:3mm 4mm}
+.sous .bloc i{font-size:7mm}
+/* étapes */
+.etapes{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin-top:3mm}
+.et{background:#f4f7fb;border-radius:4mm;padding:2.8mm 4mm;font-size:3.35mm;line-height:1.4}
+.et b.t{font-family:Manrope;font-size:4.2mm;display:block;margin-bottom:1mm}
+.et code,.sql code{font-family:ui-monospace,Menlo,Consolas,monospace;background:#e6ecf4;border-radius:1mm;padding:0 1mm;font-size:3.1mm}
+/* SQL */
+.cols{display:grid;grid-template-columns:1.12fr 1fr;gap:5mm}
+.sql ol{list-style:none;margin-top:2.5mm;display:grid;gap:1.3mm;counter-reset:s}
+.sql li{counter-increment:s;display:flex;gap:2.5mm;align-items:flex-start;font-size:3.2mm;line-height:1.3}
+.sql li::before{content:counter(s);flex:none;width:5.6mm;height:5.6mm;border-radius:1.5mm;background:#f5c542;font-family:Manrope;font-weight:800;font-size:3.2mm;display:grid;place-items:center}
+.sql li code{font-weight:700;color:#0b2347}
+.sql li span{color:#5b6b80}
+.how{margin-top:3mm;background:#0b2347;color:#fff;border-radius:3mm;padding:3mm 4mm;font-size:3.3mm;line-height:1.45}
+.how b{color:#f5c542}
+pre{background:#0d1b33;color:#d6e2f5;border-radius:3.5mm;padding:4mm;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:2.7mm;line-height:1.4;white-space:pre;overflow:hidden;margin-top:3mm}
+pre .c{color:#7f93b3}
+pre .k{color:#f5c542}
+pre .s{color:#8fe3a8}
+.secu{margin-top:3mm;font-size:3.2mm;line-height:1.45}
+.secu li{margin-left:4mm;margin-top:.8mm}
+.ne{margin-top:3mm;background:#fde8ea;border-radius:3mm;padding:3mm 4mm;font-size:3.2mm;line-height:1.45;color:#7a1522}
+.ne b{color:#c8283a}
+.chips{display:flex;flex-wrap:wrap;gap:2mm;margin-top:3mm}
+.chips span{font-size:3.1mm;font-weight:600;background:#e8eef7;border-radius:99px;padding:1.2mm 3mm}
+footer{position:absolute;left:0;right:0;bottom:0}
+footer div{display:flex;justify-content:space-between;align-items:center;padding:3.5mm 12mm;background:#0b2347;color:#fff;font-size:3.4mm}
+footer b{font-family:Manrope;font-style:italic;font-weight:800}
+</style></head><body>
+<header>
+  <span class="eye">EN COULISSES</span>
+  <h1 class="d">Comment j’ai créé<br><span class="j">Team Ulysse</span></h1>
+  <p>Une appli sécurité dans la poche des salariés, <b>sans serveur à gérer et à 0 €</b> d’hébergement : un assistant IA pour écrire le code, GitHub pour le publier, Supabase pour la base de données.</p>
+  <img src="img/ulysse-face-detoure.png" alt="">
+</header>
+<div class="bande"></div>
+
+<main>
+  <section class="panel">
+    <h2><span class="n">1</span>Le schéma d’ensemble</h2>
+    <div class="schema">
+      <div class="bloc" style="background:#efe9ff"><i>🤖</i><b>Claude Code</b>Assistant IA : j’explique l’idée, il écrit le code et me montre des maquettes</div>
+      <div class="fl">➜</div>
+      <div class="bloc" style="background:#e8eef7"><i>🗂️</i><b>GitHub</b>Garde tout le code et l’historique des modifications</div>
+      <div class="fl">➜</div>
+      <div class="bloc" style="background:#e3f6ec"><i>🚀</i><b>GitHub Pages</b>Publie le site tout seul en ~2 min à chaque modification</div>
+      <div class="fl">➜</div>
+      <div class="bloc" style="background:#fff3d6"><i>📱</i><b>Téléphones</b>« Ajouter à l’écran d’accueil » : le site devient une appli</div>
+    </div>
+    <div class="sous">
+      <div class="bloc" style="background:#e6f4f1"><i>🗄️</i><div><b>Supabase</b>Base de données (PostgreSQL) : inscrits, tirages, résultats, échanges… On la remplit en copiant-collant des fichiers SQL.</div></div>
+      <div class="bloc" style="background:#fde8ea"><i>🔔</i><div><b>Notifications</b>Une « Edge Function » Supabase envoie les rappels chaque matin (tâche programmée pg_cron + Web Push).</div></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="n">2</span>Les étapes, dans l’ordre</h2>
+    <div class="etapes">
+      <div class="et"><b class="t">① L’idée et les maquettes</b>Je décris ce que je veux (cartes, packs, calendrier de l’Avent…). L’IA propose une maquette ; je valide ou je corrige avant qu’elle code.</div>
+      <div class="et"><b class="t">② Le code</b>Site en <b>React + TypeScript</b> (outil Vite, style Tailwind). La collection de cartes est enregistrée <b>sur le téléphone</b> : pas de compte, pas de mot de passe.</div>
+      <div class="et"><b class="t">③ La publication</b>Le code est envoyé sur <b>GitHub</b>. Une « GitHub Action » vérifie (tests) puis publie sur <b>GitHub Pages</b> : le lien du QR code ne change jamais.</div>
+      <div class="et"><b class="t">④ La base Supabase</b>Créer un projet gratuit sur <code>supabase.com</code>, copier son URL et sa clé publique « anon » dans <code>src/config.ts</code>, puis lancer les fichiers SQL (à droite ↓).</div>
+      <div class="et"><b class="t">⑤ Les notifications</b>Créer des clés VAPID, les mettre dans les <b>Secrets</b> de Supabase, coller la fonction <code>envoyer-rappels</code> (fichier <code>tout-en-un.ts</code>) puis « Deploy ».</div>
+      <div class="et"><b class="t">⑥ Le lancement</b>QR code, affiches, vidéo, publication Viva Engage… et l’espace admin pour suivre les inscriptions et les packs en direct.</div>
+    </div>
+  </section>
+
+  <div class="cols">
+    <section class="panel sql">
+      <h2><span class="n">3</span>Les fichiers SQL à copier-coller</h2>
+      <ol>
+        <li><div><code>setup.sql</code> <span>— inscrits, tirages, code admin (à changer avant Run !)</span></div></li>
+        <li><div><code>maj-weekends.sql</code> <span>— pas de tirage le week-end</span></div></li>
+        <li><div><code>maj-corrections.sql</code> <span>— corrections des cases du calendrier</span></div></li>
+        <li><div><code>maj-coalition-et-rappels.sql</code> <span>— volontaires + rappels du matin</span></div></li>
+        <li><div><code>maj-echanges.sql</code> <span>— échange de cartes par QR code</span></div></li>
+        <li><div><code>maj-gagnant-et-resultats.sql</code> <span>— notif du gagnant + résultats</span></div></li>
+        <li><div><code>maj-lancement.sql</code> <span>— onglet Lancement de l’admin</span></div></li>
+        <li><div><code>maj-visites.sql</code> <span>— « Du lien à l’inscription »</span></div></li>
+        <li><div><code>maj-packs.sql</code> <span>— qui a ouvert son pack du jour</span></div></li>
+        <li><div><code>maj-notif-inscrits.sql</code> <span>— alerte « Nouvel inscrit »</span></div></li>
+      </ol>
+      <p class="how">Dans Supabase : <b>SQL Editor › New query</b> › coller <b>tout</b> le fichier › <b>Run</b>. Un fichier à la fois, dans l’ordre. Ils sont tous dans le dossier <b>supabase/</b> du projet GitHub.</p>
+    </section>
+
+    <section class="panel">
+      <h2><span class="n">4</span>À quoi ressemble le SQL</h2>
+<pre><span class="c">-- Une table fermée : le site ne peut pas la lire</span>
+<span class="k">create table</span> public.participants (
+  id uuid <span class="k">primary key</span> default gen_random_uuid(),
+  prenom text not null,
+  nom text not null,
+  inscrit_le timestamptz default now()
+);
+<span class="k">alter table</span> public.participants
+  <span class="k">enable row level security</span>;
+
+<span class="c">-- Le site passe seulement par des fonctions</span>
+<span class="k">create function</span> public.inscrire(
+  p_prenom text, p_nom text) ...
+<span class="k">grant execute on function</span>
+  public.inscrire <span class="k">to</span> anon;</pre>
+      <ul class="secu">
+        <li>Les tables sont <b>fermées</b> ; le site appelle des fonctions précises.</li>
+        <li>Le code admin est stocké <b>chiffré</b> dans la base.</li>
+      </ul>
+      <p class="ne">🔒 <b>Ne jamais partager</b> : le code admin, la clé VAPID privée, la clé « service_role » de Supabase.</p>
+    </section>
+  </div>
+
+  <section class="panel" style="display:flex;gap:6mm;align-items:center">
+    <div style="flex:1">
+      <h2><span class="n">5</span>Les outils utilisés</h2>
+      <div class="chips"><span>Claude Code (abonnement)</span><span>GitHub + Actions + Pages</span><span>React</span><span>TypeScript</span><span>Vite</span><span>Tailwind CSS</span><span>Supabase (PostgreSQL)</span><span>Edge Functions (Deno)</span><span>Web Push</span><span>pg_cron</span></div>
+    </div>
+    <div style="flex:none;width:72mm;font-size:3.2mm;line-height:1.45;background:#fff7e0;border-radius:4mm;padding:3.5mm 4mm">⚠️ <b>Offre gratuite Supabase</b> : le projet se met en pause après 7 jours sans activité. Pas de perte : « Restore project » dans le tableau de bord.</div>
+  </section>
+</main>
+<footer><div><span>Code source : github.com/lucas6975/collection_cartes · dossier <b style="font-style:normal">supabase/</b> pour le SQL</span><b>Team Ulysse · <span class="j">La sécurité, notre Odyssée</span></b></div></footer>
+</body></html>
