@@ -31,6 +31,7 @@ import { JOURS_OUVRES, useIdentite } from '../data/identite';
 import { endpointActuel, rappelsStore } from '../data/rappels';
 import { OngletLancement } from './AdminLancement';
 import { OngletPacks } from './AdminPacks';
+import { AlertesInscriptions } from './AdminAlertes';
 
 type Onglet = 'lancement' | 'packs' | 'tirage' | 'inscrits' | 'resultats';
 
@@ -113,6 +114,7 @@ export function Admin() {
         </p>
       )}
 
+      <AlertesInscriptions code={codeAdmin} />
       <TestNotifications code={codeAdmin} />
 
       <div

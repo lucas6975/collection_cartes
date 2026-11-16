@@ -14,6 +14,7 @@ import {
   choisirRappel,
   gagnantAPrevenir,
   messageGagnant,
+  messageInscrit,
   momentParis,
   rappelCase,
   rappelCompteARebours,
@@ -122,6 +123,53 @@ async function prevenirGagnants(db: Base, m: MomentParis) {
   return total;
 }
 
+/** Téléphones de l'administrateur qui veulent être prévenus des nouvelles inscriptions. */
+async function telephonesAdmin(db: Base): Promise<Abonne[]> {
+  const { data: alertes } = await db.from('admin_alertes').select('endpoint');
+  const endpoints = ((alertes ?? []) as { endpoint: string }[]).map((a) => a.endpoint);
+  if (!endpoints.length) return [];
+  const { data } = await db
+    .from('rappels_abonnes')
+    .select('endpoint, p256dh, auth')
+    .in('endpoint', endpoints);
+  return (data ?? []) as Abonne[];
+}
+
+/**
+ * Prévient l'administrateur de chaque nouvelle inscription (table notifs_inscrits, remplie à
+ * chaque inscription : supabase/maj-notif-inscrits.sql).
+ */
+async function prevenirInscrits(db: Base) {
+  const { data: dus, error } = await db
+    .from('notifs_inscrits')
+    .select('participant_id')
+    .is('envoye_le', null);
+  if (error || !dus?.length) return 0;
+  const admin = await telephonesAdmin(db);
+  let total = 0;
+  for (const d of dus as { participant_id: string }[]) {
+    const { data: p } = await db
+      .from('participants')
+      .select('prenom, nom, inscrit_le')
+      .eq('id', d.participant_id)
+      .maybeSingle();
+    if (p && admin.length) {
+      const { count } = await db
+        .from('participants')
+        .select('id', { count: 'exact', head: true })
+        .lte('inscrit_le', p.inscrit_le);
+      const msg = messageInscrit(p.prenom, p.nom, count ?? 1);
+      total += (await envoyerA(db, admin, JSON.stringify(msg))).envoyes;
+    }
+    // Envoyé, ou personne à prévenir : on ne le garde pas en attente.
+    await db
+      .from('notifs_inscrits')
+      .update({ envoye_le: new Date().toISOString() })
+      .eq('participant_id', d.participant_id);
+  }
+  return total;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
   const m = momentParis(new Date());
@@ -161,6 +209,30 @@ Deno.serve(async (req) => {
     }
     return repondre({ test: 'compte à rebours', envoyes });
   }
+
+  // Test de l'administrateur : une fausse alerte « Nouvel inscrit » sur SON téléphone uniquement.
+  if (corps?.test_inscription) {
+    const { error: refus } = await db.rpc('admin_verifier', { p_code: String(corps.code ?? '') });
+    if (refus) return repondre({ erreur: 'Code administrateur incorrect' }, 403);
+    const { data: abo } = await db
+      .from('rappels_abonnes')
+      .select('endpoint, p256dh, auth')
+      .eq('endpoint', String(corps.endpoint ?? ''));
+    if (!abo?.length)
+      return repondre({ erreur: 'Ce téléphone n’est pas inscrit aux rappels' }, 404);
+    const { count } = await db.from('participants').select('id', { count: 'exact', head: true });
+    const msg = messageInscrit('Prénom', 'Nom (test)', (count ?? 0) + 1);
+    const { envoyes } = await envoyerA(
+      db,
+      abo as Abonne[],
+      JSON.stringify({ ...msg, tag: 'test-inscrit' }),
+    );
+    return repondre({ test: 'nouvel inscrit', envoyes });
+  }
+
+  // Nouvelles inscriptions à annoncer à l'administrateur (appel dédié juste après chacune).
+  const inscrits = await prevenirInscrits(db);
+  if (corps?.inscrits) return repondre({ inscrits });
 
   // Personnes tirées au sort à prévenir (à chaque appel ; appel dédié juste après un tirage).
   const gagnants = await prevenirGagnants(db, m);

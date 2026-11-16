@@ -91,3 +91,16 @@ describe('compte à rebours avant le calendrier', () => {
     expect(pack?.type).toBe('pack');
   });
 });
+
+describe('alerte « Nouvel inscrit » pour l’administrateur', () => {
+  it('donne le prénom, le nom et le rang', async () => {
+    const { messageInscrit } = await import('../supabase/functions/envoyer-rappels/rappel');
+    expect(messageInscrit('Julie', 'Durand', 14)).toEqual({
+      title: '🎉 Nouvel inscrit : Julie Durand',
+      body: 'C’est le 14ᵉ membre de la Team Ulysse !',
+      url: './#/admin',
+      tag: 'inscrit-14',
+    });
+    expect(messageInscrit('Léa', 'Martin', 1).body).toBe('C’est le 1er membre de la Team Ulysse !');
+  });
+});

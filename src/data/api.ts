@@ -144,6 +144,17 @@ export const api = {
   adminTesterCompteARebours: (code: string, endpoint: string) =>
     fonctionRappels<{ envoyes: number }>({ test_compte_a_rebours: true, code, endpoint }),
 
+  adminTesterInscription: (code: string, endpoint: string) =>
+    fonctionRappels<{ envoyes: number }>({ test_inscription: true, code, endpoint }),
+
+  /** Alerte « Nouvel inscrit » sur ce téléphone : vrai = activer, faux = couper, absent = lire. */
+  adminAlertesInscrits: (code: string, endpoint: string, actif?: boolean) =>
+    rpc<boolean>('admin_alertes_inscrits', {
+      p_code: code,
+      p_endpoint: endpoint,
+      p_actif: actif ?? null,
+    }),
+
   envoyerResultat: (
     jeton: string,
     jour: number,

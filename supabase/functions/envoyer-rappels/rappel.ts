@@ -131,6 +131,16 @@ export function messageGagnant(jour: number) {
   };
 }
 
+/** Pour l'administrateur : une nouvelle personne vient de s'inscrire (rang = nombre d'inscrits). */
+export function messageInscrit(prenom: string, nom: string, rang: number) {
+  return {
+    title: `🎉 Nouvel inscrit : ${prenom} ${nom}`.slice(0, 120),
+    body: `C’est le ${rang === 1 ? '1er' : `${rang}ᵉ`} membre de la Team Ulysse !`,
+    url: './#/admin',
+    tag: `inscrit-${rang}`,
+  };
+}
+
 /** Heure de Paris, quelle que soit l'heure du serveur. */
 export function momentParis(date: Date): MomentParis {
   const parts = Object.fromEntries(

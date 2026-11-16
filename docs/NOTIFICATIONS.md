@@ -120,3 +120,13 @@ Rien à faire dans la base : c’est la fonction `envoyer-rappels` (tout-en-un.t
 **Test administrateur :** Espace administrateur › « Tester le compte à rebours » › « Recevoir le
 test ». Les 6 notifications arrivent d’un coup sur ce téléphone uniquement (rappels activés
 dessus), les collaborateurs ne reçoivent rien.
+
+## Alerte « Nouvel inscrit » (administrateur)
+
+À chaque nouvelle inscription, les téléphones de l’administrateur qui l’ont demandé reçoivent
+« 🎉 Nouvel inscrit : Prénom Nom — C’est le Nᵉ membre de la Team Ulysse ! ».
+
+1. Lancer `supabase/maj-notif-inscrits.sql` dans le SQL Editor (une seule fois).
+2. Remettre à jour la fonction `envoyer-rappels` avec `tout-en-un.ts`.
+3. Dans l’appli, espace admin › « Nouvelles inscriptions » : activer « Me prévenir sur ce
+   téléphone » (les rappels doivent être activés sur ce téléphone), puis « M’envoyer une notif de test ».
