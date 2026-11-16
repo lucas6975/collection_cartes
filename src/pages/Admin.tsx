@@ -8,6 +8,7 @@ import {
   XCircle,
   Download,
   Lock,
+  Package,
   RefreshCw,
   Rocket,
   RotateCcw,
@@ -29,8 +30,9 @@ import { ApiError, api, type Participant, type ResultatAdmin, type Tirage } from
 import { JOURS_OUVRES, useIdentite } from '../data/identite';
 import { endpointActuel, rappelsStore } from '../data/rappels';
 import { OngletLancement } from './AdminLancement';
+import { OngletPacks } from './AdminPacks';
 
-type Onglet = 'lancement' | 'tirage' | 'inscrits' | 'resultats';
+type Onglet = 'lancement' | 'packs' | 'tirage' | 'inscrits' | 'resultats';
 
 /** [1,2,3,5,7,8] → « 1–3, 5, 7–8 » */
 export function plages(jours: number[]): string {
@@ -120,6 +122,7 @@ export function Admin() {
         {(
           [
             ['lancement', 'Lancement', Rocket],
+            ['packs', 'Packs', Package],
             ['tirage', 'Tirage', Dices],
             ['inscrits', `Inscrits (${participants.length})`, Users],
             ['resultats', 'Résultats', Trophy],
@@ -147,6 +150,7 @@ export function Admin() {
       {onglet === 'lancement' && (
         <OngletLancement code={codeAdmin} participants={participants} onActualiser={charger} />
       )}
+      {onglet === 'packs' && <OngletPacks code={codeAdmin} participants={participants} />}
       {onglet === 'tirage' && (
         <OngletTirage
           code={codeAdmin}

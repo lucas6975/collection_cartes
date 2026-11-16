@@ -6,6 +6,7 @@ import { aventStore } from './avent/progress';
 import { identiteStore, useIdentite } from './data/identite';
 import { inclinaisonStore } from './data/inclinaison';
 import { demarrerPastille } from './data/pastille';
+import { demarrerSuiviPacks } from './data/suiviPacks';
 import { CoalitionAdmin } from './pages/CoalitionAdmin';
 import { Admin } from './pages/Admin';
 import { Advent } from './pages/Advent';
@@ -41,6 +42,8 @@ export function App() {
         rappelsStore.verifier().catch(() => undefined);
         // Résultats du calendrier pas encore transmis à l'administrateur.
         void aventStore.synchroniser();
+        // Packs du jour ouverts : pour l'onglet « Packs » de l'administrateur.
+        demarrerSuiviPacks();
       });
     // Cartes holographiques : le reflet suit les mouvements du téléphone.
     inclinaisonStore.demarrer();

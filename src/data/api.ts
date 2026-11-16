@@ -1,6 +1,7 @@
 // Appels aux fonctions de la base (supabase/setup.sql), via l'API REST de Supabase.
 
 import { SUPABASE_ANON_KEY, SUPABASE_URL, baseConfiguree } from '../config';
+import type { SuiviPacks } from './packsAdmin';
 import type { ChiffresVisites } from './visites';
 
 export class ApiError extends Error {
@@ -159,6 +160,11 @@ export const api = {
 
   noterVisite: (appareil: string, etape: string, plateforme: string) =>
     rpc<null>('noter_visite', { p_appareil: appareil, p_etape: etape, p_plateforme: plateforme }),
+
+  envoyerPacks: (jeton: string, packs: { jour: string; at: string }[], cartes: number) =>
+    rpc<null>('envoyer_packs', { p_jeton: jeton, p_packs: packs, p_cartes: cartes }),
+
+  adminPacks: (code: string) => rpc<SuiviPacks[]>('admin_packs', { p_code: code }),
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 
