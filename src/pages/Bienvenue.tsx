@@ -1,11 +1,13 @@
 import { ArrowRight, KeyRound, Lock, ShieldCheck } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { Button } from '../components/ui/primitives';
 import { ApiError } from '../data/api';
 import { identiteStore } from '../data/identite';
 import { etapeRappels } from '../components/Rappels';
+import { estInstallee } from '../data/rappels';
+import { noterVisite } from '../data/visites';
 
 const champ =
   'h-12 w-full rounded-xl border border-line bg-white px-4 text-[16px] text-ink outline-none transition-shadow placeholder:text-muted/70 focus:border-blue focus:ring-4 focus:ring-blue/10';
@@ -18,6 +20,11 @@ export function Bienvenue() {
   const [erreur, setErreur] = useState<string | null>(null);
   const [modeAdmin, setModeAdmin] = useState(false);
   const [code, setCode] = useState('');
+
+  // Compteur anonyme de l'espace admin : l'appli a été ouverte depuis son icône.
+  useEffect(() => {
+    if (estInstallee()) void noterVisite('appli');
+  }, []);
 
   const valider = async (e: FormEvent) => {
     e.preventDefault();

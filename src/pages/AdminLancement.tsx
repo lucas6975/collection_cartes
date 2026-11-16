@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { Avatar, cx } from '../components/ui/primitives';
 import { ApiError, api, type ChiffresLancement, type Participant } from '../data/api';
+import { entonnoir, type ChiffresVisites } from '../data/visites';
 import { dateInscription, inscritsDuJour, parHeure, parJour, plusRecents } from '../data/lancement';
 
 const CLE_OBJECTIF = 'team-ulysse-objectif-inscrits';
@@ -137,6 +138,10 @@ export function OngletLancement({
         />
       </div>
 
+      {chiffres && (
+        <Entonnoir visites={chiffres.visites} inscritsLe={participants.map((p) => p.inscrit_le)} />
+      )}
+
       <section className="panel p-4">
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-display text-[15px] font-extrabold text-navy-950">Inscriptions</h2>
@@ -259,4 +264,124 @@ function Tuile({
       </p>
     </div>
   );
+}
+
+const COULEURS: Record<string, string> = {
+  lien: 'bg-blue',
+  appli: 'bg-blue',
+  inscrits: 'bg-sun',
+  rappels: 'bg-success',
+};
+const ICONES: Record<string, string> = { lien: '📷', appli: '📲', inscrits: '✍️', rappels: '🔔' };
+
+/** « Du lien à l'inscription » : où les gens décrochent. */
+function Entonnoir({ visites, inscritsLe }: { visites?: ChiffresVisites; inscritsLe: string[] }) {
+  if (!visites) {
+    return (
+      <p className="rounded-2xl bg-sun/20 px-4 py-3 text-sm font-medium text-navy-950">
+        « Du lien à l’inscription » : lance <b>supabase/maj-visites.sql</b> dans Supabase pour
+        démarrer le compteur.
+      </p>
+    );
+  }
+  const etapes = entonnoir(visites, inscritsLe);
+  const pertes = etapes.filter((e) => e.perdus > 0);
+  const pire = pertes.sort((a, b) => b.perdus - a.perdus)[0];
+  return (
+    <section className="panel p-4">
+      <h2 className="flex items-baseline justify-between gap-2 font-display text-[15px] font-extrabold text-navy-950">
+        Du lien à l’inscription
+        <span className="font-sans text-xs font-medium text-muted">
+          {visites.debut ? `depuis le ${dateCourte(visites.debut)}` : 'en attente'}
+        </span>
+      </h2>
+      <p className="mt-0.5 text-xs text-muted">
+        Chaque téléphone n’est compté qu’une fois, sans nom.
+      </p>
+      {!visites.debut ? (
+        <p className="py-5 text-center text-sm text-muted">
+          Le compteur est prêt : il démarre à la prochaine ouverture du lien. 📷
+        </p>
+      ) : (
+        <div className="mt-3 space-y-3">
+          {etapes.map((e) => (
+            <div key={e.id}>
+              <div className="flex items-baseline justify-between gap-2 text-[13px] font-semibold text-navy-950">
+                <span>
+                  {ICONES[e.id]} {e.label}
+                </span>
+                <span className="shrink-0">
+                  <b className="font-display text-xl font-extrabold">{e.n}</b>
+                  {e.id !== 'lien' && <small className="ml-1 text-xs text-muted">{e.part} %</small>}
+                </span>
+              </div>
+              <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-canvas">
+                <div
+                  className={cx(
+                    'h-full rounded-full transition-[width] duration-700',
+                    COULEURS[e.id],
+                  )}
+                  style={{ width: `${e.part}%` }}
+                />
+              </div>
+              {e.id === 'lien' && (
+                <div className="mt-1.5 flex gap-1.5 text-xs font-semibold text-navy-950">
+                  <span className="flex-1 rounded-lg bg-canvas px-2 py-1">
+                    iPhone {visites.ios}
+                  </span>
+                  <span className="flex-1 rounded-lg bg-canvas px-2 py-1">
+                    Android {visites.android}
+                  </span>
+                  <span className="flex-1 rounded-lg bg-canvas px-2 py-1">Ordi {visites.ordi}</span>
+                </div>
+              )}
+              {e.perdus > 0 && (
+                <p className="mt-1 text-xs font-semibold text-danger">
+                  ↓ {e.perdus}{' '}
+                  {e.id === 'lien'
+                    ? 'n’ont pas (encore) installé l’appli'
+                    : 'ne se sont pas (encore) inscrits'}
+                </p>
+              )}
+            </div>
+          ))}
+          {pire && pire.perdus >= 3 && (
+            <p className="rounded-xl bg-sun/15 px-3 py-2.5 text-[12.5px] leading-snug text-navy-950">
+              💡{' '}
+              {pire.id === 'lien' ? (
+                <>
+                  <b>La plus grosse perte est à l’installation.</b> Démo en direct, fiche
+                  d’installation près des affiches, rappel « ouvrir dans Safari / Chrome ».
+                </>
+              ) : (
+                <>
+                  <b>Des gens installent sans s’inscrire.</b> Rappelle que c’est juste prénom + nom,
+                  sans mot de passe.
+                </>
+              )}
+            </p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+const MOIS_COURTS = [
+  'janv.',
+  'févr.',
+  'mars',
+  'avr.',
+  'mai',
+  'juin',
+  'juil.',
+  'août',
+  'sept.',
+  'oct.',
+  'nov.',
+  'déc.',
+];
+function dateCourte(iso: string) {
+  const d = new Date(iso);
+  return `${d.getDate()} ${MOIS_COURTS[d.getMonth()]}`;
 }

@@ -1,6 +1,7 @@
 // Appels aux fonctions de la base (supabase/setup.sql), via l'API REST de Supabase.
 
 import { SUPABASE_ANON_KEY, SUPABASE_URL, baseConfiguree } from '../config';
+import type { ChiffresVisites } from './visites';
 
 export class ApiError extends Error {
   constructor(
@@ -58,6 +59,8 @@ export interface ChiffresLancement {
   rappels: number;
   avec_rappels: string[];
   echanges: number;
+  /** Absent tant que supabase/maj-visites.sql n'a pas été lancé. */
+  visites?: ChiffresVisites;
 }
 
 export interface Tirage {
@@ -153,6 +156,9 @@ export const api = {
       p_details: details,
     }),
   adminResultats: (code: string) => rpc<ResultatAdmin[]>('admin_resultats', { p_code: code }),
+
+  noterVisite: (appareil: string, etape: string, plateforme: string) =>
+    rpc<null>('noter_visite', { p_appareil: appareil, p_etape: etape, p_plateforme: plateforme }),
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 

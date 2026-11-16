@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { Button } from '../components/ui/primitives';
 import { estIOS } from '../data/rappels';
+import { noterVisite } from '../data/visites';
 
 interface InvitationInstallation extends Event {
   prompt: () => Promise<void>;
@@ -20,6 +21,11 @@ export function Installer({ onContinuer }: { onContinuer: () => void }) {
   const [invitation, setInvitation] = useState<InvitationInstallation | null>(null);
   const ios = estIOS();
   const android = estAndroid();
+
+  // Compteur anonyme de l'espace admin : ce téléphone a ouvert le lien.
+  useEffect(() => {
+    void noterVisite('lien');
+  }, []);
 
   // Android (Chrome) : bouton d'installation directe quand le navigateur le propose.
   useEffect(() => {
