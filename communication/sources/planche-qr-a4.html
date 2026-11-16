@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Planche QR A4</title>
+<style>
+@font-face{font-family:Manrope;src:url(fonts/manrope-latin-wght-normal.woff2);font-weight:200 800}
+@font-face{font-family:Inter;src:url(fonts/inter-latin-wght-normal.woff2);font-weight:100 900}
+@page{size:210mm 297mm;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:210mm;height:297mm;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+/* 8 cartes de 105 × 74,25 mm, traits de coupe en pointillés */
+.page{display:grid;grid-template-columns:repeat(2,105mm);grid-template-rows:repeat(4,74.25mm)}
+.c{position:relative;display:flex;align-items:center;gap:5mm;padding:6mm 6mm 6mm 7mm;border-right:.3mm dashed #b8c2cf;border-bottom:.3mm dashed #b8c2cf;overflow:hidden;font-family:Inter,sans-serif;color:#0b2347}
+.c:nth-child(2n){border-right:0}
+.c:nth-last-child(-n+2){border-bottom:0}
+.qr{flex:none;width:48mm;height:48mm}
+.qr img{display:block;width:100%;height:100%}
+.t{flex:1;display:flex;flex-direction:column;gap:2.2mm}
+.logo{display:flex;align-items:center;gap:2mm;font-family:Manrope;font-weight:800;font-size:4.2mm}
+.logo img{width:8mm;height:8mm;border-radius:2mm;box-shadow:0 0 0 .5mm #f5c542}
+.sc{align-self:flex-start;font-family:Manrope;font-weight:800;font-size:3.6mm;background:#c8283a;color:#fff;padding:1.2mm 3mm;border-radius:99px}
+.d{font-size:3.1mm;line-height:1.35;color:#33445a}
+.d b{color:#0b2347}
+.bande{position:absolute;left:0;right:0;bottom:0;height:2.2mm;background:repeating-linear-gradient(135deg,#f5c542 0 3mm,#15171c 3mm 6mm)}
+.slogan{font-family:Manrope;font-weight:800;font-style:italic;font-size:2.7mm;color:#153e75}
+</style></head><body>
+<div class="page" id="page"></div>
+<script>
+const carte = `<div class="c">
+  <div class="qr"><img src="img/qrcode-net.svg" alt="QR code Team Ulysse"></div>
+  <div class="t">
+    <div class="logo"><img src="img/icone-app.png" alt="">Team Ulysse</div>
+    <span class="sc">📷 Scanne-moi !</span>
+    <p class="d">Installe l’appli sécurité <b>Team Ulysse</b> : un pack de cartes chaque jour et le calendrier de l’Avent dès le 1er décembre.</p>
+    <p class="slogan">La sécurité, notre Odyssée</p>
+  </div>
+  <div class="bande"></div>
+</div>`;
+document.getElementById('page').innerHTML = carte.repeat(8);
+</script>
+</body></html>
