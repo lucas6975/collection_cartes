@@ -131,6 +131,24 @@ export const identiteStore = {
     }
   },
 
+  /**
+   * Inscription au tirage faite par l'administrateur (espace admin › Inscrits) : le téléphone
+   * récupère les jours enregistrés dans la base quand il n'en a aucun (oubli ou « Pas cette fois »).
+   */
+  async rafraichirJours(): Promise<void> {
+    const id = etat.identite;
+    if (!id?.jeton || !id.synchro || (id.joursChoisis && id.jours.length)) return;
+    try {
+      const r = await api.maParticipation(id.jeton);
+      const courant = etat.identite;
+      if (!r?.jours.length || !courant || courant.jeton !== id.jeton || courant.jours.length)
+        return;
+      commit({ ...etat, identite: { ...courant, jours: r.jours, joursChoisis: true } });
+    } catch {
+      // Hors ligne : on réessaiera à la prochaine ouverture.
+    }
+  },
+
   async devenirAdmin(code: string) {
     await api.adminVerifier(code.trim());
     commit({ ...etat, codeAdmin: code.trim() });
