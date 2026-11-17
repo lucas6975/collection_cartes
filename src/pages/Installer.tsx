@@ -1,10 +1,19 @@
-import { ArrowRight, Download, MoreVertical, Share, SquarePlus } from 'lucide-react';
+import {
+  ArrowRight,
+  Camera,
+  Download,
+  MoreVertical,
+  Share,
+  Smartphone,
+  SquarePlus,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { Button } from '../components/ui/primitives';
 import { estIOS } from '../data/rappels';
-import { noterVisite } from '../data/visites';
+import { renderSVG } from 'uqr';
+import { noterVisite, plateforme } from '../data/visites';
 
 interface InvitationInstallation extends Event {
   prompt: () => Promise<void>;
@@ -36,6 +45,9 @@ export function Installer({ onContinuer }: { onContinuer: () => void }) {
     window.addEventListener('beforeinstallprompt', garder);
     return () => window.removeEventListener('beforeinstallprompt', garder);
   }, []);
+
+  // Ouvert sur un ordinateur : l'appli s'installe sur le téléphone, on affiche un QR code.
+  if (plateforme() === 'ordi') return <SurOrdinateur onContinuer={onContinuer} />;
 
   return (
     <div
@@ -157,6 +169,106 @@ export function Installer({ onContinuer }: { onContinuer: () => void }) {
           Je suis sur ordinateur : continuer ici <ArrowRight size={13} />
         </button>
       </div>
+    </div>
+  );
+}
+
+/** Page ouverte sur un ordinateur : QR code à scanner avec le téléphone. */
+function SurOrdinateur({ onContinuer }: { onContinuer: () => void }) {
+  const lien = `${location.origin}${location.pathname}`;
+  const qr = `data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(lien, { ecc: 'M', border: 2 }))}`;
+  return (
+    <div
+      className="flex min-h-dvh items-center px-6 py-10"
+      style={{ background: 'linear-gradient(170deg, #2563A6 0%, #153E75 45%, #0B2347 100%)' }}
+    >
+      <motion.div
+        className="mx-auto grid w-full max-w-4xl items-center gap-10 md:grid-cols-[1.1fr_1fr]"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="text-white">
+          <div className="flex items-center gap-4">
+            <img
+              src={MASCOTTE_URL}
+              alt="Ulysse, la mascotte"
+              className="h-28 w-auto drop-shadow-[0_12px_20px_rgba(0,0,0,0.45)]"
+            />
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-sun">
+                Bienvenue dans la
+              </p>
+              <h1 className="font-display text-4xl font-extrabold">Team Ulysse</h1>
+              <p className="font-display text-lg font-bold italic text-sun">
+                La sécurité, notre Odyssée
+              </p>
+            </div>
+          </div>
+          <h2 className="mt-8 font-display text-3xl font-extrabold leading-tight">
+            📱 L’appli s’installe sur ton <span className="text-sun">téléphone</span>
+          </h2>
+          <p className="mt-2 text-white/80">
+            Tu es sur un ordinateur : Team Ulysse ne peut pas s’installer ici. Prends ton téléphone,
+            c’est l’affaire de 30 secondes !
+          </p>
+          <ol className="mt-6 space-y-3">
+            {[
+              [
+                Camera,
+                <>
+                  Ouvre l’<b>appareil photo</b> de ton téléphone
+                </>,
+              ],
+              [
+                Smartphone,
+                <>
+                  Vise le <b>QR code</b> ci-contre et touche le lien qui apparaît
+                </>,
+              ],
+              [
+                Download,
+                <>
+                  Suis les étapes pour <b>l’ajouter à ton écran d’accueil</b>
+                </>,
+              ],
+            ].map(([Icone, texte], i) => {
+              const I = Icone as typeof Camera;
+              return (
+                <li key={i} className="flex items-center gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sun font-display font-extrabold text-navy-950">
+                    {i + 1}
+                  </span>
+                  <span className="flex items-center gap-2 text-[15px]">
+                    <I size={18} className="shrink-0 text-sun" />{' '}
+                    <span>{texte as React.ReactNode}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <div className="w-full max-w-[340px] rounded-3xl bg-white p-5 shadow-lift">
+            <img
+              src={qr}
+              alt="QR code Team Ulysse"
+              className="block w-full [image-rendering:pixelated]"
+            />
+            <p className="mt-3 text-center font-display text-xl font-extrabold text-navy-950">
+              📷 Scanne-moi !
+            </p>
+            <p className="text-center text-xs text-muted">avec l’appareil photo de ton téléphone</p>
+          </div>
+          <button
+            type="button"
+            onClick={onContinuer}
+            className="mt-6 flex items-center gap-1.5 text-xs font-semibold text-white/55 hover:text-white"
+          >
+            Continuer sur l’ordinateur quand même <ArrowRight size={13} />
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 }
