@@ -43,21 +43,13 @@ export function App() {
         rappelsStore.verifier().catch(() => undefined);
         // Résultats du calendrier pas encore transmis à l'administrateur.
         void aventStore.synchroniser();
-        // Inscription au tirage faite par l'administrateur : le téléphone se met à jour.
-        void identiteStore.rafraichirJours();
         // Packs du jour ouverts : pour l'onglet « Packs » de l'administrateur.
         demarrerSuiviPacks();
       });
-    // Au retour sur l'appli aussi (l'administrateur a pu l'inscrire entre-temps).
-    const auRetour = () => {
-      if (document.visibilityState === 'visible') void identiteStore.rafraichirJours();
-    };
-    document.addEventListener('visibilitychange', auRetour);
     // Cartes holographiques : le reflet suit les mouvements du téléphone.
     inclinaisonStore.demarrer();
     // Pastille « 1 » sur l'icône tant que le pack du jour n'est pas ouvert.
     demarrerPastille();
-    return () => document.removeEventListener('visibilitychange', auRetour);
   }, []);
 
   // Lien d'échange ouvert dans le navigateur : l'échange se fait dans l'appli installée.

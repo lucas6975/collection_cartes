@@ -32,7 +32,6 @@ import { endpointActuel, rappelsStore } from '../data/rappels';
 import { OngletLancement } from './AdminLancement';
 import { OngletPacks } from './AdminPacks';
 import { AlertesInscriptions } from './AdminAlertes';
-import { InscrireAuTirage } from './AdminInscrireTirage';
 
 type Onglet = 'lancement' | 'packs' | 'tirage' | 'inscrits' | 'resultats';
 
@@ -164,8 +163,6 @@ export function Admin() {
       )}
       {onglet === 'inscrits' && (
         <OngletInscrits
-          code={codeAdmin}
-          onChange={charger}
           participants={participants}
           tirages={tirages}
           onSupprimer={async (p) => {
@@ -480,14 +477,10 @@ function telechargerCsv(participants: Participant[], tirages: Tirage[]) {
 }
 
 function OngletInscrits({
-  code,
-  onChange,
   participants,
   tirages,
   onSupprimer,
 }: {
-  code: string;
-  onChange: () => Promise<void>;
   participants: Participant[];
   tirages: Tirage[];
   onSupprimer: (p: Participant) => Promise<void>;
@@ -500,7 +493,6 @@ function OngletInscrits({
 
   return (
     <div className="space-y-4">
-      <InscrireAuTirage code={code} participants={participants} onChange={onChange} />
       <div className="flex flex-col gap-2 sm:flex-row">
         <label className="relative flex-1">
           <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />

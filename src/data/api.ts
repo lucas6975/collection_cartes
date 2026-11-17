@@ -260,9 +260,6 @@ export const api = {
   adminAnnulerTirage: (code: string, jour: number) =>
     rpc<null>('admin_annuler_tirage', { p_code: code, p_jour: jour }),
 
-  adminInscrireTirage: (code: string, id: string, jours: number[]) =>
-    rpc<null>('admin_inscrire_tirage', { p_code: code, p_id: id, p_jours: jours }),
-
   adminSupprimer: (code: string, id: string) =>
     rpc<null>('admin_supprimer', { p_code: code, p_id: id }),
 };
