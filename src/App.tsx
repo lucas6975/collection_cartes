@@ -14,6 +14,7 @@ import { Bienvenue } from './pages/Bienvenue';
 import { Installer } from './pages/Installer';
 import { estInstallee, rappelsStore } from './data/rappels';
 import { EtapeRappels, etapeRappels } from './components/Rappels';
+import { EtapeTirage, etapeTirage } from './avent/EtapeTirage';
 import { MesInscriptions } from './pages/MesInscriptions';
 import { AdventDay } from './pages/AdventDay';
 import { Collection } from './pages/Collection';
@@ -29,7 +30,7 @@ export function App() {
     /#\/echange\?/.test(location.hash) ? lireCode(location.hash) : null,
   );
   // Change quand l'écran des rappels est terminé, pour réafficher l'appli.
-  const [, setEtapeFinie] = useState(false);
+  const [, setEtapeFinie] = useState(0);
 
   // Une inscription faite hors ligne est renvoyée à chaque ouverture, jusqu'à ce qu'elle passe.
   useEffect(() => {
@@ -82,7 +83,16 @@ export function App() {
   if (identite && etapeRappels.aAfficher()) {
     return (
       <ToastProvider>
-        <EtapeRappels onFin={() => setEtapeFinie(true)} />
+        <EtapeRappels onFin={() => setEtapeFinie((n) => n + 1)} />
+      </ToastProvider>
+    );
+  }
+
+  // Puis l'inscription au tirage au sort du calendrier de l'Avent.
+  if (etapeTirage.aAfficher()) {
+    return (
+      <ToastProvider>
+        <EtapeTirage onFin={() => setEtapeFinie((n) => n + 1)} />
       </ToastProvider>
     );
   }

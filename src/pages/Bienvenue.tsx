@@ -6,6 +6,7 @@ import { Button } from '../components/ui/primitives';
 import { ApiError } from '../data/api';
 import { identiteStore } from '../data/identite';
 import { etapeRappels } from '../components/Rappels';
+import { etapeTirage } from '../avent/EtapeTirage';
 import { estInstallee } from '../data/rappels';
 import { noterVisite } from '../data/visites';
 
@@ -34,6 +35,8 @@ export function Bienvenue() {
     try {
       // Juste après l'inscription, on propose les rappels avant d'arriver sur le menu.
       etapeRappels.demander();
+      // Puis l'inscription au tirage au sort du calendrier de l'Avent.
+      etapeTirage.demander();
       // Même hors ligne, l'inscription est gardée et sera envoyée plus tard.
       await identiteStore.enregistrer(prenom, nom, [], false);
     } catch (err) {

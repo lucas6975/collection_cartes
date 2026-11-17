@@ -188,7 +188,7 @@ export function EtapeRappels({ onFin }: { onFin: () => void }) {
             </motion.span>
           </div>
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.16em] text-sun">
-            Dernière étape
+            Presque fini
           </p>
           <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight">
             Active les rappels 🔔
