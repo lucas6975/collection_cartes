@@ -108,3 +108,40 @@ describe('pack du jour', () => {
     expect(serie(p, new Date(2026, 10, 12, 9))).toBe(0);
   });
 });
+
+describe('Jeudi fou', () => {
+  it('ne concerne que le jeudi 19 novembre 2026', async () => {
+    const { estJeudiFou } = await import('../src/domain/packs');
+    expect(estJeudiFou(new Date(2026, 10, 19, 0, 1))).toBe(true);
+    expect(estJeudiFou(new Date(2026, 10, 19, 23, 59))).toBe(true);
+    expect(estJeudiFou(new Date(2026, 10, 18, 23, 59))).toBe(false);
+    expect(estJeudiFou(new Date(2026, 10, 20, 0, 1))).toBe(false);
+  });
+
+  it('multiplie par 3 les chances de légendaire (tables à 100)', async () => {
+    const m = await import('../src/domain/packs');
+    const somme = (t: Record<string, number>) => Object.values(t).reduce((a, b) => a + b, 0);
+    expect(somme(m.PROBABILITES_JEUDI_FOU)).toBe(100);
+    expect(somme(m.PROBABILITES_GARANTIE_JEUDI_FOU)).toBe(100);
+    expect(m.PROBABILITES_JEUDI_FOU.legendaire).toBe(3 * m.PROBABILITES.legendaire);
+    expect(m.PROBABILITES_GARANTIE_JEUDI_FOU.legendaire).toBe(
+      3 * m.PROBABILITES_GARANTIE.legendaire,
+    );
+  });
+
+  it('donne beaucoup plus de packs avec une légendaire', async () => {
+    const { tirerPack } = await import('../src/domain/packs');
+    const avec = (fou: boolean) => {
+      let n = 0;
+      for (let s = 1; s <= 4000; s++)
+        if (tirerPack(CARDS, s * 2654435761, fou).some((c) => c.rarete === 'legendaire')) n++;
+      return n / 4000;
+    };
+    const normal = avec(false);
+    const fou = avec(true);
+    expect(normal).toBeGreaterThan(0.15);
+    expect(normal).toBeLessThan(0.27);
+    expect(fou).toBeGreaterThan(0.45);
+    expect(fou).toBeLessThan(0.6);
+  });
+});

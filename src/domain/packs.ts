@@ -23,6 +23,24 @@ export const PROBABILITES_GARANTIE: Record<Rarity, number> = {
   legendaire: 7,
 };
 
+/**
+ * Jeudi fou (jeudi 19 novembre 2026 uniquement) : chances de carte légendaire ×3.
+ * La part ajoutée est prise sur les cartes les plus courantes.
+ */
+export const JEUDI_FOU = '2026-11-19';
+export const estJeudiFou = (now: Date) => jourDe(now) === JEUDI_FOU;
+
+export const PROBABILITES_JEUDI_FOU: Record<Rarity, number> = {
+  ...PROBABILITES,
+  commune: PROBABILITES.commune - 2 * PROBABILITES.legendaire,
+  legendaire: 3 * PROBABILITES.legendaire,
+};
+export const PROBABILITES_GARANTIE_JEUDI_FOU: Record<Rarity, number> = {
+  ...PROBABILITES_GARANTIE,
+  'peu-commune': PROBABILITES_GARANTIE['peu-commune'] - 2 * PROBABILITES_GARANTIE.legendaire,
+  legendaire: 3 * PROBABILITES_GARANTIE.legendaire,
+};
+
 const ORDRE: Rarity[] = ['commune', 'peu-commune', 'rare', 'epique', 'legendaire'];
 
 /** Générateur pseudo-aléatoire déterministe : le même pack pour la même graine. */
@@ -65,7 +83,7 @@ function tirerRarete(
 }
 
 /** Tire les cartes d'un pack, triées de la plus commune à la plus rare (la meilleure à la fin). */
-export function tirerPack(cards: Card[], seed: number): Card[] {
+export function tirerPack(cards: Card[], seed: number, jeudiFou = false): Card[] {
   const rand = rng(seed);
   const parRarete = new Map<Rarity, Card[]>();
   // Les cartes à débloquer (Ulysse) ne sortent jamais d'un pack.
@@ -74,7 +92,14 @@ export function tirerPack(cards: Card[], seed: number): Card[] {
   const disponibles = new Set(parRarete.keys());
   const tirage: Card[] = [];
   for (let i = 0; i < CARTES_PAR_PACK; i++) {
-    const table = i === CARTES_PAR_PACK - 1 ? PROBABILITES_GARANTIE : PROBABILITES;
+    const derniere = i === CARTES_PAR_PACK - 1;
+    const table = jeudiFou
+      ? derniere
+        ? PROBABILITES_GARANTIE_JEUDI_FOU
+        : PROBABILITES_JEUDI_FOU
+      : derniere
+        ? PROBABILITES_GARANTIE
+        : PROBABILITES;
     const rarete = tirerRarete(rand, table, disponibles);
     // Évite les doublons à l'intérieur d'un même pack quand c'est possible.
     const pool = parRarete.get(rarete)!;
@@ -123,7 +148,7 @@ export function ouvrirPack(
   const jour = jourDe(now);
   const n = progress.packs.length;
   const seed = hash(`${progress.userId}|${jour}|${bonus ? `bonus-${n}` : 'jour'}`);
-  const tirage = tirerPack(cards, seed);
+  const tirage = tirerPack(cards, seed, estJeudiFou(now));
 
   const owned = new Map(progress.cards.map((c) => [c.cardId, { ...c }]));
   const at = now.toISOString();

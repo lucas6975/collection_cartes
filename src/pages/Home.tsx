@@ -14,6 +14,7 @@ import { CardBack } from '../components/cards/CardBack';
 import { CardDetail } from '../components/cards/CardDetail';
 import { GameCard, RARITY_STYLE } from '../components/cards/GameCard';
 import { FloatingPack } from '../components/cards/Pack';
+import { BanniereJeudiFou } from '../components/JeudiFou';
 import { PackOpening } from '../components/cards/PackOpening';
 import { useToast } from '../components/ui/overlay';
 import { Button, Reveal, Ring, SectionTitle } from '../components/ui/primitives';
@@ -96,6 +97,10 @@ export function Home() {
                 <Flame size={16} className="text-sun-dark" /> {maSerie} jour{maSerie > 1 ? 's' : ''}
               </span>
             )}
+          </div>
+
+          <div className="relative mt-4">
+            <BanniereJeudiFou variante="pack" />
           </div>
 
           <div className="relative py-7">

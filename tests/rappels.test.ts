@@ -104,3 +104,13 @@ describe('alerte « Nouvel inscrit » pour l’administrateur', () => {
     expect(messageInscrit('Léa', 'Martin', 1).body).toBe('C’est le 1er membre de la Team Ulysse !');
   });
 });
+
+describe('Jeudi fou', () => {
+  const a = (j: number) => choisirRappel(momentParis(new Date(Date.UTC(2026, 10, j, 7, 45))));
+  it('remplace le rappel du pack le 19 novembre seulement', () => {
+    expect(a(19)?.title).toBe('⚡ C’est le JEUDI FOU !');
+    expect(a(19)?.type).toBe('pack');
+    expect(a(18)?.title).toBe('🃏 Ton pack du jour est disponible !');
+    expect(a(20)?.title).toBe('🃏 Ton pack du jour est disponible !');
+  });
+});

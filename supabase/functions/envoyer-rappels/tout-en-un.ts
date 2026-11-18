@@ -118,6 +118,15 @@ export function choisirRappel(m: MomentParis): Rappel | null {
     return rappelCase(m.jour);
   }
   if (t >= 8 * 60 + 30 && t < 9 * 60 + 30) {
+    // Jeudi fou (19 novembre 2026 uniquement) : chances de légendaire ×3.
+    if (m.annee === 2026 && m.mois === 11 && m.jour === 19)
+      return {
+        type: 'pack',
+        title: '⚡ C’est le JEUDI FOU !',
+        body: 'Aujourd’hui seulement, tes chances d’avoir une carte légendaire sont ×3. Ouvre vite ton pack ! 🃏',
+        url: './#/cartes',
+        tag: 'pack',
+      };
     return {
       type: 'pack',
       title: '🃏 Ton pack du jour est disponible !',

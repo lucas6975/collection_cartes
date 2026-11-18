@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
+import { BanniereJeudiFou } from '../components/JeudiFou';
 import { PropositionRappels } from '../components/Rappels';
 import { PackArt } from '../components/cards/Pack';
 import { ANNEE_AVENT, JOURS } from '../avent/jours';
@@ -101,6 +102,8 @@ export function Menu() {
           </p>
         </div>
       </motion.section>
+
+      <BanniereJeudiFou />
 
       <PropositionRappels />
 
