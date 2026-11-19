@@ -9,7 +9,7 @@ import { RoueEcran, Roue } from './RoueEcran';
 const [A, M, J] = JOUR_ROUE.split('-').map(Number);
 const DEBUT = new Date(A, M - 1, J).getTime();
 
-/** Le flou de la roue diminue chaque jour (19 → 23 novembre). */
+/** Le flou de la roue diminue chaque jour (20 → 23 novembre). */
 export const FLOUS = [18, 12, 8, 4.5, 1.8];
 
 /** Un indice de plus chaque jour. */
@@ -108,7 +108,8 @@ export function RoueAccueil() {
   }
 
   if (moment?.type !== 'teaser') return null;
-  const jour = Math.min(moment.jour, INDICES.length - 1);
+  // 4 jours de teaser (20 → 23) pour 5 indices : les 2 premiers dès le premier jour.
+  const jour = Math.min(moment.jour + 1, INDICES.length - 1);
   const r = compteARebours(DEBUT - now.getTime());
 
   return (

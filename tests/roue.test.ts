@@ -18,10 +18,10 @@ const p = (ids: string[]): Progress => ({
 });
 
 describe('Roue de Secours', () => {
-  it('teaser du 19 au 23, roue le 24 seulement', () => {
-    expect(momentRoue(new Date(2026, 10, 18, 23))).toBeNull();
-    expect(momentRoue(new Date(2026, 10, 19, 9))).toEqual({ type: 'teaser', jour: 0 });
-    expect(momentRoue(new Date(2026, 10, 23, 22))).toEqual({ type: 'teaser', jour: 4 });
+  it('teaser du 20 au 23, roue le 24 seulement', () => {
+    expect(momentRoue(new Date(2026, 10, 19, 23, 59))).toBeNull();
+    expect(momentRoue(new Date(2026, 10, 20, 0, 1))).toEqual({ type: 'teaser', jour: 0 });
+    expect(momentRoue(new Date(2026, 10, 23, 22))).toEqual({ type: 'teaser', jour: 3 });
     expect(momentRoue(new Date(2026, 10, 24, 0, 1))).toEqual({ type: 'jour' });
     expect(momentRoue(new Date(2026, 10, 25, 9))).toBeNull();
     expect(FLOUS).toHaveLength(5);
