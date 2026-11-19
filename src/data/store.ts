@@ -13,6 +13,7 @@ import {
   progressionVide,
   type PackResult,
 } from '../domain/packs';
+import { retirerCopies } from '../domain/recyclage';
 import type { Progress } from '../domain/types';
 
 export interface SavedGame {
@@ -103,6 +104,12 @@ class Game {
     const jour = jourDe(new Date());
     const p = this.state.progress;
     this.commit({ ...p, packs: p.packs.filter((x) => x.bonus || x.jour !== jour) });
+  };
+
+  /** Recycle 5 doublons, puis ouvre un pack bonus. */
+  recycler = (choix: Record<string, number>): PackResultat => {
+    this.commit(retirerCopies(this.state.progress, CARDS, choix, new Date()));
+    return this.ouvrir(true);
   };
 
   /** Pack supplémentaire, réservé à l'administrateur pour tester l'ouverture. */

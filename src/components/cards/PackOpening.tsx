@@ -141,7 +141,13 @@ function Opening({
         <X size={20} />
       </button>
 
-      {(phase === 'pack' || phase === 'tear') && <OuverturePack phase={phase} onTear={tear} />}
+      {(phase === 'pack' || phase === 'tear') && (
+        <OuverturePack
+          phase={phase}
+          onTear={tear}
+          titre={result.progress.packs.at(-1)?.bonus ? 'Pack bonus' : undefined}
+        />
+      )}
 
       {phase === 'cards' && (
         <UneCarte
@@ -189,7 +195,15 @@ function Opening({
 
 // ───────────── 1. Le pack se déchire ─────────────
 
-function OuverturePack({ phase, onTear }: { phase: 'pack' | 'tear'; onTear: () => void }) {
+function OuverturePack({
+  phase,
+  onTear,
+  titre,
+}: {
+  phase: 'pack' | 'tear';
+  onTear: () => void;
+  titre?: string;
+}) {
   return (
     <div className="relative flex flex-col items-center">
       <p className="eyebrow mb-5 text-sun">
@@ -220,7 +234,7 @@ function OuverturePack({ phase, onTear }: { phase: 'pack' | 'tear'; onTear: () =
         aria-label="Ouvrir le pack"
       >
         <div className="relative">
-          <PackArt />
+          <PackArt titre={titre} />
           {phase === 'tear' && (
             <motion.div
               className="absolute inset-x-0 top-0 h-[14%] overflow-hidden rounded-t-[26px]"

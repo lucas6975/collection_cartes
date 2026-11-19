@@ -5,6 +5,7 @@ import { Link, useSearchParams } from 'react-router';
 import { CartePerso } from '../components/cards/CartePerso';
 import { CardDetail } from '../components/cards/CardDetail';
 import { GameCard } from '../components/cards/GameCard';
+import { Recyclage } from '../components/Recyclage';
 import { Icon } from '../components/ui/Icon';
 import { Chip, PageHeader, ProgressBar, Ring, cx } from '../components/ui/primitives';
 import { CATEGORIES, RARITIES, RARITY_BY_ID } from '../content/categories';
@@ -92,7 +93,7 @@ export function Collection() {
       </PageHeader>
 
       {/* ───── Ma carte perso et échanges ───── */}
-      <section className="panel mb-6 flex items-center gap-4 p-4 sm:p-5">
+      <section className="panel mb-3 flex items-center gap-4 p-4 sm:p-5">
         {progress.cartePerso && (
           <div className="w-[96px] shrink-0 sm:w-[120px]">
             <CartePerso recueLe={progress.cartePerso} />
@@ -116,6 +117,9 @@ export function Collection() {
           </Link>
         </div>
       </section>
+
+      {/* ───── Recyclage des doublons (compact) ───── */}
+      <Recyclage />
 
       {/* ───── Filtres ───── */}
       <div className="mb-6 space-y-3">

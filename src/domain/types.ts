@@ -79,4 +79,6 @@ export interface Progress {
   packs: PackOpening[];
   /** Date de réception de la carte personnelle (offerte une seule fois, dans un pack). */
   cartePerso?: string;
+  /** Jours (AAAA-MM-JJ) où des doublons ont été recyclés contre un pack bonus. */
+  recyclages?: string[];
 }
