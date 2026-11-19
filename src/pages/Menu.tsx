@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
 import { BanniereJeudiFou } from '../components/JeudiFou';
+import { VigilancePartagee } from '../components/VigilancePartagee';
 import { PropositionRappels } from '../components/Rappels';
 import { PackArt } from '../components/cards/Pack';
 import { ANNEE_AVENT, JOURS } from '../avent/jours';
@@ -104,6 +105,8 @@ export function Menu() {
       </motion.section>
 
       <BanniereJeudiFou />
+
+      <VigilancePartagee />
 
       <PropositionRappels />
 
