@@ -10,16 +10,17 @@ const [A, M, J] = JOUR_ROUE.split('-').map(Number);
 const DEBUT = new Date(A, M - 1, J).getTime();
 
 /** Le flou de la roue diminue chaque jour (20 → 23 novembre). */
-export const FLOUS = [18, 12, 8, 4.5, 1.8];
+export const FLOUS = [16, 10, 6, 1.8];
 
 /** Un indice de plus chaque jour. */
 export const INDICES = [
-  '🕵️ Ulysse a été aperçu au parking en train de gonfler quelque chose. Il dit que c’est « pour le travail ».',
-  '🔧 Quelqu’un lui a prêté une clé en croix. Il a répondu : « Merci, mais c’est pas pour ce que tu crois. »',
   '🎰 Mardi, même ceux qui n’ont JAMAIS de chance vont gagner. 0 perdant. Zéro. Nada.',
   '👑 Une carte brille tellement qu’Ulysse a dû mettre ses lunettes de protection pour la regarder. Elle sera numérotée : le n° 001 ira au plus rapide.',
   '🛟 Collection à plat ? Il te faut… la Roue de Secours ! Demain, 8 h 30. Sois prêt.',
 ];
+
+/** Indice du jour : vendredi 1, week-end 2, lundi 3 (le nom). */
+export const INDICE_DU_JOUR = [0, 1, 1, 2];
 
 /** « 4 j 13 h 05 min 09 s » */
 export function compteARebours(ms: number) {
@@ -108,8 +109,9 @@ export function RoueAccueil() {
   }
 
   if (moment?.type !== 'teaser') return null;
-  // 4 jours de teaser (20 → 23) pour 5 indices : les 2 premiers dès le premier jour.
-  const jour = Math.min(moment.jour + 1, INDICES.length - 1);
+  const etape = Math.min(moment.jour, FLOUS.length - 1);
+  const jour = INDICE_DU_JOUR[etape];
+  const dernier = jour === INDICES.length - 1;
   const r = compteARebours(DEBUT - now.getTime());
 
   return (
@@ -129,13 +131,13 @@ export function RoueAccueil() {
         <div className="flex items-center gap-4 pt-1">
           <div className="relative shrink-0">
             <motion.div
-              style={{ filter: `blur(${FLOUS[jour]}px)` }}
+              style={{ filter: `blur(${FLOUS[etape]}px)` }}
               animate={{ rotate: 360 }}
               transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
             >
               <Roue angle={0} taille={112} />
             </motion.div>
-            {jour < 4 && (
+            {!dernier && (
               <span className="absolute inset-0 grid place-items-center font-display text-5xl font-extrabold text-white drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]">
                 ?
               </span>
@@ -143,10 +145,10 @@ export function RoueAccueil() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-sun">
-              {jour < 4 ? 'Quelque chose arrive…' : 'Demain sur ton téléphone'}
+              {!dernier ? 'Quelque chose arrive…' : 'Demain sur ton téléphone'}
             </p>
             <p className="mt-0.5 font-display text-lg font-extrabold leading-tight">
-              {jour < 4 ? 'Mardi 24, ça va tourner 👀' : '🛟 La Roue de Secours'}
+              {!dernier ? 'Mardi 24, ça va tourner 👀' : '🛟 La Roue de Secours'}
             </p>
             <div className="mt-2 flex gap-1.5 font-display font-extrabold">
               {[
@@ -183,7 +185,7 @@ export function RoueAccueil() {
                 className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3 py-2 text-[12.5px] text-white/50"
               >
                 <Lock size={12} /> Indice {i + 1} · dévoilé{' '}
-                {i === jour + 1 ? 'demain' : `dans ${i - jour} jours`}
+                {i === INDICES.length - 1 ? 'lundi' : 'demain'}
               </li>
             ),
           )}
