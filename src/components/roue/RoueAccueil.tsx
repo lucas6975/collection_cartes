@@ -14,11 +14,11 @@ export const FLOUS = [18, 12, 8, 4.5, 1.8];
 
 /** Un indice de plus chaque jour. */
 export const INDICES = [
-  '🌀 Ça tourne… mais pas en rond.',
-  '🛟 Ça peut sauver ta collection.',
-  '🎯 6 cases. 0 perdant.',
-  '👑 Un collector en or, numéroté. Les premiers auront les plus petits numéros.',
-  '🎡 Son nom : la Roue de Secours. C’est demain !',
+  '🕵️ Ulysse a été aperçu au parking en train de gonfler quelque chose. Il dit que c’est « pour le travail ».',
+  '🔧 Quelqu’un lui a prêté une clé en croix. Il a répondu : « Merci, mais c’est pas pour ce que tu crois. »',
+  '🎰 Mardi, même ceux qui n’ont JAMAIS de chance vont gagner. 0 perdant. Zéro. Nada.',
+  '👑 Une carte brille tellement qu’Ulysse a dû mettre ses lunettes de protection pour la regarder. Elle sera numérotée : le n° 001 ira au plus rapide.',
+  '🛟 Collection à plat ? Il te faut… la Roue de Secours ! Demain, 8 h 30. Sois prêt.',
 ];
 
 /** « 4 j 13 h 05 min 09 s » */
