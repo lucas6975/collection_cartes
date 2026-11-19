@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useIdentite } from '../../data/identite';
 import { game, useGame } from '../../data/store';
-import { CASES, JOUR_ROUE, momentRoue } from '../../domain/roue';
+import { CASES, JOUR_ROUE, momentRoue, type MomentRoue } from '../../domain/roue';
 import { RoueEcran, Roue } from './RoueEcran';
 
 const [A, M, J] = JOUR_ROUE.split('-').map(Number);
@@ -46,20 +46,55 @@ export function RoueAccueil() {
   const { identite, codeAdmin } = useIdentite();
   const { progress } = useGame();
   const [ouvert, setOuvert] = useState(false);
-  const moment = momentRoue(now);
+  const [apercu, setApercu] = useState<number | 'jour' | null>(null);
+  const vrai = momentRoue(now);
+  // Administrateur : aperçu du teaser dès maintenant, et de chaque jour au choix.
+  const avant = !vrai && now.getTime() < DEBUT;
+  const moment: MomentRoue =
+    codeAdmin && apercu === 'jour'
+      ? { type: 'jour' }
+      : codeAdmin && (apercu !== null || avant)
+        ? { type: 'teaser', jour: typeof apercu === 'number' ? apercu : 0 }
+        : vrai;
   if (!identite && !codeAdmin) return null;
 
   const testAdmin = codeAdmin ? (
-    <button
-      type="button"
-      onClick={() => {
-        if (progress.roue) game.remettreRoue();
-        setOuvert(true);
-      }}
-      className="relative mt-2 text-[11px] font-bold text-white/60 underline"
-    >
-      🔧 Tester la roue (admin)
-    </button>
+    <span className="relative mt-3 flex flex-wrap items-center gap-1.5 text-[11px] font-bold">
+      <span className="text-white/60">👁️ Aperçu admin :</span>
+      {(
+        [
+          [0, 'ven.'],
+          [3, 'lun.'],
+          ['jour', 'mardi'],
+        ] as const
+      ).map(([v, l]) => (
+        <span
+          key={l}
+          role="button"
+          tabIndex={0}
+          onClick={(e) => {
+            e.stopPropagation();
+            setApercu(v);
+          }}
+          className="rounded-full bg-white/15 px-2 py-0.5 text-white"
+        >
+          {l}
+        </span>
+      ))}
+      <span
+        role="button"
+        tabIndex={0}
+
+        onClick={(e) => {
+          e.stopPropagation();
+          if (progress.roue) game.remettreRoue();
+          setOuvert(true);
+        }}
+        className="text-white/60 underline"
+      >
+        🔧 Tester la roue (admin)
+      </span>
+    </span>
   ) : null;
 
   if (moment?.type === 'jour') {
