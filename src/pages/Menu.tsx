@@ -6,7 +6,6 @@ import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
 import { BanniereJeudiFou } from '../components/JeudiFou';
 import { RoueAccueil } from '../components/roue/RoueAccueil';
-import { VigilancePartagee } from '../components/VigilancePartagee';
 import { PropositionRappels } from '../components/Rappels';
 import { PackArt } from '../components/cards/Pack';
 import { ANNEE_AVENT, JOURS } from '../avent/jours';
@@ -108,8 +107,6 @@ export function Menu() {
       <BanniereJeudiFou />
 
       <RoueAccueil />
-
-      <VigilancePartagee />
 
       <PropositionRappels />
 
