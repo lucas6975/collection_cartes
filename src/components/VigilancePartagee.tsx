@@ -8,11 +8,11 @@ import { Modal } from './ui/overlay';
 import { Button } from './ui/primitives';
 
 const CLE = 'team-ulysse-vigilance-cache';
-// Affiché jusqu'à l'ouverture du calendrier de l'Avent.
-const FIN = '2026-12-01';
+// Affiché uniquement le vendredi 20 novembre 2026.
+const JOUR = '2026-11-20';
 
-export const vigilanceVisible = (now: Date, cacheLe: string | null) =>
-  jourDe(now) < FIN && cacheLe !== jourDe(now);
+/** Visible ce jour-là seulement, et plus jamais une fois « Plus tard » touché. */
+export const vigilanceVisible = (now: Date, cache: string | null) => jourDe(now) === JOUR && !cache;
 
 function lireCache() {
   try {
@@ -30,13 +30,12 @@ export function VigilancePartagee() {
   if (!identite || !vigilanceVisible(new Date(), cacheLe)) return null;
 
   const plusTard = () => {
-    const j = jourDe(new Date());
     try {
-      localStorage.setItem(CLE, j);
+      localStorage.setItem(CLE, '1');
     } catch {
       /* caché pour cette visite seulement */
     }
-    setCacheLe(j);
+    setCacheLe('1');
   };
   const lien = `${location.origin}${location.pathname}`;
   const image = `data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(lien, { ecc: 'M', border: 2 }))}`;
