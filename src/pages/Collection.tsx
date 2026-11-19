@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { CartePerso } from '../components/cards/CartePerso';
+import { CarteOr } from '../components/roue/CarteOr';
 import { CardDetail } from '../components/cards/CardDetail';
 import { GameCard } from '../components/cards/GameCard';
 import { Recyclage } from '../components/Recyclage';
@@ -97,6 +98,11 @@ export function Collection() {
         {progress.cartePerso && (
           <div className="w-[96px] shrink-0 sm:w-[120px]">
             <CartePerso recueLe={progress.cartePerso} />
+          </div>
+        )}
+        {progress.ulysseOr && (
+          <div className="w-[96px] shrink-0 sm:w-[120px]">
+            <CarteOr numero={progress.ulysseOr.numero} />
           </div>
         )}
         <div className="min-w-0 flex-1">

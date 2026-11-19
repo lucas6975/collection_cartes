@@ -14,6 +14,7 @@ import {
   type PackResult,
 } from '../domain/packs';
 import { retirerCopies } from '../domain/recyclage';
+import { CASES, carteGagnee, tirerCase } from '../domain/roue';
 import type { Progress } from '../domain/types';
 
 export interface SavedGame {
@@ -110,6 +111,74 @@ class Game {
   recycler = (choix: Record<string, number>): PackResultat => {
     this.commit(retirerCopies(this.state.progress, CARDS, choix, new Date()));
     return this.ouvrir(true);
+  };
+
+  /** Ajoute une carte à la collection (et débloque Ulysse si toutes les LSR sont réunies). */
+  private ajouterCarte(p: Progress, id: string) {
+    const at = new Date().toISOString();
+    const deja = p.cards.some((c) => c.cardId === id);
+    const next = deja
+      ? p.cards.map((c) => (c.cardId === id ? { ...c, count: c.count + 1 } : c))
+      : [...p.cards, { cardId: id, count: 1, firstAt: at }];
+    const debloquee = carteADebloquer(CARDS, new Set(next.map((c) => c.cardId)));
+    if (debloquee) next.push({ cardId: debloquee.id, count: 1, firstAt: at });
+    return { progress: { ...p, cards: next }, nouvelle: !deja, debloquee };
+  }
+
+  /** Roue de Secours : un seul tour. Les cartes gagnées sont ajoutées tout de suite. */
+  tournerRoue = () => {
+    const p = this.state.progress;
+    const jour = jourDe(new Date());
+    if (p.roue) throw new Error('Tu as déjà tourné la roue !');
+    const index = tirerCase();
+    const gain = CASES[index].id;
+    const carte = carteGagnee(gain, p, CARDS);
+    let next: Progress = { ...p, roue: { jour, gain, carteId: carte?.id, recupere: !!carte } };
+    let debloquee = null;
+    if (carte) {
+      const r = this.ajouterCarte(next, carte.id);
+      next = r.progress;
+      debloquee = r.debloquee;
+    }
+    if (gain === 'or') {
+      next = {
+        ...next,
+        ulysseOr: { at: new Date().toISOString(), numero: null },
+        roue: { ...next.roue!, recupere: true },
+      };
+    }
+    this.commit(next);
+    return { index, gain, carte, debloquee };
+  };
+
+  /** Joker : la personne choisit la carte qu'elle veut. */
+  choisirJoker = (id: string) => {
+    const p = this.state.progress;
+    if (p.roue?.gain !== 'joker' || p.roue.recupere) throw new Error('Joker déjà utilisé.');
+    const r = this.ajouterCarte(p, id);
+    this.commit({ ...r.progress, roue: { ...p.roue, carteId: id, recupere: true } });
+    return r;
+  };
+
+  /** Pack bonus gagné à la roue. */
+  ouvrirPackRoue = (): PackResultat => {
+    const p = this.state.progress;
+    if (p.roue?.gain !== 'pack' || p.roue.recupere) throw new Error('Pack déjà ouvert.');
+    this.commit({ ...p, roue: { ...p.roue, recupere: true } });
+    return this.ouvrir(true);
+  };
+
+  /** Administrateur : permet de retourner la roue (pour tester). */
+  remettreRoue = () => {
+    const { roue: _r, ...p } = this.state.progress;
+    void _r;
+    this.commit(p);
+  };
+
+  /** Numéro de la carte Ulysse en Or, attribué par la base. */
+  numeroterOr = (numero: number) => {
+    const p = this.state.progress;
+    if (p.ulysseOr) this.commit({ ...p, ulysseOr: { ...p.ulysseOr, numero } });
   };
 
   /** Pack supplémentaire, réservé à l'administrateur pour tester l'ouverture. */

@@ -15,7 +15,7 @@ export function plateforme(): Plateforme {
   return 'ordi';
 }
 
-function appareil(): string | null {
+export function appareil(): string | null {
   try {
     let id = localStorage.getItem(CLE_APPAREIL);
     if (!id) {

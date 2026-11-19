@@ -169,6 +169,8 @@ export const api = {
     }),
   adminResultats: (code: string) => rpc<ResultatAdmin[]>('admin_resultats', { p_code: code }),
 
+  numeroUlysseOr: (appareil: string) => rpc<number>('numero_ulysse_or', { p_appareil: appareil }),
+
   noterVisite: (appareil: string, etape: string, plateforme: string) =>
     rpc<null>('noter_visite', { p_appareil: appareil, p_etape: etape, p_plateforme: plateforme }),
 

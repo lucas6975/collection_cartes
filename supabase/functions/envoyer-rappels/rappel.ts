@@ -100,6 +100,15 @@ export function choisirRappel(m: MomentParis): Rappel | null {
     return rappelCase(m.jour);
   }
   if (t >= 8 * 60 + 30 && t < 9 * 60 + 30) {
+    // Roue de Secours (24 novembre 2026 uniquement).
+    if (m.annee === 2026 && m.mois === 11 && m.jour === 24)
+      return {
+        type: 'pack',
+        title: '🛟 La Roue de Secours est ouverte !',
+        body: 'Un tour gratuit, 0 perdant… et peut-être Ulysse en Or 👑. Aujourd’hui seulement !',
+        url: './',
+        tag: 'pack',
+      };
     // Jeudi fou (19 novembre 2026 uniquement) : chances de légendaire ×3.
     if (m.annee === 2026 && m.mois === 11 && m.jour === 19)
       return {
