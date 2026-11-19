@@ -14,9 +14,9 @@ export const FLOUS = [16, 10, 6, 1.8];
 
 /** Un indice de plus chaque jour. */
 export const INDICES = [
-  '🎰 Mardi, même ceux qui n’ont JAMAIS de chance vont gagner. 0 perdant. Zéro. Nada.',
-  '👑 Une carte brille tellement qu’Ulysse a dû mettre ses lunettes de protection pour la regarder. Elle sera numérotée : le n° 001 ira au plus rapide.',
-  '🛟 Collection à plat ? Il te faut… la Roue de Secours ! Demain, 8 h 30. Sois prêt.',
+  '🎰 Mardi 24, tout le monde repart gagnant : 1 tour gratuit par personne, 0 perdant, et des cartes rares à la clé.',
+  '👑 Le gros lot : Ulysse en Or, une carte collector numérotée. Le 1er gagnant aura le n° 001, le 2e le n° 002… Joue tôt mardi pour avoir le plus petit numéro !',
+  '🛟 Collection à plat ? Demain dès 8 h 30, tourne la Roue de Secours : Ulysse en Or, Joker, légendaire, LSR qui te manque… À toi de jouer !',
 ];
 
 /** Indice du jour : vendredi 1, week-end 2, lundi 3 (le nom). */
