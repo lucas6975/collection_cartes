@@ -144,7 +144,7 @@ export function RoueAccueil() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-sun">
-              {!dernier ? 'Quelque chose arrive…' : 'Demain sur ton téléphone'}
+              {!dernier ? 'Quelque chose arrive…' : 'C’est demain !'}
             </p>
             <p className="mt-0.5 font-display text-lg font-extrabold leading-tight">
               {!dernier ? 'Mardi 24, ça va tourner 👀' : '🛟 La Roue de Secours'}
