@@ -25,8 +25,8 @@ describe('Roue de Secours', () => {
     expect(momentRoue(new Date(2026, 10, 24, 0, 1))).toEqual({ type: 'jour' });
     expect(momentRoue(new Date(2026, 10, 25, 9))).toBeNull();
     expect(FLOUS).toHaveLength(4);
-    expect(INDICES).toHaveLength(3);
-    expect(INDICE_DU_JOUR).toEqual([0, 1, 1, 2]);
+    expect(INDICES).toHaveLength(2);
+    expect(INDICE_DU_JOUR).toEqual([0, 0, 0, 1]);
   });
 
   it('les chances font 100 et respectent les poids', () => {

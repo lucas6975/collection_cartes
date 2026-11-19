@@ -14,13 +14,12 @@ export const FLOUS = [16, 10, 6, 1.8];
 
 /** Un indice de plus chaque jour. */
 export const INDICES = [
-  '🎰 Mardi 24, tout le monde repart gagnant : 1 tour gratuit par personne, 0 perdant, et des cartes rares à la clé.',
-  '👑 Le gros lot : Ulysse en Or, une carte collector numérotée. Le 1er gagnant aura le n° 001, le 2e le n° 002… Joue tôt mardi pour avoir le plus petit numéro !',
+  '🎰 Mardi 24, tout le monde repart gagnant : 1 tour gratuit par personne, 0 perdant. Et le gros lot ? 👑 Ulysse en Or, une carte collector numérotée : le 1er gagnant aura le n° 001, le 2e le n° 002… Joue tôt !',
   '🛟 Collection à plat ? Demain dès 8 h 30, tourne la Roue de Secours : Ulysse en Or, Joker, légendaire, LSR qui te manque… À toi de jouer !',
 ];
 
-/** Indice du jour : vendredi 1, week-end 2, lundi 3 (le nom). */
-export const INDICE_DU_JOUR = [0, 1, 1, 2];
+/** Indice du jour : vendredi (et week-end) le 1er, lundi le 2e (le nom). */
+export const INDICE_DU_JOUR = [0, 0, 0, 1];
 
 /** « 4 j 13 h 05 min 09 s » */
 export function compteARebours(ms: number) {
