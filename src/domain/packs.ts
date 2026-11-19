@@ -83,7 +83,13 @@ function tirerRarete(
 }
 
 /** Tire les cartes d'un pack, triées de la plus commune à la plus rare (la meilleure à la fin). */
-export function tirerPack(cards: Card[], seed: number, jeudiFou = false): Card[] {
+export function tirerPack(
+  cards: Card[],
+  seed: number,
+  jeudiFou = false,
+  /** Cartes déjà possédées : si le pack n'apporte rien de nouveau, une carte manquante est garantie. */
+  possedees?: Set<string>,
+): Card[] {
   const rand = rng(seed);
   const parRarete = new Map<Rarity, Card[]>();
   // Les cartes à débloquer (Ulysse) ne sortent jamais d'un pack.
@@ -106,6 +112,20 @@ export function tirerPack(cards: Card[], seed: number, jeudiFou = false): Card[]
     const libres = pool.filter((c) => !tirage.includes(c));
     const source = libres.length ? libres : pool;
     tirage.push(source[Math.floor(rand() * source.length)]);
+  }
+  // Au moins une nouvelle carte par pack, tant qu'il en manque (hors légendaires, qui restent rares).
+  if (possedees && !tirage.some((c) => !possedees.has(c.id))) {
+    const manquantes = cards.filter(
+      (c) => !c.deblocage && c.rarete !== 'legendaire' && !possedees.has(c.id),
+    );
+    if (manquantes.length) {
+      // Remplace la carte la plus courante du pack.
+      const i = tirage.reduce(
+        (m, c, k) => (ORDRE.indexOf(c.rarete) < ORDRE.indexOf(tirage[m].rarete) ? k : m),
+        0,
+      );
+      tirage[i] = manquantes[Math.floor(rand() * manquantes.length)];
+    }
   }
   return tirage.sort((a, b) => ORDRE.indexOf(a.rarete) - ORDRE.indexOf(b.rarete));
 }
@@ -148,7 +168,12 @@ export function ouvrirPack(
   const jour = jourDe(now);
   const n = progress.packs.length;
   const seed = hash(`${progress.userId}|${jour}|${bonus ? `bonus-${n}` : 'jour'}`);
-  const tirage = tirerPack(cards, seed, estJeudiFou(now));
+  const tirage = tirerPack(
+    cards,
+    seed,
+    estJeudiFou(now),
+    new Set(progress.cards.map((c) => c.cardId)),
+  );
 
   const owned = new Map(progress.cards.map((c) => [c.cardId, { ...c }]));
   const at = now.toISOString();

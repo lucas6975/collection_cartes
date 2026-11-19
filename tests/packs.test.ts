@@ -145,3 +145,32 @@ describe('Jeudi fou', () => {
     expect(fou).toBeLessThan(0.6);
   });
 });
+
+describe('au moins une nouvelle carte par pack', () => {
+  it('garantit une carte manquante quand le pack n’apporte rien de nouveau', async () => {
+    const { tirerPack } = await import('../src/domain/packs');
+    // Il ne manque qu'une seule carte « rare » : chaque pack doit la contenir.
+    const manquante = CARDS.find((c) => c.rarete === 'rare' && !c.deblocage)!;
+    const possedees = new Set(CARDS.filter((c) => c.id !== manquante.id).map((c) => c.id));
+    for (let s = 1; s <= 300; s++)
+      expect(tirerPack(CARDS, s * 7919, false, possedees).map((c) => c.id)).toContain(manquante.id);
+  });
+
+  it('ne force jamais une légendaire', async () => {
+    const { tirerPack } = await import('../src/domain/packs');
+    const leg = CARDS.find((c) => c.rarete === 'legendaire' && !c.deblocage)!;
+    const possedees = new Set(CARDS.filter((c) => c.id !== leg.id).map((c) => c.id));
+    let force = 0;
+    for (let s = 1; s <= 300; s++)
+      if (tirerPack(CARDS, s * 7919, false, possedees).some((c) => c.id === leg.id)) force++;
+    expect(force).toBeLessThan(300 * 0.4);
+  });
+
+  it('ne change rien quand le pack a déjà une nouvelle carte', async () => {
+    const { tirerPack } = await import('../src/domain/packs');
+    for (let s = 1; s <= 100; s++)
+      expect(tirerPack(CARDS, s, false, new Set()).map((c) => c.id)).toEqual(
+        tirerPack(CARDS, s).map((c) => c.id),
+      );
+  });
+});
