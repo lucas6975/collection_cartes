@@ -110,7 +110,15 @@ export function choisirRappel(m: MomentParis): Rappel | null {
         tag: 'pack',
       };
     // Jeudis fous (19 et 26 novembre 2026) : chances de légendaire ×3.
-    if (m.annee === 2026 && m.mois === 11 && (m.jour === 19 || m.jour === 26))
+    if (m.annee === 2026 && m.mois === 11 && m.jour === 26)
+      return {
+        type: 'pack',
+        title: '⚡ Le JEUDI FOU est de retour !',
+        body: 'Vous l’avez kiffé, les stats l’ont démontré : on vous le remet ! Légendaires ×3 aujourd’hui seulement 🃏',
+        url: './#/cartes',
+        tag: 'pack',
+      };
+    if (m.annee === 2026 && m.mois === 11 && m.jour === 19)
       return {
         type: 'pack',
         title: '⚡ C’est le JEUDI FOU !',

@@ -112,7 +112,7 @@ describe('Jeudi fou', () => {
     expect(a(19)?.type).toBe('pack');
     expect(a(18)?.title).toBe('🃏 Ton pack du jour est disponible !');
     expect(a(20)?.title).toBe('🃏 Ton pack du jour est disponible !');
-    expect(a(26)?.title).toBe('⚡ C’est le JEUDI FOU !');
+    expect(a(26)?.title).toBe('⚡ Le JEUDI FOU est de retour !');
   });
 });
 

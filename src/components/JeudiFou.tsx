@@ -51,6 +51,8 @@ export function BanniereJeudiFou({ variante = 'accueil' }: { variante?: 'accueil
   const moment = momentJeudiFou(now);
   if (!moment) return null;
   const pendant = moment === 'pendant';
+  // Deuxième édition (26 novembre) : « on vous le remet ! »
+  const retour = prochain(now).debut > bornes(JEUDIS_FOUS[0]).debut;
   const reste = duree((pendant ? prochain(now).fin : prochain(now).debut) - now.getTime());
 
   if (variante === 'pack')
@@ -61,7 +63,13 @@ export function BanniereJeudiFou({ variante = 'accueil' }: { variante?: 'accueil
       >
         <p className="flex items-center gap-1.5 font-display font-extrabold">
           <Zap size={17} fill="currentColor" />
-          {pendant ? 'Jeudi fou : légendaire ×3 aujourd’hui !' : 'Demain, c’est le Jeudi fou !'}
+          {pendant
+            ? retour
+              ? 'Le Jeudi fou est de retour : légendaire ×3 !'
+              : 'Jeudi fou : légendaire ×3 aujourd’hui !'
+            : retour
+              ? 'Demain, le Jeudi fou est de retour !'
+              : 'Demain, c’est le Jeudi fou !'}
         </p>
         <p className="mt-0.5 text-[13px] text-white/90">
           {pendant
@@ -96,9 +104,20 @@ export function BanniereJeudiFou({ variante = 'accueil' }: { variante?: 'accueil
           <Zap size={12} fill="currentColor" /> {pendant ? 'AUJOURD’HUI SEULEMENT' : 'DEMAIN'}
         </span>
         <p className="relative mt-2 max-w-[75%] font-display text-[26px] font-extrabold leading-[1.05]">
-          {pendant ? 'C’est le Jeudi fou !' : 'Demain, c’est le Jeudi fou !'}
+          {retour
+            ? pendant
+              ? 'Le Jeudi fou est de retour !'
+              : 'Demain, le Jeudi fou revient !'
+            : pendant
+              ? 'C’est le Jeudi fou !'
+              : 'Demain, c’est le Jeudi fou !'}
         </p>
         <p className="relative mt-1.5 max-w-[85%] text-[14px] leading-snug text-white/95">
+          {retour && (
+            <>
+              Vous l’avez kiffé, les stats l’ont démontré : <b>on vous le remet !</b>{' '}
+            </>
+          )}
           Tes chances de <b>carte légendaire</b> sont multipliées par 3 dans le pack du jour
           {pendant ? '.' : ' de demain.'}
         </p>
