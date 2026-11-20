@@ -125,6 +125,13 @@ class Game {
     return { progress: { ...p, cards: next }, nouvelle: !deja, debloquee };
   }
 
+  /** Carte offerte (cadeau de l'administrateur). */
+  recevoirCarte = (id: string) => {
+    const r = this.ajouterCarte(this.state.progress, id);
+    this.commit(r.progress);
+    return r;
+  };
+
   /** Roue de Secours : un seul tour. Les cartes gagnées sont ajoutées tout de suite. */
   tournerRoue = () => {
     const p = this.state.progress;

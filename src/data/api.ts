@@ -169,6 +169,11 @@ export const api = {
     }),
   adminResultats: (code: string) => rpc<ResultatAdmin[]>('admin_resultats', { p_code: code }),
 
+  adminCreerCadeau: (code: string, carte: string) =>
+    rpc<string>('admin_creer_cadeau', { p_code: code, p_carte: carte }),
+  recevoirCadeau: (code: string, appareil: string) =>
+    rpc<string>('recevoir_cadeau', { p_code: code, p_appareil: appareil }),
+
   numeroUlysseOr: (appareil: string) => rpc<number>('numero_ulysse_or', { p_appareil: appareil }),
 
   noterVisite: (appareil: string, etape: string, plateforme: string) =>
