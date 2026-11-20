@@ -14,7 +14,7 @@ import {
   type PackResult,
 } from '../domain/packs';
 import { retirerCopies } from '../domain/recyclage';
-import { CASES, carteGagnee, tirerCase } from '../domain/roue';
+import { CASES, carteGagnee, tirerCase, type Gain } from '../domain/roue';
 import type { Progress } from '../domain/types';
 
 export interface SavedGame {
@@ -133,11 +133,12 @@ class Game {
   };
 
   /** Roue de Secours : un seul tour. Les cartes gagnées sont ajoutées tout de suite. */
-  tournerRoue = () => {
+  /** Roue de Secours ; `forcer` (administrateur, test) impose la case, sans prendre de vrai numéro. */
+  tournerRoue = (forcer?: Gain) => {
     const p = this.state.progress;
     const jour = jourDe(new Date());
     if (p.roue) throw new Error('Tu as déjà tourné la roue !');
-    const index = tirerCase();
+    const index = forcer ? CASES.findIndex((c) => c.id === forcer) : tirerCase();
     const gain = CASES[index].id;
     const carte = carteGagnee(gain, p, CARDS);
     let next: Progress = { ...p, roue: { jour, gain, carteId: carte?.id, recupere: !!carte } };
@@ -150,7 +151,7 @@ class Game {
     if (gain === 'or') {
       next = {
         ...next,
-        ulysseOr: { at: new Date().toISOString(), numero: null },
+        ulysseOr: { at: new Date().toISOString(), numero: null, test: !!forcer },
         roue: { ...next.roue!, recupere: true },
       };
     }

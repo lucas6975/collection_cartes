@@ -46,6 +46,7 @@ export function RoueAccueil() {
   const { identite, codeAdmin } = useIdentite();
   const { progress } = useGame();
   const [ouvert, setOuvert] = useState(false);
+  const [forcer, setForcer] = useState<'or' | undefined>(undefined);
   const [apercu, setApercu] = useState<number | 'jour' | null>(null);
   const vrai = momentRoue(now);
   // Administrateur : aperçu du teaser dès maintenant, et de chaque jour au choix.
@@ -88,11 +89,25 @@ export function RoueAccueil() {
         onClick={(e) => {
           e.stopPropagation();
           if (progress.roue) game.remettreRoue();
+          setForcer(undefined);
           setOuvert(true);
         }}
         className="text-white/60 underline"
       >
         🔧 Tester la roue (admin)
+      </span>
+      <span
+        role="button"
+        tabIndex={0}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (progress.roue) game.remettreRoue();
+          setForcer('or');
+          setOuvert(true);
+        }}
+        className="text-sun underline"
+      >
+        👑 Tester Ulysse en Or
       </span>
     </span>
   ) : null;
@@ -137,7 +152,7 @@ export function RoueAccueil() {
           </span>
           {testAdmin}
         </motion.button>
-        <RoueEcran ouvert={ouvert} onClose={() => setOuvert(false)} />
+        <RoueEcran ouvert={ouvert} forcer={forcer} onClose={() => setOuvert(false)} />
       </>
     );
   }
@@ -226,7 +241,7 @@ export function RoueAccueil() {
         </ul>
         {testAdmin}
       </motion.section>
-      <RoueEcran ouvert={ouvert} onClose={() => setOuvert(false)} />
+      <RoueEcran ouvert={ouvert} forcer={forcer} onClose={() => setOuvert(false)} />
     </>
   );
 }

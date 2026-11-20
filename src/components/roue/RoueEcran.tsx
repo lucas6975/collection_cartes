@@ -7,7 +7,7 @@ import { Confetti } from '../../avent/ui';
 import { api } from '../../data/api';
 import { game, useGame, type PackResultat } from '../../data/store';
 import { appareil } from '../../data/visites';
-import { CASES, angleFinal, choixJoker } from '../../domain/roue';
+import { CASES, angleFinal, choixJoker, type Gain } from '../../domain/roue';
 import type { Card } from '../../domain/types';
 import { MASCOTTE_URL } from '../cards/CardBack';
 import { GameCard } from '../cards/GameCard';
@@ -76,14 +76,23 @@ export function Roue({ angle, taille = 300 }: { angle: number; taille?: number }
 type Tour = { index: number; carte: Card | null; debloquee: Card | null };
 
 /** Écran plein de la Roue de Secours : tourner, puis récupérer son gain. */
-export function RoueEcran({ ouvert, onClose }: { ouvert: boolean; onClose: () => void }) {
+export function RoueEcran({
+  ouvert,
+  onClose,
+  forcer,
+}: {
+  ouvert: boolean;
+  onClose: () => void;
+  /** Administrateur : case imposée pour tester. */
+  forcer?: Gain;
+}) {
   return createPortal(
-    <AnimatePresence>{ouvert && <Contenu onClose={onClose} />}</AnimatePresence>,
+    <AnimatePresence>{ouvert && <Contenu onClose={onClose} forcer={forcer} />}</AnimatePresence>,
     document.body,
   );
 }
 
-function Contenu({ onClose }: { onClose: () => void }) {
+function Contenu({ onClose, forcer }: { onClose: () => void; forcer?: Gain }) {
   const { progress, cards } = useGame();
   const navigate = useNavigate();
   const deja = progress.roue;
@@ -100,7 +109,7 @@ function Contenu({ onClose }: { onClose: () => void }) {
 
   // Ulysse en Or : numéro attribué par la base, dans l'ordre des gagnants.
   useEffect(() => {
-    if (!progress.ulysseOr || progress.ulysseOr.numero) return;
+    if (!progress.ulysseOr || progress.ulysseOr.numero || progress.ulysseOr.test) return;
     const id = appareil();
     if (id)
       api
@@ -110,7 +119,7 @@ function Contenu({ onClose }: { onClose: () => void }) {
   }, [progress.ulysseOr]);
 
   const tourner = () => {
-    const r = game.tournerRoue();
+    const r = game.tournerRoue(forcer);
     setTour(r);
     setAngle(angleFinal(r.index, (Math.random() - 0.5) * PART * 0.6));
     setTimeout(() => setFini(true), 5000);
@@ -178,7 +187,10 @@ function Contenu({ onClose }: { onClose: () => void }) {
               {gain.id === 'or' && (
                 <>
                   <div className="mt-6 w-[62%]">
-                    <CarteOr numero={progress.ulysseOr?.numero ?? null} />
+                    <CarteOr
+                      numero={progress.ulysseOr?.numero ?? null}
+                      test={progress.ulysseOr?.test}
+                    />
                   </div>
                   <p className="mt-5 text-sm text-white/90">
                     Carte <b>collector</b> : on ne l’obtient qu’à la roue, et elle est{' '}

@@ -4,7 +4,7 @@ const OR =
   'linear-gradient(150deg, #FFF3B0 0%, #F5C542 22%, #B7791F 48%, #FDE68A 70%, #C08A1E 100%)';
 
 /** Carte collector « Ulysse en Or » : dorée, brillante, numérotée. Tailles en cqw. */
-export function CarteOr({ numero }: { numero: number | null }) {
+export function CarteOr({ numero, test }: { numero: number | null; test?: boolean }) {
   return (
     <div
       className="relative aspect-[5/7] w-full [container-type:inline-size]"
@@ -44,7 +44,11 @@ export function CarteOr({ numero }: { numero: number | null }) {
         >
           Ulysse en Or
           <span className="block font-sans font-bold" style={{ fontSize: '4.6cqw' }}>
-            {numero ? `n° ${String(numero).padStart(3, '0')}` : 'Roue de Secours'}
+            {test
+              ? 'n° TEST'
+              : numero
+                ? `n° ${String(numero).padStart(3, '0')}`
+                : 'Roue de Secours'}
           </span>
         </div>
         <span

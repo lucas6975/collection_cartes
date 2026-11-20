@@ -123,3 +123,13 @@ describe('Roue de Secours', () => {
     expect(a(24)?.title).toBe('🃏 Ton pack du jour est disponible !');
   });
 });
+
+describe('test admin des événements', () => {
+  it('envoie la notif de la roue et celle du Jeudi fou', async () => {
+    const { rappelsEvenements } = await import('../supabase/functions/envoyer-rappels/rappel');
+    expect(rappelsEvenements().map((r) => r.title)).toEqual([
+      '🌀 Ulysse ne tourne plus rond !',
+      '⚡ Le JEUDI FOU est de retour !',
+    ]);
+  });
+});

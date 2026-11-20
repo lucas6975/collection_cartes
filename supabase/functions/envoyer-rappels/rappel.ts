@@ -137,6 +137,13 @@ export function choisirRappel(m: MomentParis): Rappel | null {
   return null;
 }
 
+/** Pour le test de l'administrateur : les notifications des événements (roue, Jeudi fou). */
+export function rappelsEvenements(): Rappel[] {
+  const a = (jour: number) =>
+    choisirRappel({ annee: 2026, mois: 11, jour, heure: 8, minute: 30, jourSemaine: 1 })!;
+  return [a(23), a(26)];
+}
+
 /**
  * Faut-il prévenir maintenant la personne tirée au sort pour ce jour de décembre ?
  * En décembre : le jour même (ou après, en rattrapage), jamais en avance.

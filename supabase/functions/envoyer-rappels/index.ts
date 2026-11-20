@@ -18,6 +18,7 @@ import {
   momentParis,
   rappelCase,
   rappelCompteARebours,
+  rappelsEvenements,
   type MomentParis,
   type Rappel,
 } from './rappel.ts';
@@ -208,6 +209,30 @@ Deno.serve(async (req) => {
       envoyes += (await envoyerA(db, abo as Abonne[], msg)).envoyes;
     }
     return repondre({ test: 'compte à rebours', envoyes });
+  }
+
+  // Test de l'administrateur : les notifications de la Roue de Secours et du Jeudi fou,
+  // sur SON téléphone uniquement.
+  if (corps?.test_evenements) {
+    const { error: refus } = await db.rpc('admin_verifier', { p_code: String(corps.code ?? '') });
+    if (refus) return repondre({ erreur: 'Code administrateur incorrect' }, 403);
+    const { data: abo } = await db
+      .from('rappels_abonnes')
+      .select('endpoint, p256dh, auth')
+      .eq('endpoint', String(corps.endpoint ?? ''));
+    if (!abo?.length)
+      return repondre({ erreur: 'Ce téléphone n’est pas inscrit aux rappels' }, 404);
+    let envoyes = 0;
+    for (const r of rappelsEvenements()) {
+      const msg = JSON.stringify({
+        title: r.title,
+        body: r.body,
+        url: r.url,
+        tag: `test-${r.title}`,
+      });
+      envoyes += (await envoyerA(db, abo as Abonne[], msg)).envoyes;
+    }
+    return repondre({ test: 'événements', envoyes });
   }
 
   // Test de l'administrateur : une fausse alerte « Nouvel inscrit » sur SON téléphone uniquement.

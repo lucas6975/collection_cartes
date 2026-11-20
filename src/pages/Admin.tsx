@@ -587,7 +587,7 @@ function OngletInscrits({
 function TestNotifications({ code }: { code: string }) {
   const toast = useToast();
   const [envoi, setEnvoi] = useState(false);
-  const tester = async () => {
+  const tester = async (evenements = false) => {
     setEnvoi(true);
     try {
       const endpoint = await endpointActuel();
@@ -596,7 +596,9 @@ function TestNotifications({ code }: { code: string }) {
         return;
       }
       await rappelsStore.verifier().catch(() => undefined);
-      const r = await api.adminTesterCompteARebours(code, endpoint);
+      const r = evenements
+        ? await api.adminTesterEvenements(code, endpoint)
+        : await api.adminTesterCompteARebours(code, endpoint);
       toast(`${r.envoyes} notifications envoyées sur ce téléphone 🔔`, 'success');
     } catch (e) {
       toast(
@@ -621,9 +623,14 @@ function TestNotifications({ code }: { code: string }) {
           J-4, J-1 et celle du 1er décembre. Les collaborateurs ne reçoivent rien.
         </p>
       </div>
-      <Button variant="accent" onClick={() => void tester()} disabled={envoi}>
-        <BellRing size={16} /> {envoi ? 'Envoi…' : 'Recevoir le test'}
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button variant="accent" onClick={() => void tester()} disabled={envoi}>
+          <BellRing size={16} /> {envoi ? 'Envoi…' : 'Recevoir le test'}
+        </Button>
+        <Button variant="secondary" onClick={() => void tester(true)} disabled={envoi}>
+          🌀 Roue + ⚡ Jeudi fou
+        </Button>
+      </div>
     </section>
   );
 }

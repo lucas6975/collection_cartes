@@ -102,7 +102,7 @@ export function Collection() {
         )}
         {progress.ulysseOr && (
           <div className="w-[96px] shrink-0 sm:w-[120px]">
-            <CarteOr numero={progress.ulysseOr.numero} />
+            <CarteOr numero={progress.ulysseOr.numero} test={progress.ulysseOr.test} />
           </div>
         )}
         <div className="min-w-0 flex-1">

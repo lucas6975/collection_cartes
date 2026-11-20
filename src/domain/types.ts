@@ -84,5 +84,5 @@ export interface Progress {
   /** Tour de la Roue de Secours (un seul) : jour, case gagnée, carte reçue, gain déjà récupéré. */
   roue?: { jour: string; gain: string; carteId?: string; recupere: boolean };
   /** Carte collector « Ulysse en Or » (gagnée à la roue), numérotée dans l'ordre des gagnants. */
-  ulysseOr?: { at: string; numero: number | null };
+  ulysseOr?: { at: string; numero: number | null; test?: boolean };
 }

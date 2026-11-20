@@ -144,6 +144,9 @@ export const api = {
   adminTesterCompteARebours: (code: string, endpoint: string) =>
     fonctionRappels<{ envoyes: number }>({ test_compte_a_rebours: true, code, endpoint }),
 
+  adminTesterEvenements: (code: string, endpoint: string) =>
+    fonctionRappels<{ envoyes: number }>({ test_evenements: true, code, endpoint }),
+
   adminTesterInscription: (code: string, endpoint: string) =>
     fonctionRappels<{ envoyes: number }>({ test_inscription: true, code, endpoint }),
 
