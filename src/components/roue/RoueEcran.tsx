@@ -145,7 +145,7 @@ function Contenu({ onClose }: { onClose: () => void }) {
           <>
             <p className="font-display text-[26px] font-extrabold">🛟 La Roue de Secours</p>
             <p className="mt-1 text-center text-sm text-white/85">
-              Jamais en roue libre sur la sécu… sauf aujourd’hui ! 0 perdant.
+              Ulysse ne tourne plus rond… à ton tour de tourner ! 0 perdant.
             </p>
             <div className="mt-9">
               <Roue angle={angle} taille={Math.min(320, window.innerWidth - 50)} />
@@ -156,7 +156,7 @@ function Contenu({ onClose }: { onClose: () => void }) {
               disabled={!!tour}
               className="mt-9 h-14 w-full rounded-2xl bg-sun text-lg font-extrabold text-navy-950 shadow-lg transition-transform active:scale-95 disabled:opacity-70"
             >
-              {tour ? 'Ça tourne… 🤞' : '🎡 Tourner la roue !'}
+              {tour ? 'Ulysse a la tête qui tourne… 😵‍💫' : '🎡 Tourner la roue !'}
             </button>
             <p className="mt-2 text-sm text-white/70">1 seul tour · aujourd’hui seulement</p>
           </>

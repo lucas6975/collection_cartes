@@ -18,15 +18,15 @@ const p = (ids: string[]): Progress => ({
 });
 
 describe('Roue de Secours', () => {
-  it('teaser du 20 au 23, roue le 24 seulement', () => {
+  it('teaser du 20 au 22, roue le lundi 23 seulement', () => {
     expect(momentRoue(new Date(2026, 10, 19, 23, 59))).toBeNull();
     expect(momentRoue(new Date(2026, 10, 20, 0, 1))).toEqual({ type: 'teaser', jour: 0 });
-    expect(momentRoue(new Date(2026, 10, 23, 22))).toEqual({ type: 'teaser', jour: 3 });
-    expect(momentRoue(new Date(2026, 10, 24, 0, 1))).toEqual({ type: 'jour' });
-    expect(momentRoue(new Date(2026, 10, 25, 9))).toBeNull();
-    expect(FLOUS).toHaveLength(4);
+    expect(momentRoue(new Date(2026, 10, 22, 22))).toEqual({ type: 'teaser', jour: 2 });
+    expect(momentRoue(new Date(2026, 10, 23, 0, 1))).toEqual({ type: 'jour' });
+    expect(momentRoue(new Date(2026, 10, 24, 9))).toBeNull();
+    expect(FLOUS).toHaveLength(3);
     expect(INDICES).toHaveLength(2);
-    expect(INDICE_DU_JOUR).toEqual([0, 0, 0, 1]);
+    expect(INDICE_DU_JOUR).toEqual([0, 0, 1]);
   });
 
   it('les chances font 100 et respectent les poids', () => {

@@ -10,16 +10,16 @@ const [A, M, J] = JOUR_ROUE.split('-').map(Number);
 const DEBUT = new Date(A, M - 1, J).getTime();
 
 /** Le flou de la roue diminue chaque jour (20 → 23 novembre). */
-export const FLOUS = [16, 10, 6, 1.8];
+export const FLOUS = [16, 8, 1.8];
 
 /** Un indice de plus chaque jour. */
 export const INDICES = [
-  '🎰 Mardi 24, tout le monde repart gagnant : 1 tour gratuit par personne, 0 perdant. Et le gros lot ? 👑 Ulysse en Or, une carte collector numérotée : le 1er gagnant aura le n° 001, le 2e le n° 002… Joue tôt !',
+  '🎰 Lundi 23, tout le monde repart gagnant : 1 tour gratuit par personne, 0 perdant. Et le gros lot ? 👑 Ulysse en Or, une carte collector numérotée : le 1er gagnant aura le n° 001, le 2e le n° 002… Joue tôt !',
   '🛟 Collection à plat ? Demain dès 8 h 30, tourne la Roue de Secours : Ulysse en Or, Joker, légendaire, LSR qui te manque… À toi de jouer !',
 ];
 
-/** Indice du jour : vendredi (et week-end) le 1er, lundi le 2e (le nom). */
-export const INDICE_DU_JOUR = [0, 0, 0, 1];
+/** Indice du jour : vendredi et samedi le 1er, dimanche le 2e (le nom). */
+export const INDICE_DU_JOUR = [0, 0, 1];
 
 /** « 4 j 13 h 05 min 09 s » */
 export function compteARebours(ms: number) {
@@ -64,8 +64,8 @@ export function RoueAccueil() {
       {(
         [
           [0, 'ven.'],
-          [3, 'lun.'],
-          ['jour', 'mardi'],
+          [2, 'dim.'],
+          ['jour', 'lundi'],
         ] as const
       ).map(([v, l]) => (
         <span
@@ -118,7 +118,7 @@ export function RoueAccueil() {
             <Roue angle={0} taille={150} />
           </motion.div>
           <span className="relative rounded-full bg-black/25 px-2.5 py-1 text-[11px] font-extrabold tracking-[0.12em]">
-            🛟 AUJOURD’HUI SEULEMENT
+            🌀 ULYSSE NE TOURNE PLUS ROND
           </span>
           <p className="relative mt-2 max-w-[62%] font-display text-[26px] font-extrabold leading-[1.05]">
             La Roue de Secours !
@@ -182,7 +182,7 @@ export function RoueAccueil() {
               {!dernier ? 'Quelque chose arrive…' : 'C’est demain !'}
             </p>
             <p className="mt-0.5 font-display text-lg font-extrabold leading-tight">
-              {!dernier ? 'Mardi 24, ça va tourner 👀' : '🛟 La Roue de Secours'}
+              {!dernier ? 'Lundi, Ulysse ne va plus tourner rond 🌀' : '🛟 La Roue de Secours'}
             </p>
             <div className="mt-2 flex gap-1.5 font-display font-extrabold">
               {[
@@ -219,7 +219,7 @@ export function RoueAccueil() {
                 className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/20 px-3 py-2 text-[12.5px] text-white/50"
               >
                 <Lock size={12} /> Indice {i + 1} · dévoilé{' '}
-                {i === INDICES.length - 1 ? 'lundi' : 'demain'}
+                {i === INDICES.length - 1 ? 'dimanche' : 'demain'}
               </li>
             ),
           )}

@@ -112,13 +112,14 @@ describe('Jeudi fou', () => {
     expect(a(19)?.type).toBe('pack');
     expect(a(18)?.title).toBe('🃏 Ton pack du jour est disponible !');
     expect(a(20)?.title).toBe('🃏 Ton pack du jour est disponible !');
+    expect(a(26)?.title).toBe('⚡ C’est le JEUDI FOU !');
   });
 });
 
 describe('Roue de Secours', () => {
-  it('remplace le rappel du pack le 24 novembre seulement', () => {
+  it('remplace le rappel du pack le 23 novembre seulement', () => {
     const a = (j: number) => choisirRappel(momentParis(new Date(Date.UTC(2026, 10, j, 7, 45))));
-    expect(a(24)?.title).toBe('🛟 La Roue de Secours est ouverte !');
-    expect(a(25)?.title).toBe('🃏 Ton pack du jour est disponible !');
+    expect(a(23)?.title).toBe('🌀 Ulysse ne tourne plus rond !');
+    expect(a(24)?.title).toBe('🃏 Ton pack du jour est disponible !');
   });
 });

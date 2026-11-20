@@ -2,21 +2,28 @@ import { Zap } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
-import { JEUDI_FOU, jourDe } from '../domain/packs';
+import { JEUDIS_FOUS, jourDe } from '../domain/packs';
 import { cx } from './ui/primitives';
 
-const [A, M, J] = JEUDI_FOU.split('-').map(Number);
-const DEBUT = new Date(A, M - 1, J).getTime();
-const FIN = new Date(A, M - 1, J + 1).getTime();
 // Le compte à rebours s'affiche à partir de la veille.
-const ANNONCE = new Date(A, M - 1, J - 1).getTime();
+const bornes = (jour: string) => {
+  const [A, M, J] = jour.split('-').map(Number);
+  return {
+    annonce: new Date(A, M - 1, J - 1).getTime(),
+    debut: new Date(A, M - 1, J).getTime(),
+    fin: new Date(A, M - 1, J + 1).getTime(),
+  };
+};
+const prochain = (now: Date) =>
+  JEUDIS_FOUS.map(bornes).find((b) => now.getTime() < b.fin) ?? bornes(JEUDIS_FOUS[0]);
 
 export type MomentJeudiFou = 'annonce' | 'pendant' | null;
 
 export function momentJeudiFou(now: Date): MomentJeudiFou {
   const t = now.getTime();
-  if (jourDe(now) === JEUDI_FOU) return 'pendant';
-  if (t >= ANNONCE && t < DEBUT) return 'annonce';
+  if (JEUDIS_FOUS.includes(jourDe(now))) return 'pendant';
+  const b = prochain(now);
+  if (t >= b.annonce && t < b.debut) return 'annonce';
   return null;
 }
 
@@ -44,7 +51,7 @@ export function BanniereJeudiFou({ variante = 'accueil' }: { variante?: 'accueil
   const moment = momentJeudiFou(now);
   if (!moment) return null;
   const pendant = moment === 'pendant';
-  const reste = duree((pendant ? FIN : DEBUT) - now.getTime());
+  const reste = duree((pendant ? prochain(now).fin : prochain(now).debut) - now.getTime());
 
   if (variante === 'pack')
     return (

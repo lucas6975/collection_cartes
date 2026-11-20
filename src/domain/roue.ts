@@ -1,9 +1,9 @@
-// La Roue de Secours d'Ulysse : un tour par personne, le mardi 24 novembre 2026.
+// La Roue de Secours d'Ulysse : un tour par personne, le lundi 23 novembre 2026.
 // Teaser sur l'accueil à partir du 20 novembre. Fonctions pures, testées.
 import { jourDe } from './packs';
 import type { Card, Progress } from './types';
 
-export const JOUR_ROUE = '2026-11-24';
+export const JOUR_ROUE = '2026-11-23';
 export const DEBUT_TEASER = '2026-11-20';
 
 export type Gain = 'or' | 'joker' | 'lsr' | 'legendaire' | 'manquante' | 'pack';
@@ -20,7 +20,7 @@ export const CASES: { id: Gain; emoji: string; label: string; poids: number; cou
 
 export type MomentRoue = { type: 'teaser'; jour: number } | { type: 'jour' } | null;
 
-/** Teaser du 20 au 23 novembre (jour 0 à 3), puis la roue le 24. */
+/** Teaser du 20 au 22 novembre (jour 0 à 2), puis la roue le 23. */
 export function momentRoue(now: Date): MomentRoue {
   const j = jourDe(now);
   if (j === JOUR_ROUE) return { type: 'jour' };

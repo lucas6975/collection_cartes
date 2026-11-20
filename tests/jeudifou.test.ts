@@ -8,6 +8,10 @@ describe('bannière du Jeudi fou', () => {
     expect(momentJeudiFou(new Date(2026, 10, 19, 0, 0))).toBe('pendant');
     expect(momentJeudiFou(new Date(2026, 10, 19, 23, 59))).toBe('pendant');
     expect(momentJeudiFou(new Date(2026, 10, 20, 0, 0))).toBeNull();
+    expect(momentJeudiFou(new Date(2026, 10, 24, 22, 0))).toBeNull();
+    expect(momentJeudiFou(new Date(2026, 10, 25, 9, 0))).toBe('annonce');
+    expect(momentJeudiFou(new Date(2026, 10, 26, 15, 0))).toBe('pendant');
+    expect(momentJeudiFou(new Date(2026, 10, 27, 0, 1))).toBeNull();
   });
   it('écrit le temps restant', () => {
     expect(duree(7 * 3600_000 + 5 * 60_000)).toBe('7 h 05');

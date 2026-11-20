@@ -27,8 +27,8 @@ export const PROBABILITES_GARANTIE: Record<Rarity, number> = {
  * Jeudi fou (jeudi 19 novembre 2026 uniquement) : chances de carte légendaire ×3.
  * La part ajoutée est prise sur les cartes les plus courantes.
  */
-export const JEUDI_FOU = '2026-11-19';
-export const estJeudiFou = (now: Date) => jourDe(now) === JEUDI_FOU;
+export const JEUDIS_FOUS = ['2026-11-19', '2026-11-26'];
+export const estJeudiFou = (now: Date) => JEUDIS_FOUS.includes(jourDe(now));
 
 export const PROBABILITES_JEUDI_FOU: Record<Rarity, number> = {
   ...PROBABILITES,

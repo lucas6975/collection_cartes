@@ -110,12 +110,14 @@ describe('pack du jour', () => {
 });
 
 describe('Jeudi fou', () => {
-  it('ne concerne que le jeudi 19 novembre 2026', async () => {
+  it('ne concerne que les jeudis 19 et 26 novembre 2026', async () => {
     const { estJeudiFou } = await import('../src/domain/packs');
     expect(estJeudiFou(new Date(2026, 10, 19, 0, 1))).toBe(true);
     expect(estJeudiFou(new Date(2026, 10, 19, 23, 59))).toBe(true);
     expect(estJeudiFou(new Date(2026, 10, 18, 23, 59))).toBe(false);
     expect(estJeudiFou(new Date(2026, 10, 20, 0, 1))).toBe(false);
+    expect(estJeudiFou(new Date(2026, 10, 26, 10))).toBe(true);
+    expect(estJeudiFou(new Date(2026, 10, 27, 10))).toBe(false);
   });
 
   it('multiplie par 3 les chances de légendaire (tables à 100)', async () => {
