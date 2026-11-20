@@ -114,7 +114,7 @@ export function choisirRappel(m: MomentParis): Rappel | null {
       return {
         type: 'pack',
         title: '⚡ Le JEUDI FOU est de retour !',
-        body: 'Vous l’avez kiffé, les stats l’ont démontré : on vous le remet ! Légendaires ×3 aujourd’hui seulement 🃏',
+        body: 'Vous en redemandiez, les stats l’ont prouvé : on vous le remet ! Légendaires ×3 aujourd’hui seulement 🃏',
         url: './#/cartes',
         tag: 'pack',
       };

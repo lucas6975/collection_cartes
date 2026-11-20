@@ -115,7 +115,7 @@ export function BanniereJeudiFou({ variante = 'accueil' }: { variante?: 'accueil
         <p className="relative mt-1.5 max-w-[85%] text-[14px] leading-snug text-white/95">
           {retour && (
             <>
-              Vous l’avez kiffé, les stats l’ont démontré : <b>on vous le remet !</b>{' '}
+              Vous en redemandiez, les stats l’ont prouvé : <b>on vous le remet !</b>{' '}
             </>
           )}
           Tes chances de <b>carte légendaire</b> sont multipliées par 3 dans le pack du jour
