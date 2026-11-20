@@ -115,7 +115,7 @@ export function Admin() {
         </p>
       )}
 
-      <OffrirCarte code={codeAdmin} />
+      <OffrirCarte code={codeAdmin} participants={participants} />
       <AlertesInscriptions code={codeAdmin} />
       <TestNotifications code={codeAdmin} />
 

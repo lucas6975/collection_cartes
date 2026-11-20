@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { renderSVG } from 'uqr';
 import { Confetti } from '../avent/ui';
-import { CardFace, GameCard } from '../components/cards/GameCard';
+import { CardFace } from '../components/cards/GameCard';
 import { useNomCartePerso } from '../components/cards/CartePerso';
 import { ScannerQR } from '../components/ScannerQR';
 import { useToast } from '../components/ui/overlay';
@@ -13,8 +13,6 @@ import { CARDS } from '../content/cards';
 import { RARITY_BY_ID } from '../content/categories';
 import { ApiError, api, type Echange as EchangeServeur } from '../data/api';
 import { doublons, game, useGame } from '../data/store';
-import { appareil } from '../data/visites';
-import { lireCadeau } from './AdminCadeau';
 import type { Card } from '../domain/types';
 
 const CARTE = new Map(CARDS.map((c) => [c.id, c]));
@@ -69,8 +67,7 @@ type Vue =
   | { k: 'moncode' }
   | { k: 'choix'; code: string; cle: string; e: EchangeServeur }
   | { k: 'attente'; code: string; cle: string; e: EchangeServeur }
-  | { k: 'reussi'; donne: string; recoit: string; avec: string }
-  | { k: 'cadeau'; carte: string; nouvelle: boolean };
+  | { k: 'reussi'; donne: string; recoit: string; avec: string };
 
 export function Echange() {
   const { progress } = useGame();
@@ -118,19 +115,6 @@ export function Echange() {
 
   const scanne = (texte: string) => {
     setScanner(false);
-    // Carte offerte par l'administrateur.
-    const cadeau = lireCadeau(texte);
-    if (cadeau) {
-      const id = appareil() ?? '00000000-0000-0000-0000-000000000000';
-      void api
-        .recevoirCadeau(cadeau, id)
-        .then((carte) => {
-          const r = game.recevoirCarte(carte);
-          setVue({ k: 'cadeau', carte, nouvelle: r.nouvelle });
-        })
-        .catch((e) => toast(message(e), 'error'));
-      return;
-    }
     const c = lireCode(texte);
     if (!c) return toast('Ce QR code n’est pas un code d’échange Team Ulysse.', 'error');
     void rejoindre(c);
@@ -207,14 +191,6 @@ export function Echange() {
           {...vue}
           onCollection={() => navigate('/collection')}
           onAutre={() => setVue({ k: 'moncode' })}
-        />
-      )}
-
-      {vue.k === 'cadeau' && (
-        <CadeauRecu
-          carte={vue.carte}
-          nouvelle={vue.nouvelle}
-          onCollection={() => navigate('/collection')}
         />
       )}
 
@@ -773,38 +749,5 @@ export function EchangeHorsAppli({ code, onContinuer }: { code: string; onContin
         Je n’ai pas encore l’appli
       </button>
     </div>
-  );
-}
-
-function CadeauRecu({
-  carte,
-  nouvelle,
-  onCollection,
-}: {
-  carte: string;
-  nouvelle: boolean;
-  onCollection: () => void;
-}) {
-  const c = CARDS.find((x) => x.id === carte);
-  return (
-    <section className="panel relative overflow-hidden p-6 text-center">
-      <Confetti />
-      <p className="eyebrow text-[#C8283A]">🎁 Cadeau</p>
-      <h2 className="mt-1 font-display text-2xl font-extrabold text-navy-950">
-        Une carte rien que pour toi !
-      </h2>
-      {c && (
-        <div className="mx-auto mt-5 w-[60%]">
-          <GameCard card={c} total={CARDS.length} size="lg" className="w-full" isNew={nouvelle} />
-        </div>
-      )}
-      <p className="mt-4 text-sm text-muted">
-        Offerte par la Team Ulysse.{' '}
-        {nouvelle ? 'Elle rejoint ta collection 🗂️' : 'Un doublon de plus à échanger 🔁'}
-      </p>
-      <Button variant="accent" size="lg" className="mt-5 w-full" onClick={onCollection}>
-        Voir ma collection
-      </Button>
-    </section>
   );
 }

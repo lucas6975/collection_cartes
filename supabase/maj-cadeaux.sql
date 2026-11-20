@@ -1,5 +1,6 @@
--- Team Ulysse : l'administrateur offre une carte à une personne (QR code à usage unique).
--- À copier une seule fois dans Supabase › SQL Editor › Run.
+-- Team Ulysse : l'administrateur offre une carte à une personne inscrite.
+-- La carte arrive sur le téléphone de la personne à sa prochaine ouverture de l'appli.
+-- À copier une seule fois dans Supabase › SQL Editor › Run (peut être relancé sans risque).
 
 create table if not exists public.cadeaux (
   code text primary key,
@@ -8,34 +9,40 @@ create table if not exists public.cadeaux (
   utilise_le timestamptz,
   appareil uuid
 );
+alter table public.cadeaux
+  add column if not exists participant_id uuid references public.participants (id) on delete cascade;
 alter table public.cadeaux enable row level security;
 revoke all on public.cadeaux from anon, authenticated;
 
--- L'administrateur crée un cadeau : renvoie le code à mettre dans le QR.
-create or replace function public.admin_creer_cadeau(p_code text, p_carte text) returns text
+-- L'administrateur offre une carte à une personne inscrite.
+create or replace function public.admin_offrir_carte(p_code text, p_participant uuid, p_carte text)
+returns void
 language plpgsql security definer set search_path = public, extensions as $$
-declare
-  c text;
 begin
   perform verifier_code(p_code);
-  c := upper(substr(encode(extensions.gen_random_bytes(8), 'hex'), 1, 10));
-  insert into cadeaux (code, carte) values (c, p_carte);
-  return c;
+  if not exists (select 1 from participants where id = p_participant) then
+    raise exception 'Personne introuvable';
+  end if;
+  insert into cadeaux (code, carte, participant_id)
+  values (upper(encode(extensions.gen_random_bytes(8), 'hex')), p_carte, p_participant);
 end $$;
 
--- Le collègue scanne le QR : une seule fois, dans les 24 heures. Renvoie l'identifiant de la carte.
-create or replace function public.recevoir_cadeau(p_code text, p_appareil uuid) returns text
+-- Le téléphone de la personne récupère ses cartes offertes (une seule fois chacune).
+create or replace function public.recuperer_cadeaux(p_jeton uuid) returns jsonb
 language plpgsql security definer set search_path = public as $$
 declare
-  r cadeaux;
+  pid uuid := (select id from participants where jeton = p_jeton);
+  r jsonb;
 begin
-  select * into r from cadeaux where code = upper(p_code) for update;
-  if not found then raise exception 'Ce cadeau n’existe pas.'; end if;
-  if r.utilise_le is not null then raise exception 'Ce cadeau a déjà été récupéré.'; end if;
-  if r.cree_le < now() - interval '24 hours' then raise exception 'Ce cadeau a expiré.'; end if;
-  update cadeaux set utilise_le = now(), appareil = p_appareil where code = r.code;
-  return r.carte;
+  if pid is null then return '[]'; end if;
+  with pris as (
+    update cadeaux set utilise_le = now()
+    where participant_id = pid and utilise_le is null
+    returning carte, cree_le
+  )
+  select coalesce(jsonb_agg(carte order by cree_le), '[]') into r from pris;
+  return r;
 end $$;
 
-revoke execute on function public.admin_creer_cadeau(text, text), public.recevoir_cadeau(text, uuid) from public;
-grant execute on function public.admin_creer_cadeau(text, text), public.recevoir_cadeau(text, uuid) to anon, authenticated;
+revoke execute on function public.admin_offrir_carte(text, uuid, text), public.recuperer_cadeaux(uuid) from public;
+grant execute on function public.admin_offrir_carte(text, uuid, text), public.recuperer_cadeaux(uuid) to anon, authenticated;

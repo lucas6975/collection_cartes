@@ -1,40 +1,38 @@
-import { Gift } from 'lucide-react';
+import { Gift, Search } from 'lucide-react';
 import { useState } from 'react';
-import { renderSVG } from 'uqr';
 import { GameCard } from '../components/cards/GameCard';
 import { Modal, useToast } from '../components/ui/overlay';
-import { Button, cx } from '../components/ui/primitives';
+import { Avatar, Button, cx } from '../components/ui/primitives';
 import { CARDS } from '../content/cards';
-import { ApiError, api } from '../data/api';
+import { ApiError, api, type Participant } from '../data/api';
 
-/** Contenu du QR : du texte, lu par le scanner d'échange de l'appli (comme les échanges). */
-export const texteCadeau = (code: string) => `TEAM ULYSSE CADEAU ${code}`;
-
-export function lireCadeau(texte: string): string | null {
-  const m = /CADEAU[\s:-]*([A-Za-z0-9]{10})\b/i.exec(texte.trim());
-  return m ? m[1].toUpperCase() : null;
-}
-
-/** Espace admin : offrir n'importe quelle carte à une personne, par un QR code à usage unique. */
-export function OffrirCarte({ code }: { code: string }) {
+/** Espace admin : offrir n'importe quelle carte à une personne inscrite. */
+export function OffrirCarte({ code, participants }: { code: string; participants: Participant[] }) {
   const toast = useToast();
   const [ouvert, setOuvert] = useState(false);
+  const [q, setQ] = useState('');
+  const [qui, setQui] = useState<Participant | null>(null);
   const [carte, setCarte] = useState<string | null>(null);
-  const [cadeau, setCadeau] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const choisie = CARDS.find((c) => c.id === carte);
+  const liste = participants
+    .filter((p) => `${p.prenom} ${p.nom}`.toLowerCase().includes(q.trim().toLowerCase()))
+    .sort((a, b) => `${a.prenom} ${a.nom}`.localeCompare(`${b.prenom} ${b.nom}`));
 
   const fermer = () => {
     setOuvert(false);
+    setQui(null);
     setCarte(null);
-    setCadeau(null);
+    setQ('');
   };
 
-  const creer = async () => {
-    if (!carte) return;
+  const offrir = async () => {
+    if (!qui || !carte) return;
     setEnvoi(true);
     try {
-      setCadeau(await api.adminCreerCadeau(code, carte));
+      await api.adminOffrirCarte(code, qui.id, carte);
+      toast(`🎁 « ${choisie?.nom} » offerte à ${qui.prenom} ${qui.nom}`, 'success');
+      fermer();
     } catch (e) {
       toast(
         e instanceof ApiError ? `${e.message} (as-tu lancé supabase/maj-cadeaux.sql ?)` : 'Erreur',
@@ -45,10 +43,6 @@ export function OffrirCarte({ code }: { code: string }) {
     }
   };
 
-  const qr = cadeau
-    ? `data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(texteCadeau(cadeau), { ecc: 'M', border: 2 }))}`
-    : '';
-
   return (
     <>
       <section className="panel mb-5 flex items-center gap-3 p-4">
@@ -58,7 +52,7 @@ export function OffrirCarte({ code }: { code: string }) {
         <div className="min-w-0 flex-1">
           <p className="font-display font-extrabold text-navy-950">Offrir une carte</p>
           <p className="text-sm text-muted">
-            Choisis une carte, puis fais scanner le QR code par la personne. Une seule fois.
+            Choisis une personne et une carte : elle la reçoit à sa prochaine ouverture de l’appli.
           </p>
         </div>
         <Button variant="accent" onClick={() => setOuvert(true)}>
@@ -69,11 +63,49 @@ export function OffrirCarte({ code }: { code: string }) {
       <Modal
         open={ouvert}
         onClose={fermer}
-        title={cadeau ? 'Fais scanner ce QR code 📷' : 'Quelle carte offrir ?'}
+        title={qui ? `Quelle carte pour ${qui.prenom} ?` : 'À qui offrir une carte ?'}
         size="lg"
       >
-        {!cadeau ? (
+        {!qui ? (
+          <div className="space-y-3 p-5">
+            <label className="relative block">
+              <Search size={17} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Rechercher un nom…"
+                className="h-11 w-full rounded-xl border border-line bg-white pl-10 pr-3 text-[16px] outline-none focus:border-blue"
+              />
+            </label>
+            <ul className="divide-y divide-line">
+              {liste.map((p) => (
+                <li key={p.id}>
+                  <button
+                    type="button"
+                    onClick={() => setQui(p)}
+                    className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left hover:bg-canvas"
+                  >
+                    <Avatar user={{ id: p.id, prenom: p.prenom, nom: p.nom }} size={34} />
+                    <span className="font-semibold text-navy-950">
+                      {p.prenom} {p.nom}
+                    </span>
+                  </button>
+                </li>
+              ))}
+              {!liste.length && (
+                <li className="py-6 text-center text-sm text-muted">Aucun inscrit trouvé.</li>
+              )}
+            </ul>
+          </div>
+        ) : (
           <div className="space-y-4 p-5">
+            <button
+              type="button"
+              onClick={() => setQui(null)}
+              className="text-sm font-semibold text-blue"
+            >
+              ← Changer de personne
+            </button>
             <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
               {CARDS.map((c) => (
                 <button
@@ -102,30 +134,17 @@ export function OffrirCarte({ code }: { code: string }) {
                 variant="accent"
                 size="lg"
                 className="w-full"
-                onClick={() => void creer()}
+                onClick={() => void offrir()}
                 disabled={!carte || envoi}
               >
                 <Gift size={18} />{' '}
-                {envoi ? 'Création…' : choisie ? `Offrir « ${choisie.nom} »` : 'Choisis une carte'}
+                {envoi
+                  ? 'Envoi…'
+                  : choisie
+                    ? `Offrir « ${choisie.nom} » à ${qui.prenom}`
+                    : 'Choisis une carte'}
               </Button>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-3 p-5 text-center">
-            <img
-              src={qr}
-              alt="QR code du cadeau"
-              className="mx-auto block w-full max-w-[280px] rounded-2xl [image-rendering:pixelated]"
-            />
-            <p className="font-display text-lg font-extrabold text-navy-950">🎁 {choisie?.nom}</p>
-            <p className="text-sm text-muted">
-              Dans son appli : <b className="text-navy-950">Collection › Échanger une carte ›</b>{' '}
-              scanner le QR code. Valable <b className="text-navy-950">une seule fois</b>, pendant
-              24 h.
-            </p>
-            <Button variant="secondary" className="w-full" onClick={fermer}>
-              Terminé
-            </Button>
           </div>
         )}
       </Modal>
