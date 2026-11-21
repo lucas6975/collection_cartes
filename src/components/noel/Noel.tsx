@@ -1,19 +1,13 @@
 // Décors du thème de Noël (voir src/data/noel.ts).
 import { useReducedMotion } from 'motion/react';
-import { useState } from 'react';
 import { useIdentite } from '../../data/identite';
-import type { ThemeNoel } from '../../data/noel';
 import { cx } from '../ui/primitives';
 
 export const ULYSSE_NOEL_URL = `${import.meta.env.BASE_URL}avent/ulysse-noel.webp`;
 export const AVATAR_NOEL_URL = `${import.meta.env.BASE_URL}ulysse-avatar-noel.webp`;
 
-/** Fond du bandeau d'accueil selon le thème. */
-export const FOND_HERO: Record<ThemeNoel, string> = {
-  rouge: 'linear-gradient(125deg, #C62A38 0%, #931626 55%, #5E0C18 100%)',
-  neige: 'linear-gradient(160deg, #24508F 0%, #12305E 45%, #081A36 100%)',
-  nuit: 'linear-gradient(140deg, #1F3F74 0%, #0E2348 100%)',
-};
+/** Fond rouge du bandeau d'accueil. */
+export const FOND_HERO_NOEL = 'linear-gradient(125deg, #C62A38 0%, #931626 55%, #5E0C18 100%)';
 
 const COULEURS = ['#F5C542', '#E0434F', '#4C9BE8', '#3DBE6E'];
 
@@ -56,87 +50,20 @@ export function Guirlande() {
   );
 }
 
-/** Petites étoiles dorées qui scintillent (thème « Nuit dorée »). */
-export function Etoiles({ nombre = 12 }: { nombre?: number }) {
-  const reduce = useReducedMotion();
-  const [items] = useState(() =>
-    Array.from({ length: nombre }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      taille: 7 + Math.random() * 8,
-      delai: Math.random() * 2.5,
-    })),
-  );
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      {items.map((e) => (
-        <span
-          key={e.id}
-          className="absolute text-sun"
-          style={{
-            left: `${e.x}%`,
-            top: `${e.y}%`,
-            fontSize: e.taille,
-            animation: reduce ? undefined : `scintille 2.4s ease-in-out ${e.delai}s infinite`,
-          }}
-        >
-          ✦
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/** Le calendrier en sapin : une boule dorée s'allume pour chaque case réussie. */
-export function BoulesSapin({ jours, faits }: { jours: number[]; faits: Set<number> }) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {jours.map((j) => (
-        <span
-          key={j}
-          className={cx(
-            'grid size-7 place-items-center rounded-full text-[11px] font-extrabold',
-            faits.has(j) ? 'text-navy-950' : 'bg-white/10 text-white/60',
-          )}
-          style={
-            faits.has(j)
-              ? {
-                  background: 'radial-gradient(circle at 35% 30%, #FFE08A, #E0A91B 60%, #A87406)',
-                  boxShadow: '0 0 10px rgba(245,197,66,0.55)',
-                }
-              : undefined
-          }
-          title={`${j} décembre`}
-        >
-          {faits.has(j) ? '' : j}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 /** Le pack du jour emballé comme un cadeau, avec le prénom sur l'étiquette. */
 export function PaquetCadeau({
-  theme,
   titre,
   sousTitre,
   opened,
   className,
 }: {
-  theme: ThemeNoel;
   titre: string;
   sousTitre: string;
   opened?: boolean;
   className?: string;
 }) {
   const { identite } = useIdentite();
-  const papier =
-    theme === 'nuit'
-      ? 'linear-gradient(135deg, #1F3F74, #0B1A33)'
-      : theme === 'neige'
-        ? 'linear-gradient(135deg, #D33544, #8E1424)'
-        : 'linear-gradient(135deg, #22774D, #0D3A24)';
+  const papier = 'linear-gradient(135deg, #22774D, #0D3A24)';
   return (
     <div
       className={cx(

@@ -20,13 +20,7 @@ export function PackArt({
   const noel = useNoel();
   if (noel)
     return (
-      <PaquetCadeau
-        theme={noel}
-        titre={titre}
-        sousTitre={sousTitre}
-        opened={opened}
-        className={className}
-      />
+      <PaquetCadeau titre={titre} sousTitre={sousTitre} opened={opened} className={className} />
     );
   return (
     <div

@@ -5,7 +5,6 @@ import {
   House,
   Layers,
   ShieldCheck,
-  Snowflake,
   Star,
   TreePine,
   UserRound,
@@ -53,16 +52,9 @@ export function AppShell() {
   }, [location.pathname]);
 
   return (
-    <div
-      className="min-h-dvh transition-colors"
-      style={
-        (noel === 'nuit' || noel === 'neige') && section === 'menu'
-          ? { background: 'linear-gradient(180deg, #0E2348 0%, #081A36 100%)' }
-          : undefined
-      }
-    >
+    <div className="min-h-dvh">
       <header className="sticky top-0 z-30 border-b border-line bg-white/90 backdrop-blur-md">
-        {noel === 'rouge' && <Guirlande />}
+        {noel && <Guirlande />}
         <div className="mx-auto flex h-16 max-w-[1180px] items-center gap-3 px-4 sm:px-6">
           <NavLink
             to="/"
@@ -241,14 +233,7 @@ function BarreOnglets() {
     {
       to: '/avent',
       label: 'Calendrier',
-      icon:
-        noel === 'rouge'
-          ? TreePine
-          : noel === 'nuit'
-            ? Star
-            : noel === 'neige'
-              ? Snowflake
-              : CalendarDays,
+      icon: noel ? TreePine : CalendarDays,
       actif: pathname.startsWith('/avent'),
       pastille: caseDispo ? '' : null,
     },
