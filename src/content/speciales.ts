@@ -14,9 +14,8 @@ export const SPECIALES: CarteSpecialeDef[] = [
     id: 'special:best-rgep',
     titre: 'La best RGEP',
     emoji: '👑',
-    pouvoir:
-      'Transforme n’importe quelle réunion en quart d’heure sécurité… et tout le monde dit merci.',
-    faiblesse: 'Un EPI mal rangé à 10 mètres.',
+    pouvoir: 'Fait passer la sécurité avant tout !',
+    faiblesse: 'Aucune connue à ce jour.',
     de: 'Lucas',
   },
 ];
