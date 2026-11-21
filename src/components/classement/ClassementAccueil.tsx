@@ -8,6 +8,7 @@ import {
   useClassement,
   type LigneClassement,
 } from '../../data/classement';
+import { useIdentite } from '../../data/identite';
 import { useGame } from '../../data/store';
 import { Avatar } from '../ui/primitives';
 
@@ -37,6 +38,7 @@ function Podium({ l, place }: { l: LigneClassement; place: number }) {
 export function ClassementAccueil() {
   const { lignes } = useClassement();
   const { progress } = useGame();
+  const { codeAdmin } = useIdentite();
   if (!lignes || lignes.length < 3) return null;
   const t = trier(lignes, 'cartes');
   const moi = t.find((x) => x.moi);
@@ -58,24 +60,32 @@ export function ClassementAccueil() {
         ))}
       </div>
       <div className="my-3.5 h-px bg-line" />
-      <div className="flex items-center gap-3">
-        <p className="font-display text-[26px] font-extrabold leading-none text-navy-950">
-          {moi ? moi.rang : '–'}
-          <span className="text-[13px] text-[#8a97ab]">{moi?.rang === 1 ? 'er' : 'ᵉ'}</span>
+      {moi ? (
+        <div className="flex items-center gap-3">
+          <p className="font-display text-[26px] font-extrabold leading-none text-navy-950">
+            {moi.rang}
+            <span className="text-[13px] text-[#8a97ab]">{moi.rang === 1 ? 'er' : 'ᵉ'}</span>
+          </p>
+          <p className="flex-1 text-[12.5px] leading-snug text-muted">
+            Tu as <b className="text-navy-950">{moi.cartes} cartes</b>.{' '}
+            {moi.rang === 1 ? (
+              'Tu es en tête, tiens bon ! 🔥'
+            ) : manque ? (
+              <>
+                Encore <b className="text-navy-950">{manque}</b> pour entrer dans le top 10.
+              </>
+            ) : (
+              'Tu es dans le top 10, bravo ! 💪'
+            )}
+          </p>
+        </div>
+      ) : (
+        <p className="text-[12.5px] leading-snug text-muted">
+          {codeAdmin
+            ? '🔧 Compte administrateur : tu es hors classement (cartes de test).'
+            : `Tu as ${progress.cards.length} cartes. Ta place arrive dans un instant…`}
         </p>
-        <p className="flex-1 text-[12.5px] leading-snug text-muted">
-          Tu as <b className="text-navy-950">{moi?.cartes ?? progress.cards.length} cartes</b>.{' '}
-          {moi && moi.rang === 1 ? (
-            'Tu es en tête, tiens bon ! 🔥'
-          ) : manque ? (
-            <>
-              Encore <b className="text-navy-950">{manque}</b> pour entrer dans le top 10.
-            </>
-          ) : (
-            'Tu es dans le top 10, bravo ! 💪'
-          )}
-        </p>
-      </div>
+      )}
       <div className="mt-3 flex items-center justify-between text-[13px] font-bold">
         <Link to="/classement" className="text-blue">
           Voir le classement →
