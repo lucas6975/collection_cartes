@@ -75,22 +75,24 @@ export const useMasque = () => useSyncExternalStore(masqueStore.subscribe, masqu
 
 /** Classement actualisé toutes les minutes. */
 export function useClassement() {
-  const { identite } = useIdentite();
-  const jeton = identite?.synchro ? identite.jeton : undefined;
+  const { identite, codeAdmin } = useIdentite();
+  const jeton = identite?.synchro ? (identite.jeton ?? null) : null;
   const [lignes, setLignes] = useState<LigneClassement[] | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
   const charger = useCallback(async () => {
-    if (!jeton) return;
+    if (!jeton && !codeAdmin) return;
     try {
-      setLignes(await api.classement(jeton));
-    } catch {
-      /* hors ligne ou SQL pas encore lancé : on garde l'affichage */
+      setLignes(await api.classement(jeton, codeAdmin));
+      setErreur(null);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : 'Classement indisponible');
     }
-  }, [jeton]);
+  }, [jeton, codeAdmin]);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void charger();
     const t = setInterval(() => void charger(), 60_000);
     return () => clearInterval(t);
   }, [charger]);
-  return { lignes, recharger: charger };
+  return { lignes, erreur, recharger: charger };
 }

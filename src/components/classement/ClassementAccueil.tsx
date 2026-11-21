@@ -36,9 +36,23 @@ function Podium({ l, place }: { l: LigneClassement; place: number }) {
 
 /** Accueil : top 3 des collectionneurs et ma place. */
 export function ClassementAccueil() {
-  const { lignes } = useClassement();
+  const { lignes, erreur } = useClassement();
   const { progress } = useGame();
   const { codeAdmin } = useIdentite();
+  // L'administrateur voit pourquoi le classement ne s'affiche pas.
+  if (codeAdmin && (erreur || (lignes && lignes.length < 3)))
+    return (
+      <section className="rounded-[22px] bg-white p-4 text-[12.5px] text-muted shadow-soft">
+        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8a97ab]">
+          Classement des collectionneurs · admin
+        </p>
+        <p className="mt-1.5">
+          {erreur
+            ? `⚠️ ${erreur}`
+            : `Seulement ${lignes!.length} joueur${lignes!.length > 1 ? 's' : ''} pour l’instant : l’encadré s’affiche pour tous à partir de 3.`}
+        </p>
+      </section>
+    );
   if (!lignes || lignes.length < 3) return null;
   const t = trier(lignes, 'cartes');
   const moi = t.find((x) => x.moi);

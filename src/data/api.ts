@@ -202,7 +202,12 @@ export const api = {
         : { p_jeton: jeton, p_packs: packs, p_cartes: cartes },
     ),
 
-  classement: (jeton: string) => rpc<LigneClassement[]>('classement', { p_jeton: jeton }),
+  classement: (jeton: string | null, code: string | null) =>
+    rpc<LigneClassement[]>('classement', { p_jeton: jeton, p_code: code }).catch((e) => {
+      // Ancienne version du SQL (jeton seulement).
+      if (jeton) return rpc<LigneClassement[]>('classement', { p_jeton: jeton });
+      throw e;
+    }),
 
   adminPacks: (code: string) => rpc<SuiviPacks[]>('admin_packs', { p_code: code }),
 

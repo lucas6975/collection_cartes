@@ -34,13 +34,18 @@ revoke execute on function public.envoyer_packs(uuid, jsonb, int, int, boolean, 
 grant execute on function public.envoyer_packs(uuid, jsonb, int, int, boolean, boolean) to anon, authenticated;
 
 -- Le classement : prénom + initiale du nom (ou « Joueur anonyme »), cartes, légendaires, échanges.
--- Réservé aux inscrits (jeton exigé). Aucun identifiant n'est renvoyé.
-create or replace function public.classement(p_jeton uuid) returns jsonb
+-- Réservé aux inscrits (jeton) et à l'administrateur (code). Aucun identifiant n'est renvoyé.
+drop function if exists public.classement(uuid);
+create or replace function public.classement(p_jeton uuid default null, p_code text default null)
+returns jsonb
 language plpgsql stable security definer set search_path = public as $$
 declare
   moi uuid := (select id from participants where jeton = p_jeton);
 begin
-  if moi is null then raise exception 'Inscris-toi pour voir le classement'; end if;
+  if moi is null then
+    if p_code is null then raise exception 'Inscris-toi pour voir le classement'; end if;
+    perform verifier_code(p_code);
+  end if;
   return coalesce((
     select jsonb_agg(jsonb_build_object(
       'cle', substr(md5(p.id::text), 1, 10),
@@ -51,10 +56,10 @@ begin
       'echanges', (select count(*) from echanges e where e.etat = 'accepte'
                     and (lower(e.nom_a) = lower(p.prenom || ' ' || p.nom)
                       or lower(e.nom_b) = lower(p.prenom || ' ' || p.nom))),
-      'moi', p.id = moi
+      'moi', p.id is not distinct from moi
     ) order by s.cartes desc, s.legendaires desc, p.inscrit_le)
     from packs_suivi s join participants p on p.id = s.participant_id
     where not s.hors_classement and s.cartes > 0), '[]');
 end $$;
-revoke execute on function public.classement(uuid) from public;
-grant execute on function public.classement(uuid) to anon, authenticated;
+revoke execute on function public.classement(uuid, text) from public;
+grant execute on function public.classement(uuid, text) to anon, authenticated;

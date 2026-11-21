@@ -7,7 +7,7 @@ import { avatarDe, trier, useClassement, type Tri } from '../data/classement';
 import { useGame } from '../data/store';
 
 export function Classement() {
-  const { lignes } = useClassement();
+  const { lignes, erreur } = useClassement();
   const { progress } = useGame();
   const [tri, setTri] = useState<Tri>('cartes');
   const t = lignes ? trier(lignes, tri) : [];
@@ -53,7 +53,9 @@ export function Classement() {
       </div>
 
       {!lignes ? (
-        <p className="py-10 text-center text-sm text-muted">Chargement du classement…</p>
+        <p className="py-10 text-center text-sm text-muted">
+          {erreur ? `⚠️ ${erreur}` : 'Chargement du classement…'}
+        </p>
       ) : (
         <ul className="rounded-[22px] bg-white px-2 shadow-[0_1px_2px_rgba(11,35,71,.04),0_6px_20px_rgba(11,35,71,.06)]">
           {t.map((l) => {
