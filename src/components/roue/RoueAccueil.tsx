@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useIdentite } from '../../data/identite';
 import { game, useGame } from '../../data/store';
+import { noterRoue } from '../../data/suiviRoue';
 import { CASES, JOUR_ROUE, momentRoue, type MomentRoue } from '../../domain/roue';
 import { RoueEcran, Roue } from './RoueEcran';
 
@@ -57,6 +58,14 @@ export function RoueAccueil() {
       : codeAdmin && (apercu !== null || avant)
         ? { type: 'teaser', jour: typeof apercu === 'number' ? apercu : 0 }
         : vrai;
+  const jourJ = vrai?.type === 'jour';
+  const gainRoue = progress.roue?.gain;
+  // Statistiques admin : la personne a vu la roue (et l'a déjà tournée, si renvoi en attente).
+  useEffect(() => {
+    if (!jourJ || !identite) return;
+    void noterRoue('vue');
+    if (gainRoue) void noterRoue('tournee', gainRoue);
+  }, [jourJ, identite, gainRoue]);
   if (!identite && !codeAdmin) return null;
 
   const testAdmin = codeAdmin ? (

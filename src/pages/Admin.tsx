@@ -1,4 +1,5 @@
 import {
+  LifeBuoy,
   BellRing,
   CheckCircle2,
   ChevronDown,
@@ -31,10 +32,11 @@ import { JOURS_OUVRES, useIdentite } from '../data/identite';
 import { endpointActuel, rappelsStore } from '../data/rappels';
 import { OngletLancement } from './AdminLancement';
 import { OngletPacks } from './AdminPacks';
+import { OngletRoue } from './AdminRoue';
 import { AlertesInscriptions } from './AdminAlertes';
 import { OffrirCarte } from './AdminCadeau';
 
-type Onglet = 'lancement' | 'packs' | 'tirage' | 'inscrits' | 'resultats';
+type Onglet = 'lancement' | 'packs' | 'roue' | 'tirage' | 'inscrits' | 'resultats';
 
 /** [1,2,3,5,7,8] → « 1–3, 5, 7–8 » */
 export function plages(jours: number[]): string {
@@ -127,6 +129,7 @@ export function Admin() {
           [
             ['lancement', 'Lancement', Rocket],
             ['packs', 'Packs', Package],
+            ['roue', 'Roue', LifeBuoy],
             ['tirage', 'Tirage', Dices],
             ['inscrits', `Inscrits (${participants.length})`, Users],
             ['resultats', 'Résultats', Trophy],
@@ -155,6 +158,7 @@ export function Admin() {
         <OngletLancement code={codeAdmin} participants={participants} onActualiser={charger} />
       )}
       {onglet === 'packs' && <OngletPacks code={codeAdmin} participants={participants} />}
+      {onglet === 'roue' && <OngletRoue code={codeAdmin} participants={participants} />}
       {onglet === 'tirage' && (
         <OngletTirage
           code={codeAdmin}

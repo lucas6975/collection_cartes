@@ -13,6 +13,7 @@ import { MASCOTTE_URL } from '../cards/CardBack';
 import { GameCard } from '../cards/GameCard';
 import { PackOpening } from '../cards/PackOpening';
 import { CarteOr } from './CarteOr';
+import { noterRoue } from '../../data/suiviRoue';
 
 const FOND = 'radial-gradient(circle at 50% 30%, #2F74C4 0%, #153E75 55%, #0B2347 100%)';
 const PART = 360 / CASES.length;
@@ -118,8 +119,14 @@ function Contenu({ onClose, forcer }: { onClose: () => void; forcer?: Gain }) {
         .catch(() => undefined);
   }, [progress.ulysseOr]);
 
+  // Statistiques admin : la personne a ouvert la roue.
+  useEffect(() => {
+    if (!forcer) void noterRoue('ouverte');
+  }, [forcer]);
+
   const tourner = () => {
     const r = game.tournerRoue(forcer);
+    if (!forcer) void noterRoue('tournee', CASES[r.index].id);
     setTour(r);
     setAngle(angleFinal(r.index, (Math.random() - 0.5) * PART * 0.6));
     setTimeout(() => setFini(true), 5000);

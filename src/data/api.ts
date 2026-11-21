@@ -48,6 +48,15 @@ export interface Inscription {
   jours: number[];
 }
 
+/** Roue de Secours : étapes d'une personne (onglet « Roue » de l'admin). */
+export interface SuiviRoue {
+  participant_id: string;
+  vue_le: string | null;
+  ouverte_le: string | null;
+  tournee_le: string | null;
+  gain: string | null;
+}
+
 export interface Participant {
   id: string;
   prenom: string;
@@ -210,6 +219,10 @@ export const api = {
     }),
 
   adminPacks: (code: string) => rpc<SuiviPacks[]>('admin_packs', { p_code: code }),
+
+  noterRoue: (jeton: string, etape: string, gain?: string) =>
+    rpc<null>('noter_roue', { p_jeton: jeton, p_etape: etape, p_gain: gain ?? null }),
+  adminRoue: (code: string) => rpc<SuiviRoue[]>('admin_roue', { p_code: code }),
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 
