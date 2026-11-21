@@ -11,7 +11,7 @@ export const AVATAR_NOEL_URL = `${import.meta.env.BASE_URL}ulysse-avatar-noel.we
 /** Fond du bandeau d'accueil selon le thème. */
 export const FOND_HERO: Record<ThemeNoel, string> = {
   rouge: 'linear-gradient(125deg, #C62A38 0%, #931626 55%, #5E0C18 100%)',
-  neige: 'linear-gradient(125deg, #2563A6 0%, #153E75 55%, #0B2347 100%)',
+  neige: 'linear-gradient(160deg, #24508F 0%, #12305E 45%, #081A36 100%)',
   nuit: 'linear-gradient(140deg, #1F3F74 0%, #0E2348 100%)',
 };
 
@@ -134,7 +134,9 @@ export function PaquetCadeau({
   const papier =
     theme === 'nuit'
       ? 'linear-gradient(135deg, #1F3F74, #0B1A33)'
-      : 'linear-gradient(135deg, #22774D, #0D3A24)';
+      : theme === 'neige'
+        ? 'linear-gradient(135deg, #D33544, #8E1424)'
+        : 'linear-gradient(135deg, #22774D, #0D3A24)';
   return (
     <div
       className={cx(

@@ -7,12 +7,12 @@ export type ThemeNoel = 'rouge' | 'neige' | 'nuit';
 
 export const THEMES_NOEL: { id: ThemeNoel; nom: string; emoji: string }[] = [
   { id: 'rouge', nom: 'Rouge Noël', emoji: '🎅' },
-  { id: 'neige', nom: 'Neige qui tombe', emoji: '❄️' },
+  { id: 'neige', nom: 'Nuit enneigée', emoji: '❄️' },
   { id: 'nuit', nom: 'Nuit dorée', emoji: '✨' },
 ];
 
 /** Thème choisi pour tout le monde à partir du 1er décembre. */
-export const THEME_NOEL: ThemeNoel = 'rouge';
+export const THEME_NOEL: ThemeNoel = 'neige';
 export const DEBUT_NOEL = '2026-12-01';
 /** Premier jour où l'appli revient au thème habituel. */
 export const FIN_NOEL = '2027-01-04';

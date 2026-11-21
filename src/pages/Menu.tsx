@@ -61,7 +61,7 @@ export function Menu() {
         animate={{ opacity: 1, y: 0 }}
         className={cx(
           'relative flex items-center gap-4 overflow-hidden rounded-3xl px-5 py-5 text-white sm:gap-8 sm:px-10 sm:py-6',
-          noel === 'nuit' && 'ring-1 ring-sun/40',
+          (noel === 'nuit' || noel === 'neige') && 'ring-1 ring-sun/40',
         )}
         style={{
           background: noel
@@ -76,7 +76,8 @@ export function Menu() {
             backgroundSize: '18px 18px',
           }}
         />
-        {noel === 'neige' && <Neige flocons={34} />}
+        {noel === 'neige' && <Neige flocons={40} />}
+        {noel === 'neige' && <Etoiles nombre={6} />}
         {noel === 'rouge' && <Neige flocons={10} />}
         {noel === 'nuit' && <Etoiles nombre={14} />}
         <div className="relative shrink-0">
@@ -165,11 +166,11 @@ export function Menu() {
                 Calendrier de l’Avent
               </h2>
               <p className="mt-2 max-w-xs text-sm text-white/80">
-                {noel === 'nuit'
+                {noel === 'nuit' || noel === 'neige'
                   ? 'Chaque case réussie allume une boule dorée sur ton sapin.'
                   : 'Une case par jour, un défi sécurité à relever.'}
               </p>
-              {noel === 'nuit' && (
+              {(noel === 'nuit' || noel === 'neige') && (
                 <div className="mt-3 max-w-sm">
                   <BoulesSapin
                     jours={JOURS.map((j) => j.jour)}
