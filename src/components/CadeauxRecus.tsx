@@ -5,6 +5,8 @@ import { api } from '../data/api';
 import { identiteStore, useIdentite } from '../data/identite';
 import { game } from '../data/store';
 import { GameCard } from './cards/GameCard';
+import { CarteSpeciale } from './speciales/CarteSpeciale';
+import { speciale } from '../content/speciales';
 import { Modal } from './ui/overlay';
 import { Button } from './ui/primitives';
 
@@ -40,8 +42,32 @@ export function CadeauxRecus() {
   }, [jeton]);
 
   const carte = CARDS.find((c) => c.id === recues[0]);
+  const spe = recues[0] ? speciale(recues[0]) : undefined;
   return (
-    <Modal open={!!carte} onClose={() => setRecues((r) => r.slice(1))} size="sm">
+    <Modal open={!!carte || !!spe} onClose={() => setRecues((r) => r.slice(1))} size="sm">
+      {spe && (
+        <div className="relative overflow-hidden p-6 text-center">
+          <Confetti />
+          <p className="eyebrow text-[#C8283A]">💌 Carte unique</p>
+          <h2 className="mt-1 font-display text-2xl font-extrabold text-navy-950">
+            {spe.de} t’envoie une carte spéciale !
+          </h2>
+          <div className="mx-auto mt-5 w-[66%]">
+            <CarteSpeciale carte={spe} />
+          </div>
+          <p className="mt-4 text-sm text-muted">
+            Un seul exemplaire au monde. Elle rejoint ta collection 🗂️
+          </p>
+          <Button
+            variant="accent"
+            size="lg"
+            className="mt-5 w-full"
+            onClick={() => setRecues((r) => r.slice(1))}
+          >
+            Merci {spe.de} ! 🙌
+          </Button>
+        </div>
+      )}
       {carte && (
         <div className="relative overflow-hidden p-6 text-center">
           <Confetti />

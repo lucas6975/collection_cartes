@@ -13,6 +13,7 @@ import {
   progressionVide,
   type PackResult,
 } from '../domain/packs';
+import { estSpeciale } from '../content/speciales';
 import { retirerCopies } from '../domain/recyclage';
 import { CASES, carteGagnee, tirerCase, type Gain } from '../domain/roue';
 import type { Progress } from '../domain/types';
@@ -127,6 +128,15 @@ class Game {
 
   /** Carte offerte (cadeau de l'administrateur). */
   recevoirCarte = (id: string) => {
+    if (estSpeciale(id)) {
+      const p = this.state.progress;
+      if (!(p.speciales ?? []).some((s) => s.id === id))
+        this.commit({
+          ...p,
+          speciales: [...(p.speciales ?? []), { id, at: new Date().toISOString() }],
+        });
+      return { progress: this.state.progress, nouvelle: true, debloquee: null };
+    }
     const r = this.ajouterCarte(this.state.progress, id);
     this.commit(r.progress);
     return r;

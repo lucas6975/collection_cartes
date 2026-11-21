@@ -4,7 +4,18 @@ import { GameCard } from '../components/cards/GameCard';
 import { Modal, useToast } from '../components/ui/overlay';
 import { Avatar, Button, cx } from '../components/ui/primitives';
 import { CARDS } from '../content/cards';
+import { SPECIALES, speciale } from '../content/speciales';
+import { CarteSpeciale } from '../components/speciales/CarteSpeciale';
 import { ApiError, api, type Participant } from '../data/api';
+
+const CLE_ENVOYEES = 'team-ulysse-speciales-envoyees';
+const lireEnvoyees = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(CLE_ENVOYEES) ?? '[]') as string[];
+  } catch {
+    return [];
+  }
+};
 
 /** Espace admin : offrir n'importe quelle carte à une personne inscrite. */
 export function OffrirCarte({ code, participants }: { code: string; participants: Participant[] }) {
@@ -14,7 +25,11 @@ export function OffrirCarte({ code, participants }: { code: string; participants
   const [qui, setQui] = useState<Participant | null>(null);
   const [carte, setCarte] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
-  const choisie = CARDS.find((c) => c.id === carte);
+  const [envoyees, setEnvoyees] = useState(lireEnvoyees);
+  const spe = carte ? speciale(carte) : undefined;
+  const choisie = CARDS.find((c) => c.id === carte) ?? (spe && { nom: spe.titre });
+  // Cartes spéciales : exemplaire unique, on ne peut les envoyer qu'une fois.
+  const disponibles = SPECIALES.filter((s) => !envoyees.includes(s.id));
   const liste = participants
     .filter((p) => `${p.prenom} ${p.nom}`.toLowerCase().includes(q.trim().toLowerCase()))
     .sort((a, b) => `${a.prenom} ${a.nom}`.localeCompare(`${b.prenom} ${b.nom}`));
@@ -32,6 +47,15 @@ export function OffrirCarte({ code, participants }: { code: string; participants
     try {
       await api.adminOffrirCarte(code, qui.id, carte);
       toast(`🎁 « ${choisie?.nom} » offerte à ${qui.prenom} ${qui.nom}`, 'success');
+      if (spe) {
+        const n = [...envoyees, spe.id];
+        setEnvoyees(n);
+        try {
+          localStorage.setItem(CLE_ENVOYEES, JSON.stringify(n));
+        } catch {
+          /* rien */
+        }
+      }
       fermer();
     } catch (e) {
       toast(
@@ -106,6 +130,28 @@ export function OffrirCarte({ code, participants }: { code: string; participants
             >
               ← Changer de personne
             </button>
+            {disponibles.length > 0 && (
+              <div className="rounded-2xl bg-sun/15 p-3">
+                <p className="mb-2 text-xs font-extrabold uppercase tracking-wider text-navy-950">
+                  ✨ Carte spéciale · exemplaire unique
+                </p>
+                <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+                  {disponibles.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setCarte(s.id)}
+                      className={cx(
+                        'rounded-2xl p-1 transition-all',
+                        carte === s.id ? 'bg-sun/40 ring-[3px] ring-sun' : 'hover:opacity-90',
+                      )}
+                    >
+                      <CarteSpeciale carte={s} pour={`${qui.prenom} ${qui.nom}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
               {CARDS.map((c) => (
                 <button

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { CartePerso } from '../components/cards/CartePerso';
 import { CarteOr } from '../components/roue/CarteOr';
+import { CarteSpeciale } from '../components/speciales/CarteSpeciale';
+import { speciale } from '../content/speciales';
 import { CardDetail } from '../components/cards/CardDetail';
 import { GameCard } from '../components/cards/GameCard';
 import { Recyclage } from '../components/Recyclage';
@@ -100,6 +102,14 @@ export function Collection() {
             <CartePerso recueLe={progress.cartePerso} />
           </div>
         )}
+        {(progress.speciales ?? []).map((s) => {
+          const c = speciale(s.id);
+          return c ? (
+            <div key={s.id} className="w-[96px] shrink-0 sm:w-[120px]">
+              <CarteSpeciale carte={c} />
+            </div>
+          ) : null;
+        })}
         {progress.ulysseOr && (
           <div className="w-[96px] shrink-0 sm:w-[120px]">
             <CarteOr numero={progress.ulysseOr.numero} test={progress.ulysseOr.test} />
