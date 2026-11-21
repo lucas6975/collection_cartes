@@ -5,7 +5,8 @@ import { Link } from 'react-router';
 import { ReglagesRappels } from '../components/Rappels';
 import { JoursSelection } from '../components/JoursSelection';
 import { useToast } from '../components/ui/overlay';
-import { Avatar, Button, PageHeader } from '../components/ui/primitives';
+import { Avatar, Button, PageHeader, cx } from '../components/ui/primitives';
+import { masqueStore, useMasque } from '../data/classement';
 import { ApiError, api } from '../data/api';
 import { identiteStore, useIdentite } from '../data/identite';
 
@@ -173,6 +174,8 @@ export function MesInscriptions() {
 
       <ReglagesRappels />
 
+      {identite && !codeAdmin && <ReglageClassement />}
+
       {/* Administration */}
       <section className="mt-6">
         {codeAdmin ? (
@@ -220,5 +223,42 @@ export function MesInscriptions() {
         })}
       </p>
     </div>
+  );
+}
+
+/** Classement : apparaître sous son nom ou en « Joueur anonyme ». */
+function ReglageClassement() {
+  const masque = useMasque();
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={masque}
+      onClick={() => masqueStore.set(!masque)}
+      className="panel mt-4 flex w-full items-center gap-3 p-4 text-left"
+    >
+      <span className="text-xl">🏆</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-bold text-navy-950">
+          Masquer mon nom dans le classement
+        </span>
+        <span className="block text-xs text-muted">
+          Tu apparais en « Joueur anonyme » pour les autres.
+        </span>
+      </span>
+      <span
+        className={cx(
+          'relative h-7 w-12 shrink-0 rounded-full transition-colors',
+          masque ? 'bg-success' : 'bg-line',
+        )}
+      >
+        <span
+          className={cx(
+            'absolute top-1 size-5 rounded-full bg-white shadow transition-[left]',
+            masque ? 'left-6' : 'left-1',
+          )}
+        />
+      </span>
+    </button>
   );
 }

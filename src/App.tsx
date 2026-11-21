@@ -19,6 +19,7 @@ import { EtapeTirage, etapeTirage } from './avent/EtapeTirage';
 import { MesInscriptions } from './pages/MesInscriptions';
 import { AdventDay } from './pages/AdventDay';
 import { Collection } from './pages/Collection';
+import { Classement } from './pages/Classement';
 import { Echange, EchangeHorsAppli, lireCode } from './pages/Echange';
 import { Home } from './pages/Home';
 import { Menu } from './pages/Menu';
@@ -106,6 +107,7 @@ export function App() {
             <Route index element={<Menu />} />
             <Route path="cartes" element={<Home />} />
             <Route path="collection" element={<Collection />} />
+            <Route path="classement" element={<Classement />} />
             <Route path="echange" element={<Echange />} />
             <Route path="avent" element={<Advent />} />
             <Route path="avent/:jour" element={<AdventDay />} />

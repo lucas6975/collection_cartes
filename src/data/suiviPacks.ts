@@ -1,7 +1,9 @@
 // Envoie à la base l'historique des packs du jour de la personne inscrite, pour l'onglet
 // « Packs » de l'espace admin : à l'ouverture de l'appli, à son retour au premier plan,
 // et après chaque pack ouvert.
+import { CARDS } from '../content/cards';
 import { api } from './api';
+import { masqueStore } from './classement';
 import { identiteStore } from './identite';
 import { game } from './store';
 
@@ -19,7 +21,20 @@ export async function envoyerPacks(): Promise<void> {
   try {
     const p = game.getState().progress;
     const packs = p.packs.filter((x) => !x.bonus).map((x) => ({ jour: x.jour, at: x.at }));
-    await api.envoyerPacks(id.jeton, packs, p.cards.length);
+    const legendaires = p.cards.filter(
+      (c) => CARDS.find((x) => x.id === c.cardId)?.rarete === 'legendaire',
+    ).length;
+    const extra = {
+      legendaires,
+      admin: !!identiteStore.get().codeAdmin,
+      masque: masqueStore.get(),
+    };
+    try {
+      await api.envoyerPacks(id.jeton, packs, p.cards.length, extra);
+    } catch {
+      // SQL du classement pas encore lancé : ancienne version de la fonction.
+      await api.envoyerPacks(id.jeton, packs, p.cards.length);
+    }
   } catch {
     /* sans importance : renvoyé à la prochaine ouverture */
   } finally {
@@ -54,6 +69,8 @@ export function demarrerSuiviPacks() {
       void envoyerPacks();
     }
   });
+  // Choix « masquer mon nom » : envoyé tout de suite.
+  masqueStore.subscribe(() => void envoyerPacks());
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') void envoyerPacks();
   });

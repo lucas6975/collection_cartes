@@ -1,6 +1,7 @@
 // Appels aux fonctions de la base (supabase/setup.sql), via l'API REST de Supabase.
 
 import { SUPABASE_ANON_KEY, SUPABASE_URL, baseConfiguree } from '../config';
+import type { LigneClassement } from './classement';
 import type { SuiviPacks } from './packsAdmin';
 import type { ChiffresVisites } from './visites';
 
@@ -181,8 +182,27 @@ export const api = {
   noterVisite: (appareil: string, etape: string, plateforme: string) =>
     rpc<null>('noter_visite', { p_appareil: appareil, p_etape: etape, p_plateforme: plateforme }),
 
-  envoyerPacks: (jeton: string, packs: { jour: string; at: string }[], cartes: number) =>
-    rpc<null>('envoyer_packs', { p_jeton: jeton, p_packs: packs, p_cartes: cartes }),
+  envoyerPacks: (
+    jeton: string,
+    packs: { jour: string; at: string }[],
+    cartes: number,
+    extra?: { legendaires: number; admin: boolean; masque: boolean },
+  ) =>
+    rpc<null>(
+      'envoyer_packs',
+      extra
+        ? {
+            p_jeton: jeton,
+            p_packs: packs,
+            p_cartes: cartes,
+            p_legendaires: extra.legendaires,
+            p_admin: extra.admin,
+            p_masque: extra.masque,
+          }
+        : { p_jeton: jeton, p_packs: packs, p_cartes: cartes },
+    ),
+
+  classement: (jeton: string) => rpc<LigneClassement[]>('classement', { p_jeton: jeton }),
 
   adminPacks: (code: string) => rpc<SuiviPacks[]>('admin_packs', { p_code: code }),
 
