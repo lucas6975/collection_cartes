@@ -48,7 +48,7 @@ export function CadeauxRecus() {
       {spe && (
         <div className="relative overflow-hidden p-6 text-center">
           <Confetti />
-          <p className="eyebrow text-[#C8283A]">💌 Carte unique</p>
+          <p className="eyebrow text-[#C8283A]">✨ Carte unique</p>
           <h2 className="mt-1 font-display text-2xl font-extrabold text-navy-950">
             {spe.de} t’envoie une carte spéciale !
           </h2>

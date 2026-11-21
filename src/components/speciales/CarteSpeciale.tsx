@@ -72,7 +72,7 @@ export function CarteSpeciale({
           className="mt-auto text-center font-display font-extrabold text-white"
           style={{ background: '#153E75', padding: '2cqw', fontSize: '4.2cqw' }}
         >
-          Envoyée par {carte.de} 💌
+          Envoyée par {carte.de}
         </p>
       </div>
     </div>
