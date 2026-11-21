@@ -15,7 +15,10 @@ import { useAvent } from '../avent/progress';
 import { NOEL, Neige } from '../avent/ui';
 import { useIdentite } from '../data/identite';
 import { useGame } from '../data/store';
+import { cx } from '../components/ui/primitives';
 import { packDuJourOuvert } from '../domain/packs';
+import { joursAvantNoel, useNoel } from '../data/noel';
+import { BoulesSapin, Etoiles, FOND_HERO, ULYSSE_NOEL_URL } from '../components/noel/Noel';
 
 const FOND_NOEL = `${import.meta.env.BASE_URL}avent/fond-noel.webp`;
 
@@ -47,6 +50,8 @@ export function Menu() {
   const duJour = caseDuJour(ANNEE_AVENT, now);
   const avantDebut = joursAvantDebut(ANNEE_AVENT, now);
   const caseFaite = duJour ? !!avent[duJour] : false;
+  const noel = useNoel();
+  const avantNoel = joursAvantNoel(now);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -54,8 +59,15 @@ export function Menu() {
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative flex items-center gap-4 overflow-hidden rounded-3xl px-5 py-5 text-white sm:gap-8 sm:px-10 sm:py-6"
-        style={{ background: 'linear-gradient(125deg, #2563A6 0%, #153E75 55%, #0B2347 100%)' }}
+        className={cx(
+          'relative flex items-center gap-4 overflow-hidden rounded-3xl px-5 py-5 text-white sm:gap-8 sm:px-10 sm:py-6',
+          noel === 'nuit' && 'ring-1 ring-sun/40',
+        )}
+        style={{
+          background: noel
+            ? FOND_HERO[noel]
+            : 'linear-gradient(125deg, #2563A6 0%, #153E75 55%, #0B2347 100%)',
+        }}
       >
         <div
           className="absolute inset-0 opacity-[0.07]"
@@ -64,9 +76,12 @@ export function Menu() {
             backgroundSize: '18px 18px',
           }}
         />
+        {noel === 'neige' && <Neige flocons={34} />}
+        {noel === 'rouge' && <Neige flocons={10} />}
+        {noel === 'nuit' && <Etoiles nombre={14} />}
         <div className="relative shrink-0">
           <motion.img
-            src={MASCOTTE_URL}
+            src={noel ? ULYSSE_NOEL_URL : MASCOTTE_URL}
             alt="Ulysse, la mascotte"
             className="h-28 w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,0.45)] sm:h-40"
             initial={{ y: 20, opacity: 0 }}
@@ -102,6 +117,13 @@ export function Menu() {
           <p className="font-display text-[15px] font-bold italic text-sun sm:text-lg">
             La sécurité, notre Odyssée
           </p>
+          {noel === 'neige' && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[13px] font-bold">
+              {avantNoel > 0
+                ? `🎄 Plus que ${avantNoel} jour${avantNoel > 1 ? 's' : ''} avant Noël`
+                : '🎄 Joyeux Noël !'}
+            </p>
+          )}
         </div>
       </motion.section>
 
@@ -143,8 +165,18 @@ export function Menu() {
                 Calendrier de l’Avent
               </h2>
               <p className="mt-2 max-w-xs text-sm text-white/80">
-                Une case par jour, un défi sécurité à relever.
+                {noel === 'nuit'
+                  ? 'Chaque case réussie allume une boule dorée sur ton sapin.'
+                  : 'Une case par jour, un défi sécurité à relever.'}
               </p>
+              {noel === 'nuit' && (
+                <div className="mt-3 max-w-sm">
+                  <BoulesSapin
+                    jours={JOURS.map((j) => j.jour)}
+                    faits={new Set(Object.keys(avent).map(Number))}
+                  />
+                </div>
+              )}
             </div>
             <div className="relative mt-auto pt-6">
               <p className="text-sm font-semibold text-white/90">

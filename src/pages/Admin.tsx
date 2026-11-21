@@ -33,6 +33,7 @@ import { OngletLancement } from './AdminLancement';
 import { OngletPacks } from './AdminPacks';
 import { AlertesInscriptions } from './AdminAlertes';
 import { OffrirCarte } from './AdminCadeau';
+import { ApercuNoel } from './AdminNoel';
 
 type Onglet = 'lancement' | 'packs' | 'tirage' | 'inscrits' | 'resultats';
 
@@ -115,6 +116,7 @@ export function Admin() {
         </p>
       )}
 
+      <ApercuNoel />
       <OffrirCarte code={codeAdmin} participants={participants} />
       <AlertesInscriptions code={codeAdmin} />
       <TestNotifications code={codeAdmin} />

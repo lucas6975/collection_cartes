@@ -53,6 +53,16 @@
   }
 }
 
+@keyframes scintille {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
 @keyframes neige {
   from {
     transform: translate3d(0, -10px, 0);

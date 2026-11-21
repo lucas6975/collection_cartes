@@ -6,6 +6,7 @@ import {
   Layers,
   ShieldCheck,
   Star,
+  TreePine,
   UserRound,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -15,8 +16,10 @@ import { ANNEE_AVENT, JOURS, caseOuverte } from '../../avent/jours';
 import { caseDuJour } from '../../avent/logic';
 import { useAvent } from '../../avent/progress';
 import { useIdentite } from '../../data/identite';
+import { useNoel } from '../../data/noel';
 import { useGame } from '../../data/store';
 import { packDuJourOuvert } from '../../domain/packs';
+import { AVATAR_NOEL_URL, Guirlande } from '../noel/Noel';
 import { Avatar, cx } from '../ui/primitives';
 
 /** Onglets de la partie « cartes à collectionner ». */
@@ -41,6 +44,7 @@ export function AppShell() {
         ? 'compte'
         : 'cartes';
   const etoiles = Object.values(avent).reduce((s, j) => s + j.etoiles, 0);
+  const noel = useNoel();
 
   // Chaque nouvelle page s'affiche depuis le haut.
   useEffect(() => {
@@ -48,8 +52,12 @@ export function AppShell() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-dvh">
+    <div
+      className="min-h-dvh transition-colors"
+      style={noel === 'nuit' && section === 'menu' ? { background: '#0B1A33' } : undefined}
+    >
       <header className="sticky top-0 z-30 border-b border-line bg-white/90 backdrop-blur-md">
+        {noel === 'rouge' && <Guirlande />}
         <div className="mx-auto flex h-16 max-w-[1180px] items-center gap-3 px-4 sm:px-6">
           <NavLink
             to="/"
@@ -57,7 +65,7 @@ export function AppShell() {
             aria-label="Team Ulysse, retour au menu"
           >
             <img
-              src={`${import.meta.env.BASE_URL}ulysse-avatar.webp`}
+              src={noel ? AVATAR_NOEL_URL : `${import.meta.env.BASE_URL}ulysse-avatar.webp`}
               alt=""
               width={42}
               height={42}
@@ -200,6 +208,7 @@ function BarreOnglets() {
   const { progress } = useGame();
   const avent = useAvent();
   const { codeAdmin } = useIdentite();
+  const noel = useNoel();
   const { pathname } = useLocation();
   const now = new Date();
   const packDispo = !packDuJourOuvert(progress, now);
@@ -227,7 +236,7 @@ function BarreOnglets() {
     {
       to: '/avent',
       label: 'Calendrier',
-      icon: CalendarDays,
+      icon: noel === 'rouge' ? TreePine : noel === 'nuit' ? Star : CalendarDays,
       actif: pathname.startsWith('/avent'),
       pastille: caseDispo ? '' : null,
     },

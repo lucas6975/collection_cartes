@@ -14,6 +14,7 @@ const AVATAR = `${import.meta.env.BASE_URL}ulysse-avatar.webp`;
 import { CartePerso } from './CartePerso';
 import { CardFace } from './GameCard';
 import { PackArt } from './Pack';
+import { useNoel } from '../../data/noel';
 
 type Phase = 'pack' | 'tear' | 'cards' | 'secrete' | 'perso' | 'recap';
 
@@ -204,10 +205,15 @@ function OuverturePack({
   onTear: () => void;
   titre?: string;
 }) {
+  const noel = useNoel();
   return (
     <div className="relative flex flex-col items-center">
-      <p className="eyebrow mb-5 text-sun">
-        {phase === 'pack' ? 'Touche le pack pour l’ouvrir' : 'Ouverture…'}
+      <p className={cx('eyebrow text-sun', noel ? 'mb-12' : 'mb-5')}>
+        {phase === 'pack'
+          ? noel
+            ? 'Touche le cadeau pour le déballer 🎁'
+            : 'Touche le pack pour l’ouvrir'
+          : 'Ouverture…'}
       </p>
       <motion.button
         type="button"
@@ -242,7 +248,9 @@ function OuverturePack({
               animate={{ y: -160, rotate: -18, opacity: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
               style={{
-                background: 'repeating-linear-gradient(135deg, #F5C542 0 14px, #15171C 14px 28px)',
+                background: noel
+                  ? 'repeating-linear-gradient(135deg, #C62A38 0 14px, #22774D 14px 28px)'
+                  : 'repeating-linear-gradient(135deg, #F5C542 0 14px, #15171C 14px 28px)',
               }}
             />
           )}

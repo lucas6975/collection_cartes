@@ -1,4 +1,6 @@
 import { motion } from 'motion/react';
+import { useNoel } from '../../data/noel';
+import { PaquetCadeau } from '../noel/Noel';
 import { cx } from '../ui/primitives';
 import { HAZARD, MASCOTTE_URL } from './CardBack';
 
@@ -15,6 +17,17 @@ export function PackArt({
   /** Pack déjà ouvert : rendu atténué. */
   opened?: boolean;
 }) {
+  const noel = useNoel();
+  if (noel)
+    return (
+      <PaquetCadeau
+        theme={noel}
+        titre={titre}
+        sousTitre={sousTitre}
+        opened={opened}
+        className={className}
+      />
+    );
   return (
     <div
       className={cx(
