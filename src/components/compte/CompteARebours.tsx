@@ -7,6 +7,8 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import { renderSVG } from 'uqr';
 import { etapeCompteARebours, jourLocal } from '../../domain/compteRebours';
+import { Neige } from '../../avent/ui';
+import { Guirlande } from '../noel/Noel';
 import { Button } from '../ui/primitives';
 
 const BASE = import.meta.env.BASE_URL;
@@ -196,7 +198,10 @@ function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
 
   return (
     <div
-      className="cr-fond fixed inset-0 z-[300] flex flex-col items-center overflow-y-auto bg-canvas select-none"
+      className="cr-fond fixed inset-0 z-[300] flex flex-col items-center overflow-y-auto select-none"
+      style={{
+        background: 'radial-gradient(120% 70% at 50% 0%, #D93444 0%, #A8182A 45%, #6E0D1A 100%)',
+      }}
       role="dialog"
       aria-modal="true"
       aria-label={`Compte à rebours du calendrier de l’Avent, ${etiquette(n)}`}
@@ -214,9 +219,22 @@ function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
         <X size={20} />
       </button>
 
-      <header className="mt-[max(16px,calc(env(safe-area-inset-top)+6px))] mb-3 w-full max-w-[440px] px-5">
-        <p className="eyebrow text-[#C8283A]">Calendrier de l’Avent</p>
-        <h1 className="mt-0.5 font-display text-2xl font-extrabold text-navy-950">
+      <div className="cr-motif pointer-events-none fixed inset-0" aria-hidden />
+      <div className="pointer-events-none fixed inset-0" aria-hidden>
+        <Neige flocons={46} />
+      </div>
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-10 h-[env(safe-area-inset-top)]">
+        <Guirlande />
+      </div>
+      <div
+        className="pointer-events-none fixed inset-x-0 bottom-0 h-28"
+        style={{ background: 'linear-gradient(transparent, rgba(255,255,255,.22))' }}
+        aria-hidden
+      />
+
+      <header className="relative mt-[max(30px,calc(env(safe-area-inset-top)+22px))] mb-3 w-full max-w-[440px] px-5">
+        <p className="eyebrow text-sun">❄️ Calendrier de l’Avent</p>
+        <h1 className="mt-0.5 font-display text-[26px] font-extrabold text-white drop-shadow-[0_2px_6px_rgba(0,0,0,.3)]">
           {n ? (
             <>
               Plus que{' '}
@@ -231,9 +249,9 @@ function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
       </header>
 
       {/* La planche : cases passées nettes, case du jour encadrée, cases à venir floutées */}
-      <div className="w-full max-w-[440px] px-4">
+      <div className="relative w-full max-w-[440px] px-4">
         <div
-          className="relative w-full overflow-hidden rounded-3xl bg-white shadow-lift"
+          className="relative w-full overflow-hidden rounded-3xl bg-white shadow-[0_24px_50px_rgba(40,0,8,.55)] ring-4 ring-white/90"
           style={{ aspectRatio: `${L} / ${H}` }}
         >
           <img src={PLANCHE} alt="" draggable={false} className="absolute inset-0 size-full" />
@@ -269,7 +287,7 @@ function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
       </div>
 
       {phase === 'page' && (
-        <div className="cr-bas mx-4 mt-4 mb-[max(16px,env(safe-area-inset-bottom))] w-[calc(100%-32px)] max-w-[408px] space-y-3">
+        <div className="cr-bas relative mx-4 mt-4 mb-[max(16px,env(safe-area-inset-bottom))] w-[calc(100%-32px)] max-w-[408px] space-y-3">
           <div className="panel p-4">
             <p className="font-display text-[17px] font-extrabold text-navy-950">
               🤝 Vigilance partagée
@@ -297,7 +315,7 @@ function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
 
       {/* La case du jour, en grand */}
       {phase === 'zoom' && (
-        <div className="fixed inset-0 z-20 grid place-items-center bg-navy-950/70 px-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-20 grid place-items-center bg-[#5E0C18]/80 px-4 backdrop-blur-sm">
           <div className="cr-zoom w-full max-w-[440px]">
             <div
               className="w-full overflow-hidden rounded-3xl shadow-lift"
