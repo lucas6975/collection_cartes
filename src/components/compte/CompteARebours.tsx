@@ -1,12 +1,13 @@
-// Compte à rebours avant le calendrier de l'Avent : une BD dont chaque jour (J-7 → jour J) est
-// une case. Chaque jour, la case du jour s'ouvre en grand puis prend sa place dans la page.
-// Les illustrations sont celles de l'annonce de lancement (même style).
+// Compte à rebours avant le calendrier de l'Avent : une planche de BD de Noël dont chaque jour
+// (J-7 → jour J) est une case. Les cases à venir sont floutées, de plus en plus loin, plus
+// floues. Après la planche : la vigilance partagée (faire venir les collègues).
 // Jouée une fois par jour, à la première ouverture de l'appli (ou au retour dans l'appli) après minuit.
 import '@fontsource/bangers/400.css';
 import '@fontsource/comic-neue/700.css';
 import { X } from 'lucide-react';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
+import { renderSVG } from 'uqr';
 import { etapeCompteARebours, jourLocal } from '../../domain/compteRebours';
 
 const BASE = import.meta.env.BASE_URL;
@@ -71,107 +72,135 @@ export function CompteARebours() {
   return createPortal(<PageBD key={affiche} n={affiche} onFermer={fermer} />, document.body);
 }
 
-// ───────────── Les 8 cases de la BD ─────────────
+// ───────────── La planche de Noël : 8 cases, une par jour ─────────────
+
+const PLANCHE = `${BASE}bd/planche-noel.webp`;
+const L = 1024;
+const H = 1536;
 
 interface CaseBD {
   /** 7 → J-7 … 0 → jour J */
   n: number;
-  image: string;
-  /** Cadrage de l'illustration dans la case. */
-  cadrage: string;
   jour: string;
-  legende: string;
-  large?: boolean;
+  /** Contour de la case dans la planche (pixels, planche 1024 × 1536). */
+  contour: [number, number][];
 }
 
 export const CASES_BD: CaseBD[] = [
   {
     n: 7,
-    image: 'j7',
-    cadrage: '50% 25%',
     jour: 'Mar. 24',
-    legende: 'Le calendrier de l’Avent approche… Ulysse le sent.',
+    contour: [
+      [0, 0],
+      [500, 0],
+      [470, 402],
+      [0, 402],
+    ],
   },
   {
     n: 6,
-    image: 'j6',
-    cadrage: '50% 30%',
     jour: 'Mer. 25',
-    legende: 'Il se met en route à travers l’entrepôt.',
+    contour: [
+      [505, 0],
+      [1024, 0],
+      [1024, 404],
+      [472, 404],
+    ],
   },
   {
     n: 5,
-    image: 'j5',
-    cadrage: '50% 40%',
     jour: 'Jeu. 26',
-    legende: 'Jeudi fou : il fonce ! Légendaires ×3 aujourd’hui ⚡',
-    large: true,
+    contour: [
+      [0, 408],
+      [500, 408],
+      [470, 752],
+      [0, 752],
+    ],
   },
   {
     n: 4,
-    image: 'j4',
-    cadrage: '50% 60%',
     jour: 'Ven. 27',
-    legende: 'Pas une minute à perdre… en chaussures de sécu, bien sûr 😉',
+    contour: [
+      [505, 410],
+      [1024, 410],
+      [1024, 756],
+      [476, 756],
+    ],
   },
   {
     n: 3,
-    image: 'j3',
-    cadrage: '50% 35%',
     jour: 'Sam. 28',
-    legende: 'Une lumière au bout de l’allée…',
+    contour: [
+      [0, 758],
+      [498, 758],
+      [478, 1080],
+      [0, 1080],
+    ],
   },
   {
     n: 2,
-    image: 'j2',
-    cadrage: '50% 62%',
     jour: 'Dim. 29',
-    legende: 'Un raccourci en chariot ? Autorisation de conduite en poche ✅',
+    contour: [
+      [505, 762],
+      [1024, 762],
+      [1024, 1082],
+      [480, 1082],
+    ],
   },
   {
     n: 1,
-    image: 'j1',
-    cadrage: '50% 40%',
     jour: 'Lun. 30',
-    legende: 'Il plonge dans l’appli… Rendez-vous demain, 7 h 30 !',
+    contour: [
+      [0, 1084],
+      [498, 1084],
+      [494, 1536],
+      [0, 1536],
+    ],
   },
   {
     n: 0,
-    image: 'jj',
-    cadrage: '16% 55%',
     jour: 'Mar. 1er',
-    legende: 'JOUR J : le calendrier de l’Avent est ouvert ! 🎄',
-    large: true,
+    contour: [
+      [500, 1086],
+      [1024, 1086],
+      [1024, 1536],
+      [496, 1536],
+    ],
   },
 ];
 
+const pct = (c: [number, number][]) =>
+  `polygon(${c.map(([x, y]) => `${(x / L) * 100}% ${(y / H) * 100}%`).join(', ')})`;
+const boite = (c: [number, number][]) => {
+  const xs = c.map((p) => p[0]);
+  const ys = c.map((p) => p[1]);
+  const x0 = Math.min(...xs);
+  const y0 = Math.min(...ys);
+  return { x0, y0, w: Math.max(...xs) - x0, h: Math.max(...ys) - y0 };
+};
 const etiquette = (n: number) => (n ? `J-${n}` : 'JOUR J');
-const src = (c: CaseBD) => `${BASE}bd/${c.image}.webp`;
+
+/** Flou des cases à venir : de plus en plus flou à mesure qu'elles sont loin. */
+const flou = (ecart: number) => 8 + ecart * 5;
 
 function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
   const [phase, setPhase] = useState<'zoom' | 'page'>('zoom');
   const duJour = CASES_BD.find((c) => c.n === n)!;
-  const numero = 8 - n;
+  const b = boite(duJour.contour);
 
   useEffect(() => {
     if (phase !== 'zoom') return;
-    const t = setTimeout(() => setPhase('page'), 3200);
+    const t = setTimeout(() => setPhase('page'), 3000);
     return () => clearTimeout(t);
   }, [phase]);
-  // Fermeture automatique, 10 secondes après l'affichage de la page.
-  useEffect(() => {
-    if (phase !== 'page') return;
-    const t = setTimeout(onFermer, 10000);
-    return () => clearTimeout(t);
-  }, [phase, onFermer]);
 
   return (
     <div
-      className="bd-fond fixed inset-0 z-[300] flex flex-col overflow-hidden select-none"
+      className="bd-fond fixed inset-0 z-[300] flex flex-col items-center overflow-y-auto select-none"
       role="dialog"
       aria-modal="true"
-      aria-label={`La BD du calendrier, case ${numero} sur 8 : ${duJour.legende}`}
-      onClick={() => (phase === 'zoom' ? setPhase('page') : onFermer())}
+      aria-label={`La BD du calendrier, ${etiquette(n)}`}
+      onClick={() => phase === 'zoom' && setPhase('page')}
     >
       <button
         type="button"
@@ -180,79 +209,144 @@ function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
           onFermer();
         }}
         aria-label="Fermer"
-        className="absolute right-3 top-[max(12px,env(safe-area-inset-top))] z-30 grid size-10 place-items-center rounded-full border-[3px] border-black bg-white text-black"
+        className="fixed right-3 top-[max(12px,env(safe-area-inset-top))] z-30 grid size-10 place-items-center rounded-full border-[3px] border-black bg-white text-black"
       >
         <X size={20} strokeWidth={3} />
       </button>
 
-      <header className="relative mx-4 mt-[max(14px,calc(env(safe-area-inset-top)+4px))] flex items-center gap-2.5 self-start">
+      <header className="mt-[max(14px,calc(env(safe-area-inset-top)+4px))] mb-2 flex w-full max-w-[440px] items-center gap-2.5 px-4">
         <span className="bd-titre-page">La BD du calendrier</span>
-        <span className="bd-cartouche">Case {numero} / 8</span>
+        <span className="bd-cartouche">{etiquette(n)}</span>
       </header>
 
-      {/* La page : les cases déjà sorties, la case du jour, et celles à venir */}
-      <div
-        className="grid min-h-0 flex-1 grid-cols-2 gap-2.5 px-4 pt-3 pb-2"
-        style={{ gridTemplateRows: 'repeat(5, minmax(0, 1fr))' }}
-      >
-        {CASES_BD.map((c) => {
-          const sortie = c.n >= n;
-          const aujourdhui = c.n === n;
-          return (
-            <div
-              key={c.n}
-              className={`bd-case-page relative min-h-0 overflow-hidden ${c.large ? 'col-span-2' : ''} ${
-                aujourdhui ? (phase === 'page' ? 'bd-case-du-jour' : 'opacity-0') : ''
-              }`}
-            >
-              {sortie ? (
-                <>
-                  <img
-                    src={src(c)}
-                    alt=""
-                    draggable={false}
-                    className="absolute inset-0 size-full object-cover"
-                    style={{ objectPosition: c.cadrage }}
-                  />
-                  <span className="bd-etiquette absolute top-1.5 left-1.5">{etiquette(c.n)}</span>
-                </>
-              ) : (
-                <div className="bd-case-cachee absolute inset-0 grid place-items-center text-center">
-                  <span>
-                    <span className="bd-point-interrogation block">?</span>
-                    <span className="bd-jour-cache">{c.jour}</span>
-                  </span>
-                </div>
-              )}
+      {/* La planche : les cases passées en clair, celle du jour en surbrillance, les suivantes floutées */}
+      <div className="w-full max-w-[440px] px-4">
+        <div className="bd-planche relative w-full" style={{ aspectRatio: `${L} / ${H}` }}>
+          <img src={PLANCHE} alt="" draggable={false} className="absolute inset-0 size-full" />
+          {CASES_BD.filter((c) => c.n < n).map((c) => (
+            <div key={c.n} className="absolute inset-0" style={{ clipPath: pct(c.contour) }}>
+              <img
+                src={PLANCHE}
+                alt=""
+                draggable={false}
+                className="absolute inset-0 size-full"
+                style={{ filter: `blur(${flou(n - c.n)}px) saturate(.7) brightness(.85)` }}
+              />
+              <CadenasCase c={c} />
             </div>
-          );
-        })}
+          ))}
+          {phase === 'page' && (
+            <svg
+              className="bd-surbrillance pointer-events-none absolute inset-0 size-full"
+              viewBox={`0 0 ${L} ${H}`}
+              aria-hidden
+            >
+              <polygon
+                points={duJour.contour.map((p) => p.join(',')).join(' ')}
+                fill="none"
+                stroke="#FFE14D"
+                strokeWidth="14"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
+        </div>
       </div>
 
-      <p className="bd-indice mb-[max(10px,env(safe-area-inset-bottom))] text-center">
-        {phase === 'zoom'
-          ? 'Touche pour voir toute la BD'
-          : 'Une nouvelle case chaque jour · touche pour continuer'}
-      </p>
+      {/* Après la planche : la vigilance partagée */}
+      {phase === 'page' && <Partage onFermer={onFermer} />}
 
       {/* La case du jour, en grand */}
       {phase === 'zoom' && (
-        <div className="absolute inset-0 z-20 grid place-items-center bg-black/55 px-5 backdrop-blur-[2px]">
-          <div className="bd-zoom relative w-full max-w-[420px]">
-            <div className="bd-case-page relative aspect-[4/5] w-full overflow-hidden">
-              <img
-                src={src(duJour)}
-                alt=""
-                draggable={false}
-                className="absolute inset-0 size-full object-cover"
-                style={{ objectPosition: duJour.cadrage }}
-              />
-              <span className="bd-sticker absolute top-3 left-3">{etiquette(n)}</span>
-            </div>
-            <p className="bd-legende relative -mt-6 mx-3">{duJour.legende}</p>
+        <div className="fixed inset-0 z-20 grid place-items-center bg-black/60 px-4 backdrop-blur-[2px]">
+          <div className="bd-zoom w-full max-w-[440px]">
+            <div
+              className="bd-case-page w-full"
+              style={{
+                aspectRatio: `${b.w} / ${b.h}`,
+                backgroundImage: `url(${PLANCHE})`,
+                backgroundSize: `${(L / b.w) * 100}% auto`,
+                backgroundPosition: `${(b.x0 / (L - b.w)) * 100}% ${(b.y0 / (H - b.h)) * 100}%`,
+              }}
+            />
+            <p className="bd-indice mt-3 text-center !text-white/80">
+              Touche pour voir toute la BD
+            </p>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function CadenasCase({ c }: { c: CaseBD }) {
+  const b = boite(c.contour);
+  return (
+    <span
+      className="bd-cadenas absolute grid place-items-center text-center"
+      style={{
+        left: `${((b.x0 + b.w / 2) / L) * 100}%`,
+        top: `${((b.y0 + b.h / 2) / H) * 100}%`,
+      }}
+    >
+      <span className="text-[22px] leading-none">🔒</span>
+      <span>{c.jour}</span>
+    </span>
+  );
+}
+
+// ───────────── Vigilance partagée : faire venir les collègues ─────────────
+
+const LIEN = 'https://lucas6975.github.io/collection_cartes/';
+const MESSAGE =
+  'Rejoins la Team Ulysse ! 🦺 Chaque jour une case de la BD, et le 1er décembre le calendrier de l’Avent sécurité avec des cadeaux à gagner 🎁';
+
+function Partage({ onFermer }: { onFermer: () => void }) {
+  const [qr, setQr] = useState(false);
+  const [copie, setCopie] = useState(false);
+  const partager = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Team Ulysse', text: MESSAGE, url: LIEN });
+        return;
+      }
+      await navigator.clipboard.writeText(`${MESSAGE} ${LIEN}`);
+      setCopie(true);
+    } catch {
+      /* partage annulé */
+    }
+  };
+  return (
+    <div className="bd-partage mx-4 mt-4 mb-[max(16px,env(safe-area-inset-bottom))] w-[calc(100%-32px)] max-w-[408px]">
+      <div className="bd-case-page bg-white p-4">
+        <p className="bd-titre-partage">🤝 Vigilance partagée</p>
+        <p className="mt-1.5 font-['Comic_Neue'] text-[15px] leading-snug font-bold text-black">
+          Ulysse ne veut laisser personne derrière : un collègue n’a pas encore l’appli ? Envoie-lui
+          le lien, ou montre-lui le QR code.
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <button type="button" onClick={() => void partager()} className="bd-bouton bg-[#FFE14D]">
+            📲 {copie ? 'Lien copié !' : 'Partager'}
+          </button>
+          <button type="button" onClick={() => setQr((v) => !v)} className="bd-bouton bg-white">
+            {qr ? 'Masquer' : '🔳 QR code'}
+          </button>
+        </div>
+        {qr && (
+          <img
+            src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(LIEN, { ecc: 'M', border: 2 }))}`}
+            alt="QR code de l’appli Team Ulysse"
+            className="mx-auto mt-3 w-[62%] border-[3px] border-black"
+          />
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={onFermer}
+        className="bd-bouton mt-3 w-full bg-[#C8283A] text-white"
+      >
+        Continuer vers l’appli →
+      </button>
     </div>
   );
 }
