@@ -33,6 +33,7 @@ import { endpointActuel, rappelsStore } from '../data/rappels';
 import { OngletLancement } from './AdminLancement';
 import { OngletPacks } from './AdminPacks';
 import { OngletRoue } from './AdminRoue';
+import { ApercuCompteARebours } from './AdminCompte';
 import { AlertesInscriptions } from './AdminAlertes';
 import { OffrirCarte } from './AdminCadeau';
 
@@ -117,6 +118,7 @@ export function Admin() {
         </p>
       )}
 
+      <ApercuCompteARebours />
       <OffrirCarte code={codeAdmin} participants={participants} />
       <AlertesInscriptions code={codeAdmin} />
       <TestNotifications code={codeAdmin} />
