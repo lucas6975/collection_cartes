@@ -181,9 +181,6 @@ const boite = (c: [number, number][]) => {
 };
 const etiquette = (n: number) => (n ? `J-${n}` : 'JOUR J');
 
-/** Flou des cases à venir : fort, et encore plus fort plus elles sont loin. */
-const flou = (ecart: number) => 22 + ecart * 6;
-
 function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
   const [phase, setPhase] = useState<'zoom' | 'page'>('zoom');
   const [qr, setQr] = useState(false);
@@ -257,14 +254,15 @@ function PageBD({ n, onFermer }: { n: number; onFermer: () => void }) {
           <img src={PLANCHE} alt="" draggable={false} className="absolute inset-0 size-full" />
           {CASES_BD.filter((c) => c.n < n).map((c) => (
             <div key={c.n} className="absolute inset-0" style={{ clipPath: pct(c.contour) }}>
-              <img
-                src={PLANCHE}
-                alt=""
-                draggable={false}
-                className="absolute inset-0 size-full scale-110"
-                style={{ filter: `blur(${flou(n - c.n)}px)` }}
+              {/* Case cachée : aucun bout du dessin ne passe, juste du givre */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    'radial-gradient(circle at 30% 25%, rgba(255,255,255,.35), transparent 55%), linear-gradient(160deg, #8E1424, #4A0A14)',
+                }}
               />
-              <div className="absolute inset-0 bg-navy-950/45" />
+              <div className="cr-motif absolute inset-0" />
               <CadenasCase c={c} />
             </div>
           ))}
