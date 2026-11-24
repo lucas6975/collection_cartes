@@ -63,6 +63,120 @@
   }
 }
 
+/* ───────────── Appli vivante : boutons, onglets, chargement, écrans vides ───────────── */
+.vi-elastique {
+  transition:
+    transform 0.35s cubic-bezier(0.3, 1.8, 0.5, 1),
+    background-color 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+.vi-elastique:active {
+  transform: scale(0.93);
+  transition-duration: 0.08s;
+}
+.vi-saute {
+  animation: vi-saute 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.vi-secoue {
+  animation: vi-secoue 2.4s ease-in-out infinite;
+}
+.vi-coureur {
+  animation:
+    vi-court 2.2s linear infinite,
+    vi-foulee 0.28s ease-in-out infinite alternate;
+}
+.vi-piste {
+  background: repeating-linear-gradient(135deg, #f5c542 0 10px, #15171c 10px 20px);
+  background-size: 28px 28px;
+  animation: vi-defile 0.8s linear infinite;
+}
+.vi-attend {
+  transform-origin: 50% 100%;
+  animation: vi-attend 2.6s ease-in-out infinite;
+}
+.vi-zzz {
+  animation: vi-zzz 2.6s ease-in-out infinite;
+}
+@keyframes vi-saute {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-7px);
+  }
+  70% {
+    transform: translateY(0) scaleY(0.9);
+  }
+}
+@keyframes vi-secoue {
+  0%,
+  78%,
+  100% {
+    transform: rotate(0);
+  }
+  82% {
+    transform: rotate(-18deg);
+  }
+  86% {
+    transform: rotate(16deg);
+  }
+  90% {
+    transform: rotate(-10deg);
+  }
+  94% {
+    transform: rotate(6deg);
+  }
+}
+@keyframes vi-court {
+  from {
+    left: -20px;
+  }
+  to {
+    left: 150px;
+  }
+}
+@keyframes vi-foulee {
+  to {
+    translate: 0 -4px;
+  }
+}
+@keyframes vi-defile {
+  to {
+    background-position: 28px 0;
+  }
+}
+@keyframes vi-attend {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg) translateY(-3px);
+  }
+}
+@keyframes vi-zzz {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(4px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vi-saute,
+  .vi-secoue,
+  .vi-coureur,
+  .vi-piste,
+  .vi-attend,
+  .vi-zzz {
+    animation: none;
+  }
+}
+
 @keyframes neige {
   from {
     transform: translate3d(0, -10px, 0);

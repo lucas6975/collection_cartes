@@ -13,6 +13,9 @@ import type { Card, Nature } from '../../domain/types';
 import { Modal } from '../ui/overlay';
 import { cx } from '../ui/primitives';
 import { GameCard, RARITY_STYLE } from './GameCard';
+import { CardBack } from './CardBack';
+import { useState } from 'react';
+import { vibrer } from '../../data/bravo';
 
 const NATURE_STYLE: Record<Nature, string> = {
   obligation: 'bg-navy text-white',
@@ -106,7 +109,11 @@ export function CardDetail({
               }}
             />
             <div className="relative w-[230px] sm:w-[280px]">
-              <GameCard card={card} total={total} size="lg" locked={!owned} className="w-full" />
+              {owned ? (
+                <CarteRetournable card={card} total={total} />
+              ) : (
+                <GameCard card={card} total={total} size="lg" locked className="w-full" />
+              )}
             </div>
           </div>
 
@@ -185,5 +192,38 @@ export function CardDetail({
         </div>
       )}
     </Modal>
+  );
+}
+
+/** Une carte de la collection : un toucher la retourne pour voir son dos (Ulysse). */
+function CarteRetournable({ card, total }: { card: Card; total: number }) {
+  const [dos, setDos] = useState(false);
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => {
+          vibrer();
+          setDos((d) => !d);
+        }}
+        aria-label={dos ? 'Revoir la carte' : 'Retourner la carte'}
+        className="block w-full [perspective:1100px]"
+      >
+        <span
+          className="relative block w-full transition-transform duration-700 [transform-style:preserve-3d]"
+          style={{ transform: dos ? 'rotateY(180deg)' : 'none' }}
+        >
+          <span className="block [backface-visibility:hidden]">
+            <GameCard card={card} total={total} size="lg" className="w-full" tilt={false} />
+          </span>
+          <span className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <CardBack size="lg" label={`N° ${card.numero}`} />
+          </span>
+        </span>
+      </button>
+      <p className="mt-3 text-center text-xs font-semibold text-white/60">
+        Touche la carte pour la retourner
+      </p>
+    </div>
   );
 }

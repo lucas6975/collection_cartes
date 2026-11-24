@@ -185,10 +185,10 @@ export function AppShell() {
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
+            initial={{ opacity: 0, x: 28 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.3, 1] }}
           >
             {outlet}
           </motion.div>
@@ -269,11 +269,17 @@ function BarreOnglets() {
                   transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                 />
               )}
-              <o.icon size={22} strokeWidth={o.actif ? 2.3 : 1.9} className="relative" />
+              <o.icon
+                key={o.actif ? 'actif' : 'repos'}
+                size={22}
+                strokeWidth={o.actif ? 2.3 : 1.9}
+                className={cx('relative', o.actif && 'vi-saute')}
+              />
               {o.pastille != null && (
                 <span
                   className={cx(
                     'absolute grid place-items-center rounded-full bg-danger font-extrabold text-white ring-2 ring-white',
+                    o.pastille && 'vi-secoue',
                     o.pastille
                       ? 'right-1.5 top-0 h-4 min-w-4 px-1 text-[10px]'
                       : 'right-3 top-1 size-2.5',

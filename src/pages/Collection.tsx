@@ -1,4 +1,5 @@
-import { ArrowDownUp, Repeat, Search, SearchX, Trophy } from 'lucide-react';
+import { UlysseAttend } from '../components/ui/vivant';
+import { ArrowDownUp, Repeat, Search, Trophy } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
@@ -205,11 +206,10 @@ export function Collection() {
 
       {/* ───── Album ───── */}
       {filtered.length === 0 ? (
-        <div className="panel flex flex-col items-center px-6 py-16 text-center">
-          <SearchX size={36} className="text-muted" />
-          <p className="mt-3 font-semibold text-navy-950">Aucune carte ne correspond</p>
-          <p className="mt-1 text-sm text-muted">Essaie d’élargir les filtres ou la recherche.</p>
-        </div>
+        <UlysseAttend
+          titre="Aucune carte ne correspond"
+          texte="Ulysse a beau chercher… Essaie d’élargir les filtres ou la recherche."
+        />
       ) : (
         <div className="space-y-10">
           {groups.map((g) => {

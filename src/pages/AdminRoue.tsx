@@ -1,3 +1,4 @@
+import { ChargementUlysse } from '../components/ui/vivant';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Avatar, cx } from '../components/ui/primitives';
 import { ApiError, api, type Participant, type SuiviRoue } from '../data/api';
@@ -75,7 +76,7 @@ export function OngletRoue({ code, participants }: { code: string; participants:
     return (
       <p className="rounded-2xl bg-danger/10 px-4 py-3 text-sm font-medium text-danger">{erreur}</p>
     );
-  if (!suivis) return <p className="text-sm text-muted">Chargement…</p>;
+  if (!suivis) return <ChargementUlysse texte="Chargement de la roue…" />;
 
   return (
     <div className="space-y-4">

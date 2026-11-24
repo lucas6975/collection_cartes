@@ -1,3 +1,4 @@
+import { bravoStore } from '../data/bravo';
 import { ArrowLeft, ArrowUpDown, Camera, Check, Hourglass, Repeat, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -38,6 +39,7 @@ function appliquer(code: string, donne: string, recoit: string) {
     // Stockage indisponible.
   }
   game.echanger(donne, recoit);
+  bravoStore.montrer('Échange réussi ! 🔁', 'Ta nouvelle carte est dans ta collection.');
   return true;
 }
 

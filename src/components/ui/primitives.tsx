@@ -1,3 +1,4 @@
+import { vibrer } from '../../data/bravo';
 import { animate, motion, useInView, useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import type { User } from '../../domain/types';
@@ -20,18 +21,23 @@ export function Button({
   size = 'md',
   className,
   children,
+  onPointerDown,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'sm' | 'md' | 'lg' }) {
   return (
     <button
       className={cx(
-        'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50',
+        'vi-elastique inline-flex items-center justify-center gap-2 rounded-xl font-semibold disabled:pointer-events-none disabled:opacity-50',
         size === 'sm' && 'h-9 px-3 text-sm',
         size === 'md' && 'h-11 px-4 text-sm',
         size === 'lg' && 'h-12 px-6 text-base',
         VARIANTS[variant],
         className,
       )}
+      onPointerDown={(e) => {
+        vibrer();
+        onPointerDown?.(e);
+      }}
       {...props}
     >
       {children}

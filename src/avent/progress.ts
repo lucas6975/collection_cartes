@@ -1,3 +1,4 @@
+import { bravoStore } from '../data/bravo';
 // Progression du calendrier.
 //
 // Collaborateurs : les étoiles sont enregistrées dans le navigateur.
@@ -73,6 +74,11 @@ export const aventStore = {
       void aventStore.synchroniser();
     }
     notify();
+    if (resultat.etoiles > 0)
+      bravoStore.montrer(
+        'Bien joué ! 👍',
+        `${resultat.etoiles} étoile${resultat.etoiles > 1 ? 's' : ''} : tu gères la sécurité.`,
+      );
   },
 
   /**

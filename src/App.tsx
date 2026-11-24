@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
 import { CadeauxRecus } from './components/CadeauxRecus';
+import { Bravo } from './components/ui/vivant';
 import { CompteARebours } from './components/compte/CompteARebours';
 import { ToastProvider } from './components/ui/overlay';
 import { aventStore } from './avent/progress';
@@ -120,6 +121,8 @@ export function App() {
         </Routes>
         {/* Cartes offertes par l'administrateur. */}
         <CadeauxRecus />
+        {/* Ulysse qui félicite. */}
+        <Bravo />
         {/* Compte à rebours avant le calendrier de l'Avent (J-7 → jour J). */}
         <CompteARebours />
       </ToastProvider>

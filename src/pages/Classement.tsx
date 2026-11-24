@@ -1,3 +1,4 @@
+import { ChargementUlysse, UlysseAttend } from '../components/ui/vivant';
 import { ArrowLeft, Repeat } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
@@ -53,9 +54,16 @@ export function Classement() {
       </div>
 
       {!lignes ? (
-        <p className="py-10 text-center text-sm text-muted">
-          {erreur ? `⚠️ ${erreur}` : 'Chargement du classement…'}
-        </p>
+        erreur ? (
+          <p className="py-10 text-center text-sm text-muted">⚠️ {erreur}</p>
+        ) : (
+          <ChargementUlysse texte="Ulysse va chercher le classement…" />
+        )
+      ) : !t.length ? (
+        <UlysseAttend
+          titre="Personne pour l’instant"
+          texte="Ouvre ton pack du jour : tu seras le premier du classement !"
+        />
       ) : (
         <ul className="rounded-[22px] bg-white px-2 shadow-[0_1px_2px_rgba(11,35,71,.04),0_6px_20px_rgba(11,35,71,.06)]">
           {t.map((l) => {
