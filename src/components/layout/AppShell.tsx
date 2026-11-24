@@ -19,6 +19,7 @@ import { useIdentite } from '../../data/identite';
 import { useNoel } from '../../data/noel';
 import { useGame } from '../../data/store';
 import { packDuJourOuvert } from '../../domain/packs';
+import { BanniereEchange } from '../BanniereEchange';
 import { AVATAR_NOEL_URL, Guirlande } from '../noel/Noel';
 import { Avatar, cx } from '../ui/primitives';
 
@@ -195,6 +196,7 @@ export function AppShell() {
         </AnimatePresence>
       </main>
 
+      <BanniereEchange />
       <BarreOnglets />
     </div>
   );

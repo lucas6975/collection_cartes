@@ -1,5 +1,4 @@
-import { bravoStore } from '../data/bravo';
-import { ArrowLeft, ArrowUpDown, Camera, Check, Hourglass, Repeat, X } from 'lucide-react';
+import { ArrowLeft, Camera, Check, Hourglass, Repeat, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
@@ -10,38 +9,21 @@ import { useNomCartePerso } from '../components/cards/CartePerso';
 import { ScannerQR } from '../components/ScannerQR';
 import { useToast } from '../components/ui/overlay';
 import { Button, cx } from '../components/ui/primitives';
+import { ChargementUlysse } from '../components/ui/vivant';
 import { CARDS } from '../content/cards';
-import { RARITY_BY_ID } from '../content/categories';
 import { ApiError, api, type Echange as EchangeServeur } from '../data/api';
-import { doublons, game, useGame } from '../data/store';
+import {
+  appliquerEchange,
+  correspondance,
+  echangeEnCours,
+  type Correspondance,
+} from '../data/echangeEnCours';
+import { doublons, game, manquantes, useGame } from '../data/store';
 import type { Card } from '../domain/types';
 
 const CARTE = new Map(CARDS.map((c) => [c.id, c]));
 const AVATAR = `${import.meta.env.BASE_URL}ulysse-avatar.webp`;
-
-// ───────────── Échanges déjà appliqués sur ce téléphone (jamais deux fois) ─────────────
-
-const KEY = 'team-ulysse-echanges';
-function dejaFaits(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(KEY) ?? '[]') as string[];
-  } catch {
-    return [];
-  }
-}
-/** Met à jour la collection une seule fois par échange. Renvoie faux si déjà fait. */
-function appliquer(code: string, donne: string, recoit: string) {
-  const faits = dejaFaits();
-  if (faits.includes(code)) return false;
-  try {
-    localStorage.setItem(KEY, JSON.stringify([...faits, code].slice(-200)));
-  } catch {
-    // Stockage indisponible.
-  }
-  game.echanger(donne, recoit);
-  bravoStore.montrer('Échange réussi ! 🔁', 'Ta nouvelle carte est dans ta collection.');
-  return true;
-}
+const prenom = (nom: string | null | undefined) => (nom ?? 'ton collègue').split(' ')[0];
 
 /**
  * Lit le code d'échange dans le texte d'un QR code : « TEAM ULYSSE ECHANGE ABC123 », un ancien
@@ -67,37 +49,57 @@ const message = (e: unknown) => (e instanceof ApiError ? e.message : 'Erreur, r�
 
 type Vue =
   | { k: 'moncode' }
+  | { k: 'reprise' }
   | { k: 'choix'; code: string; cle: string; e: EchangeServeur }
   | { k: 'attente'; code: string; cle: string; e: EchangeServeur }
   | { k: 'reussi'; donne: string; recoit: string; avec: string };
 
 export function Echange() {
   const { progress } = useGame();
-  const { prenom, nom } = useNomCartePerso();
-  const moi = `${prenom} ${nom}`.trim();
+  const { prenom: p, nom } = useNomCartePerso();
+  const moi = `${p} ${nom}`.trim();
   const toast = useToast();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const [vue, setVue] = useState<Vue>({ k: 'moncode' });
+  const [vue, setVue] = useState<Vue>(() =>
+    echangeEnCours.get()?.role === 'b' ? { k: 'reprise' } : { k: 'moncode' },
+  );
   const [scanner, setScanner] = useState(false);
   const mesDoublons = doublons(progress);
-  const possedees = new Set(progress.cards.map((c) => c.cardId));
 
   const reussi = useCallback((donne: string, recoit: string, avec: string) => {
+    echangeEnCours.set(null);
     setVue({ k: 'reussi', donne, recoit, avec });
   }, []);
+
+  // Retour sur l'onglet : on reprend l'échange commencé en scannant le code d'un collègue.
+  useEffect(() => {
+    const en = echangeEnCours.get();
+    if (en?.role !== 'b') return;
+    api
+      .echangeVoir(en.code, en.cle)
+      .then((e) => {
+        if (!e || e.etat === 'annule') {
+          echangeEnCours.set(null);
+          return setVue({ k: 'moncode' });
+        }
+        if (e.etat === 'accepte') {
+          appliquerEchange(e.code, e.donne_b!, e.recoit_b!);
+          return reussi(e.donne_b!, e.recoit_b!, e.nom_a);
+        }
+        setVue({ k: e.etat === 'propose' ? 'attente' : 'choix', code: en.code, cle: en.cle, e });
+      })
+      .catch(() => setVue({ k: 'moncode' }));
+  }, [reussi]);
 
   // B : rejoindre l'échange d'un collègue à partir de son code.
   const rejoindre = useCallback(
     async (code: string) => {
       try {
-        const r = await api.echangeRejoindre(code, moi, doublons(game.getState().progress));
+        const pr = game.getState().progress;
+        const r = await api.echangeRejoindre(code, moi, doublons(pr), manquantes(pr));
         const { cle, ...e } = r;
-        if (!e.doublons_a.length) {
-          toast(`${e.nom_a} n’a pas encore de doublon à échanger.`, 'info');
-          await api.echangeAnnuler(code, cle).catch(() => undefined);
-          return;
-        }
+        echangeEnCours.set({ role: 'b', code, cle, depuis: Date.now() });
         setVue({ k: 'choix', code, cle, e });
       } catch (e) {
         toast(message(e), 'error');
@@ -122,6 +124,12 @@ export function Echange() {
     void rejoindre(c);
   };
 
+  const annulerB = (code: string, cle: string) => {
+    void api.echangeAnnuler(code, cle).catch(() => undefined);
+    echangeEnCours.set(null);
+    setVue({ k: 'moncode' });
+  };
+
   return (
     <div className="mx-auto max-w-md">
       <div className="mb-4 flex items-center gap-3">
@@ -134,9 +142,15 @@ export function Echange() {
         </Link>
         <div>
           <p className="eyebrow">Face à face</p>
-          <h1 className="font-display text-2xl font-extrabold text-navy-950">Échanger une carte</h1>
+          <h1 className="font-display text-2xl font-extrabold text-navy-950">
+            {vue.k === 'choix' || vue.k === 'attente'
+              ? `Échange avec ${prenom(vue.e.nom_a)}`
+              : 'Échanger une carte'}
+          </h1>
         </div>
       </div>
+
+      {vue.k === 'reprise' && <ChargementUlysse texte="Reprise de ton échange…" />}
 
       {vue.k === 'moncode' && (
         <MonCode
@@ -151,12 +165,7 @@ export function Echange() {
       {vue.k === 'choix' && (
         <Choix
           e={vue.e}
-          mesDoublons={mesDoublons}
-          possedees={possedees}
-          onAnnuler={() => {
-            void api.echangeAnnuler(vue.code, vue.cle).catch(() => undefined);
-            setVue({ k: 'moncode' });
-          }}
+          onAnnuler={() => annulerB(vue.code, vue.cle)}
           onProposer={async (donne, recoit) => {
             try {
               const e = await api.echangeProposer(vue.code, vue.cle, donne, recoit);
@@ -174,15 +183,17 @@ export function Echange() {
           cle={vue.cle}
           e={vue.e}
           onRefus={(e) => {
-            toast(`${e.nom_a} a refusé : choisis un autre échange.`, 'info');
+            toast(`${prenom(e.nom_a)} a refusé : choisis un autre échange.`, 'info');
             setVue({ k: 'choix', code: vue.code, cle: vue.cle, e });
           }}
           onAccepte={(e) => {
-            appliquer(e.code, e.donne_b!, e.recoit_b!);
+            appliquerEchange(e.code, e.donne_b!, e.recoit_b!);
             reussi(e.donne_b!, e.recoit_b!, e.nom_a);
           }}
+          onAnnuler={() => annulerB(vue.code, vue.cle)}
           onFin={() => {
             toast('L’échange a été annulé.', 'info');
+            echangeEnCours.set(null);
             setVue({ k: 'moncode' });
           }}
         />
@@ -201,7 +212,60 @@ export function Echange() {
   );
 }
 
+// ───────────── Ce qui arrange chacun ─────────────
+
+function Rangee({ ids, vide }: { ids: string[]; vide: string }) {
+  if (!ids.length) return <p className="mt-1.5 text-xs text-muted">{vide}</p>;
+  return (
+    <div className="mt-2 grid grid-cols-4 gap-2">
+      {ids.map((id) => (
+        <div key={id} className="aspect-[5/7]">
+          <CardFace card={CARTE.get(id)!} total={CARDS.length} size="sm" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Les deux colonnes de la maquette : ce que l'autre peut me donner, ce que je peux lui donner. */
+function CeQuiArrange({ c, avec }: { c: Correspondance; avec: string }) {
+  return (
+    <div className="space-y-2.5">
+      <div className="rounded-2xl bg-success/10 p-3">
+        <p className="flex items-center justify-between text-sm font-extrabold text-navy-950">
+          🎁 {avec} peut te donner
+          <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-success">
+            te manquent
+          </span>
+        </p>
+        <Rangee ids={c.pourMoi} vide={`${avec} n’a aucun doublon qui te manque.`} />
+      </div>
+      <div className="rounded-2xl bg-blue-light p-3">
+        <p className="flex items-center justify-between text-sm font-extrabold text-navy-950">
+          🤝 Tu peux donner à {avec}
+          {c.connu && (
+            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-blue">
+              lui manquent
+            </span>
+          )}
+        </p>
+        <Rangee
+          ids={c.pourLui}
+          vide={
+            c.connu
+              ? `Aucun de tes doublons ne manque à ${avec}.`
+              : 'Tu n’as pas de doublon à donner.'
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
 // ───────────── ① Mon code (côté A) ─────────────
+
+/** Création de code en cours : évite d'en créer deux en même temps. */
+let creation: Promise<{ code: string; cle: string }> | null = null;
 
 function MonCode({
   moi,
@@ -217,6 +281,7 @@ function MonCode({
   onReussi: (donne: string, recoit: string, avec: string) => void;
 }) {
   const toast = useToast();
+  const { progress } = useGame();
   const [mon, setMon] = useState<{ code: string; cle: string } | null>(null);
   const [etat, setEtat] = useState<EchangeServeur | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -224,34 +289,50 @@ function MonCode({
   const [envoi, setEnvoi] = useState(false);
   const [essai, setEssai] = useState(0);
   const n = mesDoublons.length;
-  const cleDoublons = mesDoublons.join(',');
+  const nManquantes = manquantes(progress).length;
+  const possedees = new Set(progress.cards.map((c) => c.cardId));
 
-  // Crée un échange (un nouveau code) dès que la page s'ouvre.
+  // Un code : celui déjà ouvert sur ce téléphone (on ne le perd plus en changeant d'onglet),
+  // sinon un nouveau.
   useEffect(() => {
     if (!n) return;
     let actif = true;
-    let cree: { code: string; cle: string } | null = null;
-    api
-      .echangeCreer(moi, cleDoublons.split(','))
+    const en = echangeEnCours.get();
+    const creer = () => {
+      if (!creation) {
+        const pr = game.getState().progress;
+        creation = api
+          .echangeCreer(moi, doublons(pr), manquantes(pr))
+          .then((r) => {
+            if (echangeEnCours.get()?.role !== 'b')
+              echangeEnCours.set({ role: 'a', ...r, depuis: Date.now() });
+            return r;
+          })
+          .finally(() => {
+            creation = null;
+          });
+      }
+      return creation;
+    };
+    const reprendre =
+      en?.role === 'a' && essai === 0
+        ? api
+            .echangeVoir(en.code, en.cle)
+            .then((e) => (e && e.etat !== 'annule' && e.etat !== 'accepte' ? en : creer()))
+            .catch(() => creer())
+        : creer();
+    reprendre
       .then((r) => {
-        cree = r;
-        if (actif) {
-          setMon(r);
-          setEtat(null);
-          setErreur(null);
-        } else void api.echangeAnnuler(r.code, r.cle).catch(() => undefined);
+        if (!actif) return;
+        setMon({ code: r.code, cle: r.cle });
+        setEtat(null);
+        setErreur(null);
       })
       .catch((e: unknown) => actif && setErreur(message(e)));
     return () => {
       actif = false;
-      if (cree) {
-        const { code, cle } = cree;
-        void api.echangeVoir(code, cle).then((e) => {
-          if (e && e.etat !== 'accepte') void api.echangeAnnuler(code, cle);
-        });
-      }
     };
-  }, [moi, cleDoublons, n, essai]);
+  }, [moi, n, essai]);
 
   // Toutes les 2 secondes : un collègue a-t-il scanné le code, ou fait une proposition ?
   useEffect(() => {
@@ -282,7 +363,7 @@ function MonCode({
     try {
       const e = await api.echangeRepondre(mon.code, mon.cle, accepte);
       if (accepte) {
-        appliquer(e.code, e.recoit_b!, e.donne_b!);
+        appliquerEchange(e.code, e.recoit_b!, e.donne_b!);
         onReussi(e.recoit_b!, e.donne_b!, e.nom_b ?? 'ton collègue');
       } else setEtat(e);
     } catch (err) {
@@ -292,58 +373,99 @@ function MonCode({
     }
   };
 
+  const c =
+    etat?.nom_b && correspondance(mesDoublons, possedees, etat.doublons_b, etat.manquantes_b);
+
   // Un collègue propose un échange : A accepte ou refuse.
   if (etat?.etat === 'propose' && etat.donne_b && etat.recoit_b) {
     const recue = CARTE.get(etat.donne_b)!;
     const donnee = CARTE.get(etat.recoit_b)!;
-    const nouvelle = !game.getState().progress.cards.some((c) => c.cardId === recue.id);
+    const nouvelle = !possedees.has(recue.id);
     return (
-      <section className="overflow-hidden rounded-3xl bg-navy-950 p-5 text-center text-white shadow-lift">
-        <p className="eyebrow text-sun">Proposition</p>
-        <h2 className="mt-1 font-display text-xl font-extrabold">
-          {etat.nom_b} te propose un échange
-        </h2>
-        <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-white/60">
-              Tu donnes
-            </p>
-            <div className="mx-auto aspect-[5/7] w-[120px]">
-              <CardFace card={donnee} total={CARDS.length} size="sm" />
+      <div className="space-y-4">
+        <section className="overflow-hidden rounded-3xl bg-navy-950 p-5 text-center text-white shadow-lift">
+          <p className="eyebrow text-sun">Proposition</p>
+          <h2 className="mt-1 font-display text-xl font-extrabold">
+            {prenom(etat.nom_b)} te propose un échange
+          </h2>
+          <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+            <div>
+              <p className="mb-2 text-xs font-bold tracking-wide text-white/60 uppercase">
+                Tu donnes
+              </p>
+              <div className="mx-auto aspect-[5/7] w-[120px]">
+                <CardFace card={donnee} total={CARDS.length} size="sm" />
+              </div>
+            </div>
+            <Repeat className="text-sun" />
+            <div>
+              <p className="mb-2 text-xs font-bold tracking-wide text-white/60 uppercase">
+                Tu reçois
+              </p>
+              <div className="relative mx-auto aspect-[5/7] w-[120px]">
+                <CardFace card={recue} total={CARDS.length} size="sm" />
+                {nouvelle && <Badge vert>Nouvelle !</Badge>}
+              </div>
             </div>
           </div>
-          <Repeat className="text-sun" />
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-white/60">
-              Tu reçois
+          <div className="mt-6 grid grid-cols-2 gap-2">
+            <Button
+              variant="ghost"
+              size="lg"
+              className="border border-white/25 text-white hover:bg-white/10"
+              disabled={envoi}
+              onClick={() => void repondre(false)}
+            >
+              <X size={18} /> Refuser
+            </Button>
+            <Button variant="accent" size="lg" disabled={envoi} onClick={() => void repondre(true)}>
+              <Check size={18} /> Accepter
+            </Button>
+          </div>
+        </section>
+        {c && (
+          <section className="panel p-4">
+            <p className="eyebrow mb-2.5">Ce qui vous arrange aussi</p>
+            <CeQuiArrange c={c} avec={prenom(etat.nom_b)} />
+            <p className="mt-3 text-xs text-muted">
+              Tu préfères une autre carte ? Refuse : {prenom(etat.nom_b)} pourra te proposer autre
+              chose.
             </p>
-            <div className="relative mx-auto aspect-[5/7] w-[120px]">
-              <CardFace card={recue} total={CARDS.length} size="sm" />
-              {nouvelle && <Badge vert>Nouvelle !</Badge>}
+          </section>
+        )}
+      </div>
+    );
+  }
+
+  // Un collègue a scanné le code et choisit : A voit déjà ce qui l'arrange.
+  if (c && etat?.nom_b) {
+    return (
+      <div className="space-y-4">
+        <section className="panel p-4">
+          <div className="mb-3 flex items-center gap-3">
+            <img src={AVATAR} alt="" className="size-10 rounded-full ring-2 ring-sun" />
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-extrabold text-navy-950">
+                {etat.nom_b} a scanné ton code
+              </p>
+              <p className="inline-flex items-center gap-1.5 text-xs text-muted">
+                <Hourglass size={12} className="text-sun-dark" /> Il choisit l’échange à te
+                proposer…
+              </p>
             </div>
           </div>
-        </div>
-        <div className="mt-6 grid grid-cols-2 gap-2">
-          <Button
-            variant="ghost"
-            size="lg"
-            className="border border-white/25 text-white hover:bg-white/10"
-            disabled={envoi}
-            onClick={() => void repondre(false)}
-          >
-            <X size={18} /> Refuser
-          </Button>
-          <Button variant="accent" size="lg" disabled={envoi} onClick={() => void repondre(true)}>
-            <Check size={18} /> Accepter
-          </Button>
-        </div>
-      </section>
+          <CeQuiArrange c={c} avec={prenom(etat.nom_b)} />
+        </section>
+        <p className="text-center text-xs text-muted">
+          Tu peux changer d’onglet : l’échange reste ouvert et une bannière te prévient.
+        </p>
+      </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <section className="overflow-hidden rounded-3xl bg-[radial-gradient(circle_at_50%_35%,#1E4C8C,#0B2347_62%,#060F22)] px-5 pb-6 pt-5 text-center text-white shadow-lift">
+      <section className="overflow-hidden rounded-3xl bg-[radial-gradient(circle_at_50%_35%,#1E4C8C,#0B2347_62%,#060F22)] px-5 pt-5 pb-6 text-center text-white shadow-lift">
         <p className="eyebrow text-sun">Mon code d’échange</p>
         <p className="mt-1 font-display text-xl font-extrabold">Montre ce code à un collègue</p>
         {n === 0 ? (
@@ -364,7 +486,7 @@ function MonCode({
                   <img
                     src={AVATAR}
                     alt=""
-                    className="absolute left-1/2 top-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white p-0.5 shadow"
+                    className="absolute top-1/2 left-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white p-0.5 shadow"
                   />
                 </>
               ) : (
@@ -382,23 +504,22 @@ function MonCode({
               📲 Ton collègue scanne ce code <b className="text-sun">depuis l’appli Team Ulysse</b>{' '}
               (Collection › Échanger une carte › Scanner), pas avec l’appareil photo.
             </p>
-            <p className="mt-2 text-sm text-white/75">
-              {etat?.nom_b ? (
-                <span className="inline-flex items-center gap-1.5 font-semibold text-white">
-                  <Hourglass size={14} className="text-sun" /> {etat.nom_b} choisit les cartes…
-                </span>
-              ) : (
-                <>
-                  <b className="text-sun">
-                    {n} doublon{n > 1 ? 's' : ''}
-                  </b>{' '}
-                  à échanger
-                </>
-              )}
-            </p>
           </>
         )}
       </section>
+
+      {n > 0 && (
+        <section className="panel p-4">
+          <p className="eyebrow">Ce que je partage</p>
+          <p className="mt-1.5 text-sm text-navy-950">
+            🔁 <b>{n}</b> doublon{n > 1 ? 's' : ''} à donner · 🔍 <b>{nManquantes}</b> carte
+            {nManquantes > 1 ? 's' : ''} qui me manque{nManquantes > 1 ? 'nt' : ''}
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            Envoyés avec ton code : ton collègue voit tout de suite ce qui vous arrange.
+          </p>
+        </section>
+      )}
 
       <section className="panel space-y-3 p-5">
         <Button
@@ -414,11 +535,11 @@ function MonCode({
           className="flex gap-2"
           onSubmit={(e) => {
             e.preventDefault();
-            const c = lireCode(saisie);
-            if (!c) return toast('Le code fait 6 caractères.', 'error');
-            if (c === mon?.code) return toast('C’est ton propre code !', 'error');
+            const code = lireCode(saisie);
+            if (!code) return toast('Le code fait 6 caractères.', 'error');
+            if (code === mon?.code) return toast('C’est ton propre code !', 'error');
             setSaisie('');
-            onCodeSaisi(c);
+            onCodeSaisi(code);
           }}
         >
           <input
@@ -428,7 +549,7 @@ function MonCode({
             maxLength={6}
             autoCapitalize="characters"
             autoComplete="off"
-            className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-white px-3 font-mono text-base uppercase tracking-[0.2em] outline-none placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-muted/80 focus:border-blue focus:ring-4 focus:ring-blue/10"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-white px-3 font-mono text-base tracking-[0.2em] uppercase outline-none placeholder:font-sans placeholder:tracking-normal placeholder:text-muted/80 placeholder:normal-case focus:border-blue focus:ring-4 focus:ring-blue/10"
             disabled={n === 0}
           />
           <Button variant="secondary" type="submit" disabled={n === 0 || saisie.length < 6}>
@@ -494,86 +615,159 @@ function Mini({
 
 function Choix({
   e,
-  mesDoublons,
-  possedees,
   onAnnuler,
   onProposer,
 }: {
   e: EchangeServeur;
-  mesDoublons: string[];
-  possedees: Set<string>;
   onAnnuler: () => void;
   onProposer: (donne: string, recoit: string) => Promise<void>;
 }) {
   const { progress } = useGame();
   const nombre = new Map(progress.cards.map((c) => [c.cardId, c.count]));
-  const rang = (id: string) => RARITY_BY_ID[CARTE.get(id)!.rarete].rang;
-  // Ses doublons : les cartes qui me manquent d'abord, puis les plus rares.
-  const siens = e.doublons_a
-    .filter((id) => CARTE.has(id))
-    .sort((a, b) => Number(possedees.has(a)) - Number(possedees.has(b)) || rang(b) - rang(a));
-  const miens = mesDoublons.filter((id) => CARTE.has(id)).sort((a, b) => rang(b) - rang(a));
-  const [donne, setDonne] = useState<string | null>(null);
-  const [recoit, setRecoit] = useState<string | null>(
-    () => siens.find((id) => !possedees.has(id)) ?? null,
-  );
+  const possedees = new Set(progress.cards.map((c) => c.cardId));
+  const mesDoublons = doublons(progress);
+  const c = correspondance(mesDoublons, possedees, e.doublons_a, e.manquantes_a);
+  const avec = prenom(e.nom_a);
+  // Sans correspondance, on peut quand même voir tous les doublons (et faire plaisir).
+  const [tout, setTout] = useState(false);
+  const recevables = tout
+    ? correspondance(mesDoublons, new Set(), e.doublons_a, undefined).pourMoi
+    : c.pourMoi;
+  const donnables = tout
+    ? correspondance(mesDoublons, possedees, [], undefined).pourLui
+    : c.pourLui;
+  const [donne, setDonne] = useState<string | null>(() => c.pourLui.at(-1) ?? null);
+  const [recoit, setRecoit] = useState<string | null>(() => c.pourMoi[0] ?? null);
   const [envoi, setEnvoi] = useState(false);
-  const prenomA = e.nom_a.split(' ')[0];
+  const match = c.pourMoi.length > 0 && c.pourLui.length > 0;
 
   return (
     <div className="space-y-4">
       <section className="panel p-4">
         <div className="mb-3 flex items-center gap-3">
           <img src={AVATAR} alt="" className="size-10 rounded-full ring-2 ring-sun" />
-          <div>
-            <p className="font-display font-extrabold text-navy-950">Échange avec {e.nom_a}</p>
-            <p className="text-xs text-muted">Choisis une carte de chaque côté</p>
+          <div className="min-w-0 flex-1">
+            <p className="font-display font-extrabold text-navy-950">{e.nom_a}</p>
+            <p className="text-xs text-muted">Touche une carte de chaque côté</p>
           </div>
+          <span
+            className={cx(
+              'shrink-0 rounded-full px-2.5 py-1 text-[11px] font-extrabold',
+              match ? 'bg-success/15 text-success' : 'bg-sun/25 text-navy-950',
+            )}
+          >
+            {match ? '✅ Ça matche !' : '🤔 Pas de match'}
+          </span>
         </div>
-        <p className="eyebrow text-muted">Tu donnes (tes doublons)</p>
-        {miens.length ? (
-          <div className="mt-2.5 grid grid-cols-4 gap-2.5">
-            {miens.map((id) => (
-              <Mini
-                key={id}
-                card={CARTE.get(id)!}
-                badge={`×${nombre.get(id) ?? 2}`}
-                choisie={donne === id}
-                onClick={() => setDonne(id)}
-              />
-            ))}
+
+        {!match && !tout && (
+          <div className="mb-3 rounded-2xl bg-sun/15 px-3.5 py-3 text-sm text-navy-950">
+            {c.pourMoi.length === 0
+              ? `${avec} n’a aucun doublon qui te manque.`
+              : `Aucun de tes doublons ne manque à ${avec}.`}{' '}
+            Vous pouvez quand même échanger pour vous faire plaisir.
+            <button
+              type="button"
+              className="mt-2 block font-bold text-blue underline"
+              onClick={() => setTout(true)}
+            >
+              Voir tous les doublons
+            </button>
           </div>
-        ) : (
-          <p className="mt-2 text-sm text-muted">Tu n’as plus de doublon à donner.</p>
         )}
-        <div className="my-3 flex justify-center text-navy">
-          <ArrowUpDown size={26} />
+
+        <div className="rounded-2xl bg-success/10 p-3">
+          <p className="flex items-center justify-between text-sm font-extrabold text-navy-950">
+            🎁 {avec} peut te donner
+            {!tout && (
+              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-success">
+                te manquent
+              </span>
+            )}
+          </p>
+          {recevables.length ? (
+            <div className="mt-2.5 grid grid-cols-4 gap-2.5">
+              {recevables.map((id) => (
+                <Mini
+                  key={id}
+                  card={CARTE.get(id)!}
+                  badge={possedees.has(id) ? 'déjà' : 'Nouvelle !'}
+                  vert={!possedees.has(id)}
+                  choisie={recoit === id}
+                  onClick={() => setRecoit(id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-1.5 text-xs text-muted">Rien de ce côté.</p>
+          )}
         </div>
-        <p className="eyebrow text-muted">Tu reçois (doublons de {prenomA})</p>
-        <div className="mt-2.5 grid grid-cols-4 gap-2.5">
-          {siens.map((id) => (
-            <Mini
-              key={id}
-              card={CARTE.get(id)!}
-              badge={possedees.has(id) ? 'déjà' : 'Nouvelle !'}
-              vert={!possedees.has(id)}
-              attenuee={possedees.has(id)}
-              choisie={recoit === id}
-              onClick={() => setRecoit(id)}
-            />
-          ))}
+
+        <div className="mt-2.5 rounded-2xl bg-blue-light p-3">
+          <p className="flex items-center justify-between text-sm font-extrabold text-navy-950">
+            🤝 Tu peux donner à {avec}
+            {!tout && c.connu && (
+              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-blue">
+                lui manquent
+              </span>
+            )}
+          </p>
+          {donnables.length ? (
+            <div className="mt-2.5 grid grid-cols-4 gap-2.5">
+              {donnables.map((id) => (
+                <Mini
+                  key={id}
+                  card={CARTE.get(id)!}
+                  badge={`×${nombre.get(id) ?? 2}`}
+                  choisie={donne === id}
+                  onClick={() => setDonne(id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="mt-1.5 text-xs text-muted">Rien de ce côté.</p>
+          )}
         </div>
-        {recoit && !possedees.has(recoit) && (
-          <p className="mt-4 rounded-2xl bg-sun/15 px-3.5 py-2.5 text-sm text-navy-950">
-            ✨ <b>{CARTE.get(recoit)!.nom}</b> est nouvelle pour toi !
+        {!tout && (
+          <p className="mt-2.5 text-[11px] text-muted">
+            Les cartes que vous avez déjà tous les deux sont cachées.
           </p>
         )}
       </section>
-      <div className="flex flex-col gap-2">
+
+      <section className="panel p-4">
+        <p className="eyebrow">Ton échange</p>
+        <div className="mt-3 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-center">
+          <div>
+            <div className="mx-auto aspect-[5/7] w-[86px]">
+              {donne ? (
+                <CardFace card={CARTE.get(donne)!} total={CARDS.length} size="sm" />
+              ) : (
+                <span className="grid size-full place-items-center rounded-xl border-2 border-dashed border-line text-2xl text-muted">
+                  ?
+                </span>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs font-semibold text-muted">tu donnes</p>
+          </div>
+          <Repeat className="text-blue" />
+          <div>
+            <div className="mx-auto aspect-[5/7] w-[86px]">
+              {recoit ? (
+                <CardFace card={CARTE.get(recoit)!} total={CARDS.length} size="sm" />
+              ) : (
+                <span className="grid size-full place-items-center rounded-xl border-2 border-dashed border-line text-2xl text-muted">
+                  ?
+                </span>
+              )}
+            </div>
+            <p className="mt-1.5 text-xs font-semibold text-muted">tu reçois</p>
+          </div>
+        </div>
         <Button
           variant="accent"
           size="lg"
-          className="h-13 w-full"
+          className="mt-4 h-13 w-full"
           disabled={!donne || !recoit || envoi}
           onClick={async () => {
             setEnvoi(true);
@@ -581,12 +775,12 @@ function Choix({
             setEnvoi(false);
           }}
         >
-          <Repeat size={18} /> {envoi ? 'Envoi…' : `Proposer l’échange à ${prenomA}`}
+          <Repeat size={18} /> {envoi ? 'Envoi…' : `Proposer à ${avec}`}
         </Button>
-        <Button variant="ghost" onClick={onAnnuler}>
-          Annuler
+        <Button variant="ghost" className="mt-1 w-full" onClick={onAnnuler}>
+          Annuler l’échange
         </Button>
-      </div>
+      </section>
     </div>
   );
 }
@@ -599,6 +793,7 @@ function Attente({
   e,
   onAccepte,
   onRefus,
+  onAnnuler,
   onFin,
 }: {
   code: string;
@@ -606,6 +801,7 @@ function Attente({
   e: EchangeServeur;
   onAccepte: (e: EchangeServeur) => void;
   onRefus: (e: EchangeServeur) => void;
+  onAnnuler: () => void;
   onFin: () => void;
 }) {
   const rappels = useRef({ onAccepte, onRefus, onFin });
@@ -638,13 +834,16 @@ function Attente({
         <Hourglass size={24} />
       </motion.div>
       <h2 className="mt-3 font-display text-xl font-extrabold text-navy-950">
-        En attente de {e.nom_a.split(' ')[0]}…
+        En attente de {prenom(e.nom_a)}…
       </h2>
       <p className="mt-1 text-sm text-muted">
         Tu donnes <b className="text-navy-950">{donne.nom}</b> et tu reçois{' '}
         <b className="text-navy-950">{recoit.nom}</b>. Ton collègue doit accepter sur son téléphone.
       </p>
-      <Button variant="ghost" className="mt-4" onClick={onFin}>
+      <p className="mt-3 rounded-xl bg-blue-light px-3 py-2 text-xs text-navy-950">
+        Tu peux changer d’onglet : l’échange continue, et ta collection se met à jour toute seule.
+      </p>
+      <Button variant="ghost" className="mt-3" onClick={onAnnuler}>
         Annuler
       </Button>
     </section>

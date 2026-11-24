@@ -109,6 +109,9 @@ export interface Echange {
   nom_b: string | null;
   doublons_a: string[];
   doublons_b: string[];
+  /** Cartes qui manquent à chacun (absentes si la base n'est pas à jour). */
+  manquantes_a?: string[];
+  manquantes_b?: string[];
   /** Carte que B donne et carte que B reçoit (prise dans les doublons de A). */
   donne_b: string | null;
   recoit_b: string | null;
@@ -226,13 +229,29 @@ export const api = {
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 
-  echangeCreer: (nom: string, doublons: string[]) =>
-    rpc<{ code: string; cle: string }>('echange_creer', { p_nom: nom, p_doublons: doublons }),
-  echangeRejoindre: (code: string, nom: string, doublons: string[]) =>
+  // Les cartes manquantes ne sont envoyées que si supabase/maj-echanges-v2.sql a été lancé.
+  echangeCreer: (nom: string, doublons: string[], manquantes: string[]) =>
+    rpc<{ code: string; cle: string }>('echange_creer', {
+      p_nom: nom,
+      p_doublons: doublons,
+      p_manquantes: manquantes,
+    }).catch(() =>
+      rpc<{ code: string; cle: string }>('echange_creer', { p_nom: nom, p_doublons: doublons }),
+    ),
+  echangeRejoindre: (code: string, nom: string, doublons: string[], manquantes: string[]) =>
     rpc<Echange & { cle: string }>('echange_rejoindre', {
       p_code: code,
       p_nom: nom,
       p_doublons: doublons,
+      p_manquantes: manquantes,
+    }).catch((e: unknown) => {
+      // Code expiré ou déjà utilisé : on garde le message ; sinon, ancienne version de la base.
+      if (e instanceof ApiError && /valable|utilisé/.test(e.message)) throw e;
+      return rpc<Echange & { cle: string }>('echange_rejoindre', {
+        p_code: code,
+        p_nom: nom,
+        p_doublons: doublons,
+      });
     }),
   echangeProposer: (code: string, cle: string, donne: string, recoit: string) =>
     rpc<Echange>('echange_proposer', {

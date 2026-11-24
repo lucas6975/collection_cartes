@@ -226,6 +226,12 @@ export function doublons(p: Progress): string[] {
   return p.cards.filter((c) => c.count > 1 && !secretes.has(c.cardId)).map((c) => c.cardId);
 }
 
+/** Cartes qui manquent à la collection (sauf la carte secrète Ulysse, qui ne s'échange pas). */
+export function manquantes(p: Progress): string[] {
+  const possedees = new Set(p.cards.map((c) => c.cardId));
+  return CARDS.filter((c) => !c.deblocage && !possedees.has(c.id)).map((c) => c.id);
+}
+
 export interface PackResultat extends PackResult {
   /** Vrai si la carte personnelle est offerte dans ce pack. */
   perso: boolean;
