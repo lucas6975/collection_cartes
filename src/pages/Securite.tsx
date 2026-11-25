@@ -268,6 +268,58 @@ export const LOGO: Record<Onglet, string> = {
   urgences: 'securite/urgences.webp',
 };
 
+/** Illustration de fond de chaque carte et cadrage. */
+const FOND: Record<Onglet, { image: string; position: string }> = {
+  accident: { image: 'securite/fond-accident.webp', position: '70% 30%' },
+  sst: { image: 'securite/fond-sst.webp', position: '75% 35%' },
+  remontee: { image: 'securite/fond-risque.webp', position: '85% 60%' },
+  urgences: { image: 'securite/fond-urgences.webp', position: '70% 50%' },
+};
+
+/** Petite animation propre à chaque carte. */
+function AnimCarte({ id }: { id: Onglet }) {
+  const c = PASTEL[id].accent;
+  if (id === 'accident')
+    return (
+      <span className="pointer-events-none absolute inset-y-0 right-0 w-1/2" aria-hidden>
+        <span className="sc-gyro-r absolute -top-6 right-10 size-28 rounded-full bg-[#ff4d5e] blur-2xl" />
+        <span className="sc-gyro-b absolute -top-6 right-0 size-28 rounded-full bg-[#4d8dff] blur-2xl" />
+      </span>
+    );
+  if (id === 'sst')
+    return (
+      <svg
+        viewBox="0 0 300 60"
+        className="sec-pouls pointer-events-none absolute right-0 bottom-2 w-[62%]"
+        aria-hidden
+      >
+        <path
+          d="M0 34 H90 L104 34 L114 10 L126 54 L136 22 L144 34 H300"
+          fill="none"
+          stroke={c}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  if (id === 'remontee')
+    return (
+      <span className="sc-bande pointer-events-none absolute inset-x-0 bottom-0 h-2" aria-hidden />
+    );
+  return (
+    <span className="pointer-events-none absolute top-1/2 right-16 size-0" aria-hidden>
+      {[0, 0.6, 1.2].map((d) => (
+        <span
+          key={d}
+          className="sc-onde absolute -top-10 -left-10 size-20 rounded-full border-[3px]"
+          style={{ borderColor: c, animationDelay: `${d}s` }}
+        />
+      ))}
+    </span>
+  );
+}
+
 function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
   return (
     <div className="space-y-3.5">
@@ -279,26 +331,34 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
       </div>
       {CARTES.map((c) => {
         const t = PASTEL[c.id];
+        const f = FOND[c.id];
         return (
           <button
             key={c.id}
             type="button"
             onClick={() => onChoisir(c.id)}
-            className="relative flex w-full items-center gap-4 rounded-[26px] border p-4 text-left transition-transform active:scale-[0.98]"
+            className="relative flex min-h-[118px] w-full items-center gap-4 overflow-hidden rounded-[26px] border p-5 text-left shadow-soft transition-transform active:scale-[0.98]"
             style={{ background: t.fond, borderColor: t.bord, color: t.texte }}
           >
             <img
-              src={`${BASE}${LOGO[c.id]}`}
+              src={`${BASE}${f.image}`}
               alt=""
-              className="size-[72px] shrink-0 rounded-[22px] object-cover shadow-[0_6px_14px_rgba(0,0,0,.12)]"
-              style={{ boxShadow: `0 0 0 3px #fff, 0 6px 14px rgba(0,0,0,.12)` }}
+              className="absolute inset-0 size-full object-cover"
+              style={{ objectPosition: f.position }}
             />
-            <span className="min-w-0 flex-1">
-              <b className="block font-display text-[21px] leading-tight">{c.titre}</b>
-              <span className="text-[14px] opacity-75">{c.sous}</span>
+            <span
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(90deg, ${t.fond} 0%, ${t.fond} 38%, ${t.fond}CC 55%, ${t.fond}33 85%, ${t.fond}10 100%)`,
+              }}
+            />
+            <AnimCarte id={c.id} />
+            <span className="relative min-w-0 flex-1 pr-24">
+              <b className="block font-display text-[22px] leading-tight">{c.titre}</b>
+              <span className="block max-w-[80%] text-[14px] opacity-80">{c.sous}</span>
             </span>
             <span
-              className="grid size-10 shrink-0 place-items-center rounded-full text-white"
+              className="relative grid size-10 shrink-0 place-items-center rounded-full text-white shadow-[0_4px_10px_rgba(0,0,0,.2)]"
               style={{ background: t.accent }}
             >
               <ArrowRight size={19} />
