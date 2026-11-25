@@ -236,7 +236,7 @@ export function Securite() {
 
       <motion.div
         key={vue}
-        initial={PAGE_TOURNE.initial}
+        initial={vue === 'accueil' ? false : PAGE_TOURNE.initial}
         animate={PAGE_TOURNE.animate}
         transition={PAGE_TOURNE.transition}
         style={PAGE_TOURNE.style}
@@ -251,51 +251,61 @@ export function Securite() {
   );
 }
 
+/** Couleurs pastel des cartes de l'accueil : fond doux, accent foncé lisible. */
+export const PASTEL: Record<Onglet, { fond: string; bord: string; texte: string; accent: string }> =
+  {
+    accident: { fond: '#FFE4E1', bord: '#FFC9C2', texte: '#7A1F1A', accent: '#E0584D' },
+    sst: { fond: '#DDF5E8', bord: '#B9E8CE', texte: '#14573A', accent: '#2FA36B' },
+    remontee: { fond: '#DFEBFF', bord: '#C2D7FB', texte: '#1D3F7A', accent: '#4A7FD6' },
+    urgences: { fond: '#ECE6FF', bord: '#D6CCFB', texte: '#3B2A80', accent: '#7A62D6' },
+  };
+
+/** Ulysse en situation, pour chaque rubrique (illustrations officielles). */
+export const LOGO: Record<Onglet, string> = {
+  accident: 'securite/accident.webp',
+  sst: 'securite/sst.webp',
+  remontee: 'securite/risque.webp',
+  urgences: 'securite/urgences.webp',
+};
+
 function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5">
       <div className="flex items-end gap-3">
-        <img src={`${BASE}mascotte.webp`} alt="" className="sec-ulysse h-24 w-auto shrink-0" />
+        <img src={`${BASE}mascotte.webp`} alt="" className="h-24 w-auto shrink-0" />
         <p className="mb-3 rounded-2xl rounded-bl-sm bg-white px-3.5 py-2.5 text-sm font-semibold text-navy-950 shadow-soft">
           En cas de besoin, tout est ici. Je veille ! 🦺
         </p>
       </div>
-      {CARTES.map((c, i) => (
-        <motion.button
-          key={c.id}
-          type="button"
-          onClick={() => onChoisir(c.id)}
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.06 * i }}
-          className="vi-elastique relative flex w-full items-center gap-4 overflow-hidden rounded-[28px] p-5 text-left text-white shadow-lift"
-          style={{ background: COULEUR[c.id].fond }}
-        >
-          {c.image && (
+      {CARTES.map((c) => {
+        const t = PASTEL[c.id];
+        return (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => onChoisir(c.id)}
+            className="relative flex w-full items-center gap-4 rounded-[26px] border p-4 text-left transition-transform active:scale-[0.98]"
+            style={{ background: t.fond, borderColor: t.bord, color: t.texte }}
+          >
             <img
-              src={`${BASE}${c.image}`}
+              src={`${BASE}${LOGO[c.id]}`}
               alt=""
-              className="absolute inset-0 size-full object-cover object-right opacity-30"
+              className="size-[72px] shrink-0 rounded-[22px] object-cover shadow-[0_6px_14px_rgba(0,0,0,.12)]"
+              style={{ boxShadow: `0 0 0 3px #fff, 0 6px 14px rgba(0,0,0,.12)` }}
             />
-          )}
-          <span
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(100deg, ${COULEUR[c.id].vif}F2 0%, ${COULEUR[c.id].vif}AA 60%, ${COULEUR[c.id].vif}55 100%)`,
-            }}
-          />
-          {c.id === 'accident' && <Gyrophare />}
-          {c.id === 'sst' && <MotifCroix />}
-          <span className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-white/20">
-            <c.icone size={34} strokeWidth={2.2} />
-          </span>
-          <span className="relative min-w-0 flex-1">
-            <b className="block font-display text-[24px] leading-tight">{c.titre}</b>
-            <span className="text-[15px] text-white/90">{c.sous}</span>
-          </span>
-          <ArrowRight size={24} className="relative shrink-0" />
-        </motion.button>
-      ))}
+            <span className="min-w-0 flex-1">
+              <b className="block font-display text-[21px] leading-tight">{c.titre}</b>
+              <span className="text-[14px] opacity-75">{c.sous}</span>
+            </span>
+            <span
+              className="grid size-10 shrink-0 place-items-center rounded-full text-white"
+              style={{ background: t.accent }}
+            >
+              <ArrowRight size={19} />
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

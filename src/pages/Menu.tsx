@@ -1,18 +1,10 @@
-import {
-  AlertTriangle,
-  ArrowRight,
-  CalendarDays,
-  Gift,
-  Layers,
-  Phone,
-  Plus,
-  Siren,
-} from 'lucide-react';
+import { ArrowRight, CalendarDays, Gift, Layers } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
+import { LOGO, PASTEL } from './Securite';
 import { BanniereJeudiFou } from '../components/JeudiFou';
 import { RoueAccueil } from '../components/roue/RoueAccueil';
 import { ClassementAccueil } from '../components/classement/ClassementAccueil';
@@ -236,82 +228,51 @@ export function Menu() {
       {codeAdmin && (
         <Link
           to="/securite"
-          className="vi-elastique relative block overflow-hidden rounded-3xl text-white shadow-lift"
-          style={{ background: 'linear-gradient(140deg, #1F3F74 0%, #12305E 55%, #0B1A36 100%)' }}
+          className="relative block overflow-hidden rounded-3xl border border-line bg-white p-5 shadow-soft transition-transform active:scale-[0.99]"
         >
-          {/* Les 4 couleurs de l'espace, en bandes diagonales dans le fond */}
-          <span
-            className="pointer-events-none absolute inset-0 flex -skew-x-12 scale-x-125 opacity-90"
-            aria-hidden
-          >
-            <span
-              className="flex-1"
-              style={{ background: 'linear-gradient(180deg, #E5384A, #8E1424)' }}
-            />
-            <span
-              className="flex-1"
-              style={{ background: 'linear-gradient(180deg, #2BB673, #0A4F31)' }}
-            />
-            <span
-              className="flex-1"
-              style={{ background: 'linear-gradient(180deg, #3D7FD6, #0B2347)' }}
-            />
-            <span
-              className="flex-1"
-              style={{ background: 'linear-gradient(180deg, #2A4A86, #0B1A36)' }}
-            />
-          </span>
-          <span
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(90deg, rgba(11,26,54,.82) 0%, rgba(11,26,54,.55) 55%, rgba(11,26,54,.15) 100%)',
-            }}
-            aria-hidden
-          />
-          {/* Ulysse en fond, à droite */}
           <img
             src={MASCOTTE_URL}
             alt=""
-            className="pointer-events-none absolute -right-6 top-3 h-[64%] w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,.45)]"
+            className="pointer-events-none absolute top-3 -right-4 h-36 w-auto"
           />
-          <span className="relative block p-5 pb-4">
-            <span className="block max-w-[62%]">
-              <span className="eyebrow text-white/75">🧪 Test admin</span>
-              <b className="mt-1 block font-display text-2xl leading-tight">Espace Sécurité</b>
-              <span className="mt-1 block text-sm text-white/85">
-                Les bons réflexes et les bons contacts, en un toucher.
+          <span className="relative block max-w-[64%]">
+            <span className="eyebrow text-muted">🧪 Test admin</span>
+            <b className="mt-1 block font-display text-2xl leading-tight text-navy-950">
+              Espace Sécurité
+            </b>
+            <span className="mt-1 block text-sm text-muted">
+              Les bons réflexes et les bons contacts, en un toucher.
+            </span>
+          </span>
+          <span className="relative mt-5 grid grid-cols-2 gap-2">
+            {(
+              [
+                ['accident', 'Accident'],
+                ['sst', 'SST'],
+                ['remontee', 'Situation à risque'],
+                ['urgences', 'Urgences'],
+              ] as const
+            ).map(([id, nom]) => (
+              <span
+                key={id}
+                className="flex items-center gap-2 rounded-2xl border px-2 py-2 text-sm font-bold"
+                style={{
+                  background: PASTEL[id].fond,
+                  borderColor: PASTEL[id].bord,
+                  color: PASTEL[id].texte,
+                }}
+              >
+                <img
+                  src={`${import.meta.env.BASE_URL}${LOGO[id]}`}
+                  alt=""
+                  className="size-9 shrink-0 rounded-xl object-cover ring-2 ring-white"
+                />
+                <span className="leading-tight">{nom}</span>
               </span>
-            </span>
-            {/* Les 4 rubriques */}
-            <span className="mt-5 grid grid-cols-2 gap-2">
-              {(
-                [
-                  ['Accident', Siren, 'linear-gradient(150deg, #E5384A, #8E1424)'],
-                  ['SST', Plus, 'linear-gradient(150deg, #2BB673, #0A4F31)'],
-                  [
-                    'Situation à risque',
-                    AlertTriangle,
-                    'linear-gradient(150deg, #3D7FD6, #1F5AA6)',
-                  ],
-                  ['Urgences', Phone, 'linear-gradient(150deg, #3A5C9A, #172E5C)'],
-                ] as const
-              ).map(([nom, I, fond]) => (
-                <span
-                  key={nom}
-                  className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-bold ring-1 ring-white/20"
-                  style={{ background: fond }}
-                >
-                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-white/20">
-                    <I size={17} strokeWidth={2.4} />
-                  </span>
-                  <span className="leading-tight">{nom}</span>
-                </span>
-              ))}
-            </span>
-            <span className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-extrabold text-navy-950">
-              Ouvrir l’espace Sécurité <ArrowRight size={16} />
-            </span>
+            ))}
+          </span>
+          <span className="relative mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-navy-950 py-2.5 text-sm font-extrabold text-white">
+            Ouvrir l’espace Sécurité <ArrowRight size={16} />
           </span>
         </Link>
       )}
