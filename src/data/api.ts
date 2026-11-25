@@ -57,6 +57,14 @@ export interface SuiviRoue {
   gain: string | null;
 }
 
+/** Sauveteur secouriste du travail (espace Sécurité, en test). */
+export interface ContactSst {
+  prenom: string;
+  nom: string;
+  telephone: string;
+  role: string;
+}
+
 export interface Participant {
   id: string;
   prenom: string;
@@ -226,6 +234,8 @@ export const api = {
   noterRoue: (jeton: string, etape: string, gain?: string) =>
     rpc<null>('noter_roue', { p_jeton: jeton, p_etape: etape, p_gain: gain ?? null }),
   adminRoue: (code: string) => rpc<SuiviRoue[]>('admin_roue', { p_code: code }),
+
+  securiteSst: (code: string) => rpc<ContactSst[]>('securite_sst', { p_code: code }),
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 

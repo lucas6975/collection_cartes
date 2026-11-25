@@ -43,7 +43,7 @@ export function sousTitre(o: { packOuvert: boolean; caseDuJour: boolean; caseFai
 
 export function Menu() {
   const { progress, cards } = useGame();
-  const { identite } = useIdentite();
+  const { identite, codeAdmin } = useIdentite();
   const avent = useAvent();
   const [now] = useState(() => new Date());
   const packOuvert = packDuJourOuvert(progress, now);
@@ -223,6 +223,23 @@ export function Menu() {
           </Link>
         </motion.div>
       </div>
+
+      {codeAdmin && (
+        <Link
+          to="/securite"
+          className="vi-elastique flex items-center gap-4 rounded-3xl bg-gradient-to-br from-[#D42A3C] to-[#8E1424] p-5 text-white shadow-lift"
+        >
+          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-2xl">
+            🚑
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="eyebrow text-white/75">🧪 Test admin</span>
+            <b className="block font-display text-xl">Espace Sécurité</b>
+            <span className="text-sm text-white/85">SST · Situation à risque · Accident</span>
+          </span>
+          <ArrowRight size={20} />
+        </Link>
+      )}
 
       <RejoindreCoalition />
     </div>

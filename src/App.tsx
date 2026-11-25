@@ -25,6 +25,7 @@ import { Classement } from './pages/Classement';
 import { Echange, EchangeHorsAppli, lireCode } from './pages/Echange';
 import { Home } from './pages/Home';
 import { Menu } from './pages/Menu';
+import { Securite } from './pages/Securite';
 
 export function App() {
   const { identite, codeAdmin } = useIdentite();
@@ -116,6 +117,8 @@ export function App() {
             <Route path="moi" element={<MesInscriptions />} />
             <Route path="admin" element={<Admin />} />
             <Route path="coalition" element={<CoalitionAdmin />} />
+            {/* Test administrateur : espace Sécurité. */}
+            <Route path="securite" element={<Securite />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
