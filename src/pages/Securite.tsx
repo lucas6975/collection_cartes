@@ -17,6 +17,7 @@ import {
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router';
+import { PAGE_TOURNE } from '../components/ui/tourne';
 import { ChargementUlysse } from '../components/ui/vivant';
 import { Button, cx } from '../components/ui/primitives';
 import { ApiError, api, type ContactSst } from '../data/api';
@@ -139,7 +140,7 @@ const Gyrophare = () => (
 const Panneau = () => (
   <svg
     viewBox="0 0 100 90"
-    className="sec-panneau pointer-events-none absolute top-4 right-4 w-20 drop-shadow-[0_6px_10px_rgba(0,0,0,.35)]"
+    className="pointer-events-none absolute top-4 right-4 w-20 drop-shadow-[0_6px_10px_rgba(0,0,0,.35)]"
     aria-hidden
   >
     <path
@@ -161,7 +162,6 @@ const CARTES: {
   titre: string;
   sous: string;
   icone: typeof Siren;
-  anim: string;
   image?: string;
 }[] = [
   {
@@ -169,14 +169,12 @@ const CARTES: {
     titre: 'Accident',
     sous: 'Quelqu’un est blessé',
     icone: Siren,
-    anim: 'sec-ico-gyro',
   },
   {
     id: 'sst',
     titre: 'SST',
     sous: 'Sauveteurs secouristes',
     icone: Plus,
-    anim: 'sec-ico-pouls',
     image: 'securite-sst.webp',
   },
   {
@@ -184,7 +182,6 @@ const CARTES: {
     titre: 'Situation à risque',
     sous: 'Remontée de situation à risque',
     icone: AlertTriangle,
-    anim: 'sec-ico-balance',
     image: 'securite-risque.webp',
   },
   {
@@ -192,7 +189,6 @@ const CARTES: {
     titre: 'Numéros d’urgence',
     sous: '15 · 18 · 112 · 114',
     icone: Phone,
-    anim: 'sec-ico-sonne',
   },
 ];
 
@@ -240,9 +236,10 @@ export function Securite() {
 
       <motion.div
         key={vue}
-        initial={{ opacity: 0, x: vue === 'accueil' ? -24 : 24 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.22 }}
+        initial={PAGE_TOURNE.initial}
+        animate={PAGE_TOURNE.animate}
+        transition={PAGE_TOURNE.transition}
+        style={PAGE_TOURNE.style}
       >
         {vue === 'accueil' && <Accueil onChoisir={setVue} />}
         {vue === 'accident' && <OngletAccident onSst={() => setVue('sst')} />}
@@ -290,7 +287,7 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
           {c.id === 'accident' && <Gyrophare />}
           {c.id === 'sst' && <MotifCroix />}
           <span className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-white/20">
-            <c.icone size={34} strokeWidth={2.2} className={c.anim} />
+            <c.icone size={34} strokeWidth={2.2} />
           </span>
           <span className="relative min-w-0 flex-1">
             <b className="block font-display text-[24px] leading-tight">{c.titre}</b>

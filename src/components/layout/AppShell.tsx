@@ -22,6 +22,7 @@ import { packDuJourOuvert } from '../../domain/packs';
 import { BanniereEchange } from '../BanniereEchange';
 import { AVATAR_NOEL_URL, Guirlande } from '../noel/Noel';
 import { Avatar, cx } from '../ui/primitives';
+import { PAGE_TOURNE } from '../ui/tourne';
 
 /** Onglets de la partie « cartes à collectionner ». */
 const NAV_CARTES = [
@@ -186,10 +187,11 @@ export function AppShell() {
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={{ opacity: 0, x: 28 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.22, ease: [0.2, 0.8, 0.3, 1] }}
+            initial={PAGE_TOURNE.initial}
+            animate={PAGE_TOURNE.animate}
+            exit={PAGE_TOURNE.exit}
+            transition={PAGE_TOURNE.transition}
+            style={PAGE_TOURNE.style}
           >
             {outlet}
           </motion.div>
@@ -275,7 +277,7 @@ function BarreOnglets() {
                 key={o.actif ? 'actif' : 'repos'}
                 size={22}
                 strokeWidth={o.actif ? 2.3 : 1.9}
-                className={cx('relative', o.actif && 'vi-saute')}
+                className="relative"
               />
               {o.pastille != null && (
                 <span
