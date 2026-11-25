@@ -1,10 +1,18 @@
-import { ArrowRight, CalendarDays, Gift, Layers } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarDays,
+  Gift,
+  Layers,
+  Phone,
+  Plus,
+  Siren,
+} from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
-import { AmbulanceSvg } from '../components/AmbulanceSvg';
 import { BanniereJeudiFou } from '../components/JeudiFou';
 import { RoueAccueil } from '../components/roue/RoueAccueil';
 import { ClassementAccueil } from '../components/classement/ClassementAccueil';
@@ -228,35 +236,81 @@ export function Menu() {
       {codeAdmin && (
         <Link
           to="/securite"
-          className="vi-elastique relative block overflow-hidden rounded-3xl p-5 text-white shadow-lift"
-          style={{ background: 'linear-gradient(140deg, #E5384A 0%, #B3202F 50%, #6E0D1A 100%)' }}
+          className="vi-elastique relative block overflow-hidden rounded-3xl text-white shadow-lift"
+          style={{ background: 'linear-gradient(140deg, #1F3F74 0%, #12305E 55%, #0B1A36 100%)' }}
         >
-          {/* Gyrophare en fond */}
-          <span className="pointer-events-none absolute -top-24 -left-24 size-72" aria-hidden>
-            <span className="sec-gyro block size-full rounded-full" />
+          {/* Les 4 couleurs de l'espace, en bandes diagonales dans le fond */}
+          <span
+            className="pointer-events-none absolute inset-0 flex -skew-x-12 scale-x-125 opacity-90"
+            aria-hidden
+          >
+            <span
+              className="flex-1"
+              style={{ background: 'linear-gradient(180deg, #E5384A, #8E1424)' }}
+            />
+            <span
+              className="flex-1"
+              style={{ background: 'linear-gradient(180deg, #2BB673, #0A4F31)' }}
+            />
+            <span
+              className="flex-1"
+              style={{ background: 'linear-gradient(180deg, #3D7FD6, #0B2347)' }}
+            />
+            <span
+              className="flex-1"
+              style={{ background: 'linear-gradient(180deg, #2A4A86, #0B1A36)' }}
+            />
           </span>
+          <span
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                'linear-gradient(90deg, rgba(11,26,54,.82) 0%, rgba(11,26,54,.55) 55%, rgba(11,26,54,.15) 100%)',
+            }}
+            aria-hidden
+          />
           {/* Ulysse en fond, à droite */}
           <img
             src={MASCOTTE_URL}
             alt=""
-            className="pointer-events-none absolute -right-6 bottom-0 h-[96%] w-auto opacity-95 drop-shadow-[0_10px_18px_rgba(0,0,0,.4)]"
+            className="pointer-events-none absolute -right-6 top-3 h-[64%] w-auto drop-shadow-[0_10px_18px_rgba(0,0,0,.45)]"
           />
-          <span
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: 'linear-gradient(90deg, rgba(110,13,26,.55) 0%, transparent 70%)',
-            }}
-            aria-hidden
-          />
-          <span className="relative block max-w-[60%]">
-            <span className="eyebrow text-white/75">🧪 Test admin</span>
-            <b className="mt-1 block font-display text-2xl leading-tight">Espace Sécurité</b>
-            <span className="mt-1 block text-sm text-white/90">
-              Accident · SST · Situation à risque · Urgences
+          <span className="relative block p-5 pb-4">
+            <span className="block max-w-[62%]">
+              <span className="eyebrow text-white/75">🧪 Test admin</span>
+              <b className="mt-1 block font-display text-2xl leading-tight">Espace Sécurité</b>
+              <span className="mt-1 block text-sm text-white/85">
+                Les bons réflexes et les bons contacts, en un toucher.
+              </span>
             </span>
-            <AmbulanceSvg className="amb-roule mt-3 w-36" />
-            <span className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-extrabold text-[#B3202F]">
-              Ouvrir <ArrowRight size={16} />
+            {/* Les 4 rubriques */}
+            <span className="mt-5 grid grid-cols-2 gap-2">
+              {(
+                [
+                  ['Accident', Siren, 'linear-gradient(150deg, #E5384A, #8E1424)'],
+                  ['SST', Plus, 'linear-gradient(150deg, #2BB673, #0A4F31)'],
+                  [
+                    'Situation à risque',
+                    AlertTriangle,
+                    'linear-gradient(150deg, #3D7FD6, #1F5AA6)',
+                  ],
+                  ['Urgences', Phone, 'linear-gradient(150deg, #3A5C9A, #172E5C)'],
+                ] as const
+              ).map(([nom, I, fond]) => (
+                <span
+                  key={nom}
+                  className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-sm font-bold ring-1 ring-white/20"
+                  style={{ background: fond }}
+                >
+                  <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-white/20">
+                    <I size={17} strokeWidth={2.4} />
+                  </span>
+                  <span className="leading-tight">{nom}</span>
+                </span>
+              ))}
+            </span>
+            <span className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-extrabold text-navy-950">
+              Ouvrir l’espace Sécurité <ArrowRight size={16} />
             </span>
           </span>
         </Link>
