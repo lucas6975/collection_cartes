@@ -251,13 +251,13 @@ export function Securite() {
   );
 }
 
-/** Couleurs pastel des cartes de l'accueil : fond doux, accent foncé lisible. */
+/** Couleurs vives des cartes de l'accueil : fond doux, accent foncé lisible. */
 export const PASTEL: Record<Onglet, { fond: string; bord: string; texte: string; accent: string }> =
   {
-    accident: { fond: '#FFE4E1', bord: '#FFC9C2', texte: '#7A1F1A', accent: '#E0584D' },
-    sst: { fond: '#DDF5E8', bord: '#B9E8CE', texte: '#14573A', accent: '#2FA36B' },
-    remontee: { fond: '#DFEBFF', bord: '#C2D7FB', texte: '#1D3F7A', accent: '#4A7FD6' },
-    urgences: { fond: '#ECE6FF', bord: '#D6CCFB', texte: '#3B2A80', accent: '#7A62D6' },
+    accident: { fond: '#D63A46', bord: '#B82A36', texte: '#FFFFFF', accent: '#8E1424' },
+    sst: { fond: '#1F9A63', bord: '#178151', texte: '#FFFFFF', accent: '#0F5C3A' },
+    remontee: { fond: '#2E6ED0', bord: '#245CB3', texte: '#FFFFFF', accent: '#163E80' },
+    urgences: { fond: '#5A45C2', bord: '#4A37A6', texte: '#FFFFFF', accent: '#2F2178' },
   };
 
 /** Ulysse en situation, pour chaque rubrique (illustrations officielles). */
@@ -278,7 +278,7 @@ const FOND: Record<Onglet, { image: string; position: string }> = {
 
 /** Petite animation propre à chaque carte. */
 function AnimCarte({ id }: { id: Onglet }) {
-  const c = PASTEL[id].accent;
+  const c = '#FFFFFF';
   if (id === 'accident')
     return (
       <span className="pointer-events-none absolute inset-y-0 right-0 w-1/2" aria-hidden>
@@ -349,17 +349,21 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
             <span
               className="absolute inset-0"
               style={{
-                background: `linear-gradient(90deg, ${t.fond} 0%, ${t.fond} 38%, ${t.fond}CC 55%, ${t.fond}33 85%, ${t.fond}10 100%)`,
+                background: `linear-gradient(90deg, ${t.fond} 0%, ${t.fond}F2 35%, ${t.fond}B3 55%, ${t.fond}40 85%, ${t.fond}1A 100%)`,
               }}
             />
             <AnimCarte id={c.id} />
             <span className="relative min-w-0 flex-1 pr-24">
-              <b className="block font-display text-[22px] leading-tight">{c.titre}</b>
-              <span className="block max-w-[80%] text-[14px] opacity-80">{c.sous}</span>
+              <b className="block font-display text-[24px] leading-tight font-extrabold tracking-tight text-white drop-shadow-[0_2px_6px_rgba(0,0,0,.35)]">
+                {c.titre}
+              </b>
+              <span className="block max-w-[80%] text-[14px] font-semibold text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,.35)]">
+                {c.sous}
+              </span>
             </span>
             <span
-              className="relative grid size-10 shrink-0 place-items-center rounded-full text-white shadow-[0_4px_10px_rgba(0,0,0,.2)]"
-              style={{ background: t.accent }}
+              className="relative grid size-10 shrink-0 place-items-center rounded-full bg-white shadow-[0_4px_10px_rgba(0,0,0,.25)]"
+              style={{ color: t.fond }}
             >
               <ArrowRight size={19} />
             </span>
