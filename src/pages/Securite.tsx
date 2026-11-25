@@ -3,24 +3,27 @@
 // Rien n'est encore envoyé : la remontée reste sur ce téléphone pendant le test.
 import {
   AlertTriangle,
+  ArrowRight,
   BookUser,
   Camera,
+  ChevronLeft,
   HeartPulse,
   Phone,
+  Plus,
   ShieldAlert,
   Siren,
   UserPlus,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import { ChargementUlysse } from '../components/ui/vivant';
-import { Button, PageHeader, cx } from '../components/ui/primitives';
+import { Button, cx } from '../components/ui/primitives';
 import { ApiError, api, type ContactSst } from '../data/api';
 import { bravoStore } from '../data/bravo';
 import { useIdentite } from '../data/identite';
 
-type Onglet = 'sst' | 'remontee' | 'accident';
+type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences';
 
 const BASE = import.meta.env.BASE_URL;
 const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
@@ -38,6 +41,11 @@ const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
     fond: 'linear-gradient(150deg, #3D7FD6 0%, #1F5AA6 50%, #0B2347 100%)',
     vif: '#1F5AA6',
     doux: '#EAF2FD',
+  },
+  urgences: {
+    fond: 'linear-gradient(150deg, #2A4A86 0%, #172E5C 55%, #0B1A36 100%)',
+    vif: '#172E5C',
+    doux: '#EEF1F6',
   },
 };
 
@@ -146,62 +154,178 @@ const Panneau = () => (
   </svg>
 );
 
+type Vue = 'accueil' | Onglet;
+
+const CARTES: {
+  id: Onglet;
+  titre: string;
+  sous: string;
+  icone: typeof Siren;
+  anim: string;
+  image?: string;
+}[] = [
+  {
+    id: 'accident',
+    titre: 'Accident',
+    sous: 'Quelqu’un est blessé',
+    icone: Siren,
+    anim: 'sec-ico-gyro',
+  },
+  {
+    id: 'sst',
+    titre: 'SST',
+    sous: 'Sauveteurs secouristes',
+    icone: Plus,
+    anim: 'sec-ico-pouls',
+    image: 'securite-sst.webp',
+  },
+  {
+    id: 'remontee',
+    titre: 'Situation à risque',
+    sous: 'Remontée de situation à risque',
+    icone: AlertTriangle,
+    anim: 'sec-ico-balance',
+    image: 'securite-risque.webp',
+  },
+  {
+    id: 'urgences',
+    titre: 'Numéros d’urgence',
+    sous: '15 · 18 · 112 · 114',
+    icone: Phone,
+    anim: 'sec-ico-sonne',
+  },
+];
+
+const TITRES: Record<Onglet, string> = {
+  accident: 'Accident',
+  sst: 'SST',
+  remontee: 'Situation à risque',
+  urgences: 'Numéros d’urgence',
+};
+
 export function Securite() {
   const { codeAdmin } = useIdentite();
-  const [onglet, setOnglet] = useState<Onglet>('accident');
+  const navigate = useNavigate();
+  const [vue, setVue] = useState<Vue>('accueil');
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [vue]);
   if (!codeAdmin) return <Navigate to="/" replace />;
 
   return (
     <div className="relative mx-auto max-w-2xl">
       <div
         className="pointer-events-none fixed inset-0 -z-10 transition-colors duration-500"
-        style={{ background: COULEUR[onglet].doux }}
+        style={{ background: vue === 'accueil' ? '#EEF1F6' : COULEUR[vue].doux }}
         aria-hidden
       />
-      <PageHeader
-        eyebrow="🧪 Test · visible seulement par l’administrateur"
-        title="Espace Sécurité"
-        description="Les bons réflexes et les bons contacts, en un toucher."
-      />
+      <header className="mb-5 flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => (vue === 'accueil' ? navigate('/') : setVue('accueil'))}
+          aria-label="Retour"
+          className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-navy-950 shadow-soft"
+        >
+          <ChevronLeft size={24} />
+        </button>
+        <div className="min-w-0">
+          <h1 className="font-display text-[28px] leading-tight font-extrabold text-navy-950">
+            {vue === 'accueil' ? 'Espace Sécurité' : TITRES[vue]}
+          </h1>
+          <p className="text-[15px] text-muted">
+            {vue === 'accueil' ? 'Choisis ce dont tu as besoin' : 'Espace Sécurité'}
+          </p>
+        </div>
+      </header>
 
-      <div
-        className="mb-5 flex max-w-full overflow-x-auto rounded-2xl border border-line bg-white p-1 shadow-soft"
-        role="tablist"
+      <motion.div
+        key={vue}
+        initial={{ opacity: 0, x: vue === 'accueil' ? -24 : 24 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.22 }}
       >
-        {(
-          [
-            ['accident', 'Accident', Siren],
-            ['sst', 'SST', HeartPulse],
-            ['remontee', 'Situation à risque', AlertTriangle],
-          ] as const
-        ).map(([id, label, I]) => (
-          <button
-            key={id}
-            role="tab"
-            aria-selected={onglet === id}
-            onClick={() => setOnglet(id)}
-            className={cx(
-              'relative flex h-10 flex-1 shrink-0 items-center justify-center gap-1.5 rounded-xl px-3 text-sm font-semibold whitespace-nowrap',
-              onglet === id ? 'text-white' : 'text-muted hover:text-navy',
-            )}
+        {vue === 'accueil' && <Accueil onChoisir={setVue} />}
+        {vue === 'accident' && <OngletAccident onSst={() => setVue('sst')} />}
+        {vue === 'sst' && <OngletSst code={codeAdmin} />}
+        {vue === 'remontee' && <OngletRemontee />}
+        {vue === 'urgences' && <GrilleUrgences titre="Appeler les secours" />}
+      </motion.div>
+    </div>
+  );
+}
+
+function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-end gap-3">
+        <img src={`${BASE}mascotte.webp`} alt="" className="sec-ulysse h-24 w-auto shrink-0" />
+        <p className="mb-3 rounded-2xl rounded-bl-sm bg-white px-3.5 py-2.5 text-sm font-semibold text-navy-950 shadow-soft">
+          En cas de besoin, tout est ici. Je veille ! 🦺
+        </p>
+      </div>
+      {CARTES.map((c, i) => (
+        <motion.button
+          key={c.id}
+          type="button"
+          onClick={() => onChoisir(c.id)}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06 * i }}
+          className="vi-elastique relative flex w-full items-center gap-4 overflow-hidden rounded-[28px] p-5 text-left text-white shadow-lift"
+          style={{ background: COULEUR[c.id].fond }}
+        >
+          {c.image && (
+            <img
+              src={`${BASE}${c.image}`}
+              alt=""
+              className="absolute inset-0 size-full object-cover object-right opacity-30"
+            />
+          )}
+          <span
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(100deg, ${COULEUR[c.id].vif}F2 0%, ${COULEUR[c.id].vif}AA 60%, ${COULEUR[c.id].vif}55 100%)`,
+            }}
+          />
+          {c.id === 'accident' && <Gyrophare />}
+          {c.id === 'sst' && <MotifCroix />}
+          <span className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-white/20">
+            <c.icone size={34} strokeWidth={2.2} className={c.anim} />
+          </span>
+          <span className="relative min-w-0 flex-1">
+            <b className="block font-display text-[24px] leading-tight">{c.titre}</b>
+            <span className="text-[15px] text-white/90">{c.sous}</span>
+          </span>
+          <ArrowRight size={24} className="relative shrink-0" />
+        </motion.button>
+      ))}
+    </div>
+  );
+}
+
+/** Les numéros d'urgence, en gros boutons rouges. */
+function GrilleUrgences({ titre, seulement }: { titre: string; seulement?: string[] }) {
+  return (
+    <section className="panel p-4">
+      <p className="eyebrow mb-3 flex items-center gap-2 text-[#C8283A]">
+        <Phone size={16} className="text-navy-950" /> {titre}
+      </p>
+      <div className="grid grid-cols-2 gap-2.5">
+        {URGENCES.filter((u) => !seulement || seulement.includes(u.num)).map((u) => (
+          <a
+            key={u.num}
+            href={u.sms ? `sms:${u.num}` : `tel:${u.num}`}
+            className="vi-elastique relative flex flex-col overflow-hidden rounded-2xl p-3.5 text-white shadow-[0_8px_18px_rgba(200,40,58,.35)]"
+            style={{ background: COULEUR.accident.fond }}
           >
-            {onglet === id && (
-              <motion.span
-                layoutId="securite-tab"
-                className="absolute inset-0 rounded-xl"
-                style={{ background: COULEUR[id].vif }}
-              />
-            )}
-            <I size={16} className="relative" />
-            <span className="relative">{label}</span>
-          </button>
+            <Phone size={64} className="absolute -right-3 -bottom-3 rotate-12 text-white/15" />
+            <span className="font-display text-[40px] leading-none font-extrabold">{u.num}</span>
+            <span className="mt-1.5 text-lg font-bold">{u.nom}</span>
+            <span className="text-sm text-white/85">{u.quand}</span>
+          </a>
         ))}
       </div>
-
-      {onglet === 'accident' && <OngletAccident onSst={() => setOnglet('sst')} />}
-      {onglet === 'sst' && <OngletSst code={codeAdmin} />}
-      {onglet === 'remontee' && <OngletRemontee />}
-    </div>
+    </section>
   );
 }
 
@@ -254,27 +378,12 @@ function OngletAccident({ onSst }: { onSst: () => void }) {
         </ol>
       </Bandeau>
 
+      <GrilleUrgences titre="Appeler les secours" />
       <section className="panel p-4">
-        <p className="eyebrow mb-3 text-[#C8283A]">📞 Appeler les secours</p>
-        <div className="grid grid-cols-2 gap-2.5">
-          {URGENCES.map((u) => (
-            <a
-              key={u.num}
-              href={u.sms ? `sms:${u.num}` : `tel:${u.num}`}
-              className="vi-elastique relative flex flex-col overflow-hidden rounded-2xl p-3 text-white shadow-[0_8px_18px_rgba(200,40,58,.35)]"
-              style={{ background: COULEUR.accident.fond }}
-            >
-              <Phone size={56} className="absolute -right-3 -bottom-3 rotate-12 text-white/15" />
-              <span className="font-display text-4xl leading-none font-extrabold">{u.num}</span>
-              <span className="mt-1 font-bold">{u.nom}</span>
-              <span className="text-xs text-white/80">{u.quand}</span>
-            </a>
-          ))}
-        </div>
         <button
           type="button"
           onClick={onSst}
-          className="vi-elastique mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold text-white"
+          className="vi-elastique flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold text-white"
           style={{ background: COULEUR.sst.fond }}
         >
           <HeartPulse size={17} /> Appeler un SST du site
@@ -402,6 +511,8 @@ function OngletSst({ code }: { code: string }) {
           </div>
         </section>
       ))}
+
+      <GrilleUrgences titre="Pas de SST ? Appelle" seulement={['15', '18']} />
 
       <section className="panel p-4">
         <p className="eyebrow mb-2">Bon à savoir</p>

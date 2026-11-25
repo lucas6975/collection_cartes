@@ -219,7 +219,77 @@
     transform: rotate(4deg);
   }
 }
+.sec-ulysse {
+  transform-origin: 50% 100%;
+  animation: sec-salut 3s ease-in-out infinite;
+}
+.sec-ico-gyro {
+  animation: sec-clignote 1s steps(2) infinite;
+}
+.sec-ico-pouls {
+  animation: sec-bat 1.2s ease-in-out infinite;
+}
+.sec-ico-balance {
+  transform-origin: 50% 90%;
+  animation: sec-balance 2.4s ease-in-out infinite;
+}
+.sec-ico-sonne {
+  animation: sec-sonne 2.4s ease-in-out infinite;
+}
+@keyframes sec-salut {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg) translateY(-3px);
+  }
+}
+@keyframes sec-clignote {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes sec-bat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.22);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.14);
+  }
+}
+@keyframes sec-sonne {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0);
+  }
+  65% {
+    transform: rotate(-14deg);
+  }
+  70% {
+    transform: rotate(12deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+  80% {
+    transform: rotate(8deg);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .sec-ulysse,
+  .sec-ico-gyro,
+  .sec-ico-pouls,
+  .sec-ico-balance,
+  .sec-ico-sonne,
   .sec-gyro,
   .sec-pouls path,
   .sec-panneau {
