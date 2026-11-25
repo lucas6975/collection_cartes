@@ -14,7 +14,6 @@ import {
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router';
-import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { ChargementUlysse } from '../components/ui/vivant';
 import { Button, PageHeader, cx } from '../components/ui/primitives';
 import { ApiError, api, type ContactSst } from '../data/api';
@@ -23,13 +22,142 @@ import { useIdentite } from '../data/identite';
 
 type Onglet = 'sst' | 'remontee' | 'accident';
 
+const BASE = import.meta.env.BASE_URL;
+const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
+  accident: {
+    fond: 'linear-gradient(150deg, #E5384A 0%, #B3202F 50%, #6E0D1A 100%)',
+    vif: '#C8283A',
+    doux: '#FDECEE',
+  },
+  sst: {
+    fond: 'linear-gradient(150deg, #2BB673 0%, #138A55 50%, #0A4F31 100%)',
+    vif: '#138A55',
+    doux: '#E8F7EF',
+  },
+  remontee: {
+    fond: 'linear-gradient(150deg, #3D7FD6 0%, #1F5AA6 50%, #0B2347 100%)',
+    vif: '#1F5AA6',
+    doux: '#EAF2FD',
+  },
+};
+
+/** Bandeau illustré en haut de chaque onglet. */
+function Bandeau({
+  onglet,
+  image,
+  eyebrow,
+  titre,
+  texte,
+  decor,
+  children,
+}: {
+  onglet: Onglet;
+  image?: string;
+  eyebrow: string;
+  titre: string;
+  texte?: string;
+  decor?: React.ReactNode;
+  children?: React.ReactNode;
+}) {
+  return (
+    <section
+      className="relative overflow-hidden rounded-3xl p-5 text-white shadow-lift"
+      style={{ background: COULEUR[onglet].fond }}
+    >
+      {image && (
+        <img
+          src={`${BASE}${image}`}
+          alt=""
+          className="absolute inset-0 size-full object-cover object-right opacity-80"
+        />
+      )}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(100deg, ${COULEUR[onglet].vif}F5 0%, ${COULEUR[onglet].vif}CC 45%, ${COULEUR[onglet].vif}33 100%)`,
+        }}
+      />
+      {decor}
+      <div className="relative">
+        <p className="eyebrow text-white/80">{eyebrow}</p>
+        <h2 className="mt-1 max-w-[80%] font-display text-[26px] leading-tight font-extrabold drop-shadow-[0_2px_8px_rgba(0,0,0,.25)]">
+          {titre}
+        </h2>
+        {texte && <p className="mt-1.5 max-w-[78%] text-sm text-white/90">{texte}</p>}
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/** Motif de croix de secours (onglet SST). */
+const MotifCroix = () => (
+  <svg className="pointer-events-none absolute inset-0 size-full opacity-[.12]" aria-hidden>
+    <defs>
+      <pattern id="croix" width="46" height="46" patternUnits="userSpaceOnUse">
+        <path d="M18 8h10v10h10v10H28v10H18V28H8V18h10z" fill="#fff" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#croix)" />
+  </svg>
+);
+
+/** Ligne de battement de cœur animée (onglet SST). */
+const Pouls = () => (
+  <svg
+    viewBox="0 0 300 60"
+    className="sec-pouls pointer-events-none absolute right-0 bottom-3 w-[70%] opacity-80"
+    aria-hidden
+  >
+    <path
+      d="M0 34 H90 L104 34 L114 10 L126 54 L136 22 L144 34 H300"
+      fill="none"
+      stroke="#fff"
+      strokeWidth="3.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+/** Gyrophare : rayons lumineux qui tournent (onglet Accident). */
+const Gyrophare = () => (
+  <div className="pointer-events-none absolute -top-24 -right-24 size-72" aria-hidden>
+    <div className="sec-gyro size-full rounded-full" />
+  </div>
+);
+
+/** Grand panneau « danger » (onglet Situation à risque). */
+const Panneau = () => (
+  <svg
+    viewBox="0 0 100 90"
+    className="sec-panneau pointer-events-none absolute top-4 right-4 w-20 drop-shadow-[0_6px_10px_rgba(0,0,0,.35)]"
+    aria-hidden
+  >
+    <path
+      d="M50 4 L96 84 H4 Z"
+      fill="#F5C542"
+      stroke="#15171C"
+      strokeWidth="6"
+      strokeLinejoin="round"
+    />
+    <rect x="46" y="30" width="8" height="30" rx="3" fill="#15171C" />
+    <circle cx="50" cy="70" r="5" fill="#15171C" />
+  </svg>
+);
+
 export function Securite() {
   const { codeAdmin } = useIdentite();
   const [onglet, setOnglet] = useState<Onglet>('accident');
   if (!codeAdmin) return <Navigate to="/" replace />;
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="relative mx-auto max-w-2xl">
+      <div
+        className="pointer-events-none fixed inset-0 -z-10 transition-colors duration-500"
+        style={{ background: COULEUR[onglet].doux }}
+        aria-hidden
+      />
       <PageHeader
         eyebrow="🧪 Test · visible seulement par l’administrateur"
         title="Espace Sécurité"
@@ -60,10 +188,8 @@ export function Securite() {
             {onglet === id && (
               <motion.span
                 layoutId="securite-tab"
-                className={cx(
-                  'absolute inset-0 rounded-xl',
-                  id === 'accident' ? 'bg-danger' : 'bg-navy',
-                )}
+                className="absolute inset-0 rounded-xl"
+                style={{ background: COULEUR[id].vif }}
               />
             )}
             <I size={16} className="relative" />
@@ -91,9 +217,12 @@ const URGENCES = [
 function OngletAccident({ onSst }: { onSst: () => void }) {
   return (
     <div className="space-y-4">
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#D42A3C] to-[#8E1424] p-5 text-white shadow-lift">
-        <p className="eyebrow text-white/80">Tu es témoin d’un accident</p>
-        <h2 className="mt-1 font-display text-2xl font-extrabold">Protéger · Alerter · Secourir</h2>
+      <Bandeau
+        onglet="accident"
+        eyebrow="🚨 Tu es témoin d’un accident"
+        titre="Protéger · Alerter · Secourir"
+        decor={<Gyrophare />}
+      >
         <ol className="mt-4 space-y-3">
           {[
             [
@@ -123,26 +252,33 @@ function OngletAccident({ onSst }: { onSst: () => void }) {
             </li>
           ))}
         </ol>
-      </section>
+      </Bandeau>
 
       <section className="panel p-4">
-        <p className="eyebrow mb-3">Appeler les secours</p>
+        <p className="eyebrow mb-3 text-[#C8283A]">📞 Appeler les secours</p>
         <div className="grid grid-cols-2 gap-2.5">
           {URGENCES.map((u) => (
             <a
               key={u.num}
               href={u.sms ? `sms:${u.num}` : `tel:${u.num}`}
-              className="vi-elastique flex flex-col rounded-2xl border-2 border-danger/15 bg-danger/5 p-3"
+              className="vi-elastique relative flex flex-col overflow-hidden rounded-2xl p-3 text-white shadow-[0_8px_18px_rgba(200,40,58,.35)]"
+              style={{ background: COULEUR.accident.fond }}
             >
-              <span className="font-display text-3xl font-extrabold text-danger">{u.num}</span>
-              <span className="font-bold text-navy-950">{u.nom}</span>
-              <span className="text-xs text-muted">{u.quand}</span>
+              <Phone size={56} className="absolute -right-3 -bottom-3 rotate-12 text-white/15" />
+              <span className="font-display text-4xl leading-none font-extrabold">{u.num}</span>
+              <span className="mt-1 font-bold">{u.nom}</span>
+              <span className="text-xs text-white/80">{u.quand}</span>
             </a>
           ))}
         </div>
-        <Button variant="secondary" className="mt-3 w-full" onClick={onSst}>
-          <HeartPulse size={16} /> Appeler un SST du site
-        </Button>
+        <button
+          type="button"
+          onClick={onSst}
+          className="vi-elastique mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold text-white"
+          style={{ background: COULEUR.sst.fond }}
+        >
+          <HeartPulse size={17} /> Appeler un SST du site
+        </button>
       </section>
 
       <section className="panel p-4">
@@ -204,18 +340,21 @@ function OngletSst({ code }: { code: string }) {
 
   return (
     <div className="space-y-4">
-      <section className="panel flex items-center gap-4 p-4">
-        <img src={MASCOTTE_URL} alt="" className="h-20 w-auto shrink-0" />
-        <div>
-          <p className="font-display text-lg font-extrabold text-navy-950">
-            Les sauveteurs secouristes du site
-          </p>
-          <p className="text-sm text-muted">
-            Formés aux premiers secours, ils interviennent en attendant les secours. Un toucher pour
-            les appeler.
-          </p>
-        </div>
-      </section>
+      <Bandeau
+        onglet="sst"
+        image="securite-sst.webp"
+        eyebrow="➕ Sauveteurs secouristes du travail"
+        titre="Les SST du site"
+        texte="Formés aux premiers secours, ils interviennent en attendant les secours. Un toucher pour les appeler."
+        decor={
+          <>
+            <MotifCroix />
+            <Pouls />
+          </>
+        }
+      >
+        <div className="h-8" />
+      </Bandeau>
 
       {erreur && (
         <p className="rounded-2xl bg-danger/10 px-4 py-3 text-sm font-medium text-danger">
@@ -228,9 +367,16 @@ function OngletSst({ code }: { code: string }) {
       )}
 
       {contacts?.map((c) => (
-        <section key={`${c.prenom}${c.nom}`} className="panel p-4">
+        <section
+          key={`${c.prenom}${c.nom}`}
+          className="panel border-l-[6px] p-4"
+          style={{ borderLeftColor: COULEUR.sst.vif }}
+        >
           <div className="flex items-center gap-3">
-            <span className="grid size-12 shrink-0 place-items-center rounded-full bg-success font-display text-lg font-extrabold text-white">
+            <span
+              className="grid size-14 shrink-0 place-items-center rounded-2xl font-display text-lg font-extrabold text-white shadow-[0_6px_14px_rgba(19,138,85,.35)]"
+              style={{ background: COULEUR.sst.fond }}
+            >
               {c.prenom[0]}
               {c.nom[0]}
             </span>
@@ -245,7 +391,8 @@ function OngletSst({ code }: { code: string }) {
           <div className="mt-3 grid grid-cols-2 gap-2">
             <a
               href={`tel:${telLien(c.telephone)}`}
-              className="vi-elastique inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-success font-semibold text-white"
+              className="vi-elastique inline-flex h-11 items-center justify-center gap-2 rounded-xl font-semibold text-white"
+              style={{ background: COULEUR.sst.fond }}
             >
               <Phone size={16} /> Appeler
             </a>
@@ -328,9 +475,18 @@ function OngletRemontee() {
 
   return (
     <div className="space-y-4">
-      <p className="rounded-2xl bg-sun/20 px-4 py-3 text-sm text-navy-950">
-        🧪 <b>Mode test</b> : rien n’est envoyé, la remontée reste sur ce téléphone.
-      </p>
+      <Bandeau
+        onglet="remontee"
+        image="securite-risque.webp"
+        eyebrow="⚠️ Vigilance partagée"
+        titre="Tu as vu un danger ?"
+        texte="Signale-le en 30 secondes : chaque remontée évite peut-être un accident."
+        decor={<Panneau />}
+      >
+        <p className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur">
+          🧪 Mode test : rien n’est envoyé
+        </p>
+      </Bandeau>
 
       <section className="panel space-y-4 p-4">
         <div>
@@ -346,7 +502,7 @@ function OngletRemontee() {
                 onClick={() => setType(t)}
                 className={cx(
                   'vi-elastique rounded-2xl border-2 p-3 text-left text-sm font-bold',
-                  type === t ? 'border-navy bg-blue-light text-navy-950' : 'border-line text-muted',
+                  type === t ? 'border-blue bg-blue-light text-navy-950' : 'border-line text-muted',
                 )}
               >
                 <span className="block text-xl">{e}</span>
@@ -434,15 +590,15 @@ function OngletRemontee() {
           Envoyer sans mon nom
         </label>
 
-        <Button
-          variant="accent"
-          size="lg"
-          className="w-full"
+        <button
+          type="button"
+          className="vi-elastique flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold text-white disabled:opacity-40"
+          style={{ background: COULEUR.remontee.fond }}
           disabled={!lieu.trim() || !description.trim()}
           onClick={envoyer}
         >
           <ShieldAlert size={18} /> Envoyer ma remontée
-        </Button>
+        </button>
         {gravite === 'Grave' && (
           <p className="rounded-xl bg-danger/10 px-3 py-2 text-xs font-semibold text-danger">
             Danger immédiat ? Préviens aussi ton responsable tout de suite, de vive voix.

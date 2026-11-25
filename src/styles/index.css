@@ -177,6 +177,56 @@
   }
 }
 
+/* ───────────── Espace Sécurité (test) ───────────── */
+.sec-gyro {
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.35) 0 12%,
+    transparent 12% 50%,
+    rgba(255, 255, 255, 0.35) 50% 62%,
+    transparent 62%
+  );
+  animation: sec-tourne 3s linear infinite;
+  filter: blur(6px);
+}
+.sec-pouls path {
+  stroke-dasharray: 420;
+  animation: sec-pouls 2.2s linear infinite;
+}
+.sec-panneau {
+  transform-origin: 50% 90%;
+  animation: sec-balance 2.8s ease-in-out infinite;
+}
+@keyframes sec-tourne {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes sec-pouls {
+  from {
+    stroke-dashoffset: 420;
+  }
+  to {
+    stroke-dashoffset: -420;
+  }
+}
+@keyframes sec-balance {
+  0%,
+  100% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(4deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sec-gyro,
+  .sec-pouls path,
+  .sec-panneau {
+    animation: none;
+  }
+}
+
 @keyframes neige {
   from {
     transform: translate3d(0, -10px, 0);
