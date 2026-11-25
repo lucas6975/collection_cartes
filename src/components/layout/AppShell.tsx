@@ -22,7 +22,6 @@ import { packDuJourOuvert } from '../../domain/packs';
 import { BanniereEchange } from '../BanniereEchange';
 import { AVATAR_NOEL_URL, Guirlande } from '../noel/Noel';
 import { Avatar, cx } from '../ui/primitives';
-import { PAGE_TOURNE } from '../ui/tourne';
 
 /** Onglets de la partie « cartes à collectionner ». */
 const NAV_CARTES = [
@@ -187,11 +186,10 @@ export function AppShell() {
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
-            initial={PAGE_TOURNE.initial}
-            animate={PAGE_TOURNE.animate}
-            exit={PAGE_TOURNE.exit}
-            transition={PAGE_TOURNE.transition}
-            style={PAGE_TOURNE.style}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
           >
             {outlet}
           </motion.div>
