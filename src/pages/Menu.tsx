@@ -228,19 +228,32 @@ export function Menu() {
       {codeAdmin && (
         <Link
           to="/securite"
-          className="relative block overflow-hidden rounded-3xl border border-line bg-white p-5 shadow-soft transition-transform active:scale-[0.99]"
+          className="relative block overflow-hidden rounded-3xl p-5 text-white shadow-lift transition-transform active:scale-[0.99]"
+          style={{ background: 'linear-gradient(140deg, #1F3F74 0%, #12305E 50%, #0B1A36 100%)' }}
         >
+          <img
+            src={`${import.meta.env.BASE_URL}securite/fond-risque.webp`}
+            alt=""
+            className="pointer-events-none absolute inset-0 size-full object-cover opacity-20"
+          />
+          <span
+            className="pointer-events-none absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage: 'radial-gradient(#fff 1px, transparent 1.2px)',
+              backgroundSize: '18px 18px',
+            }}
+          />
           <img
             src={MASCOTTE_URL}
             alt=""
             className="pointer-events-none absolute top-3 -right-4 h-36 w-auto"
           />
           <span className="relative block max-w-[64%]">
-            <span className="eyebrow text-muted">🧪 Test admin</span>
-            <b className="mt-1 block font-display text-2xl leading-tight text-navy-950">
+            <span className="eyebrow text-sun">🧪 Test admin</span>
+            <b className="mt-1 block font-display text-2xl leading-tight text-white">
               Espace Sécurité
             </b>
-            <span className="mt-1 block text-sm text-muted">
+            <span className="mt-1 block text-sm text-white/80">
               Les bons réflexes et les bons contacts, en un toucher.
             </span>
           </span>
@@ -271,7 +284,7 @@ export function Menu() {
               </span>
             ))}
           </span>
-          <span className="relative mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-navy-950 py-2.5 text-sm font-extrabold text-white">
+          <span className="relative mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-extrabold text-navy-950">
             Ouvrir l’espace Sécurité <ArrowRight size={16} />
           </span>
         </Link>
