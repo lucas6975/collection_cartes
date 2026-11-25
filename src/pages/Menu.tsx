@@ -231,11 +231,6 @@ export function Menu() {
           className="relative block overflow-hidden rounded-3xl p-5 text-white shadow-lift transition-transform active:scale-[0.99]"
           style={{ background: 'linear-gradient(140deg, #1F3F74 0%, #12305E 50%, #0B1A36 100%)' }}
         >
-          <img
-            src={`${import.meta.env.BASE_URL}securite/fond-risque.webp`}
-            alt=""
-            className="pointer-events-none absolute inset-0 size-full object-cover opacity-20"
-          />
           <span
             className="pointer-events-none absolute inset-0 opacity-[0.08]"
             style={{
