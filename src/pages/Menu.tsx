@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
+import { AmbulanceSvg } from '../components/AmbulanceSvg';
 import { BanniereJeudiFou } from '../components/JeudiFou';
 import { RoueAccueil } from '../components/roue/RoueAccueil';
 import { ClassementAccueil } from '../components/classement/ClassementAccueil';
@@ -227,17 +228,37 @@ export function Menu() {
       {codeAdmin && (
         <Link
           to="/securite"
-          className="vi-elastique flex items-center gap-4 rounded-3xl bg-gradient-to-br from-[#D42A3C] to-[#8E1424] p-5 text-white shadow-lift"
+          className="vi-elastique relative block overflow-hidden rounded-3xl p-5 text-white shadow-lift"
+          style={{ background: 'linear-gradient(140deg, #E5384A 0%, #B3202F 50%, #6E0D1A 100%)' }}
         >
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/15 text-2xl">
-            🚑
+          {/* Gyrophare en fond */}
+          <span className="pointer-events-none absolute -top-24 -left-24 size-72" aria-hidden>
+            <span className="sec-gyro block size-full rounded-full" />
           </span>
-          <span className="min-w-0 flex-1">
+          {/* Ulysse en fond, à droite */}
+          <img
+            src={MASCOTTE_URL}
+            alt=""
+            className="pointer-events-none absolute -right-6 bottom-0 h-[96%] w-auto opacity-95 drop-shadow-[0_10px_18px_rgba(0,0,0,.4)]"
+          />
+          <span
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: 'linear-gradient(90deg, rgba(110,13,26,.55) 0%, transparent 70%)',
+            }}
+            aria-hidden
+          />
+          <span className="relative block max-w-[60%]">
             <span className="eyebrow text-white/75">🧪 Test admin</span>
-            <b className="block font-display text-xl">Espace Sécurité</b>
-            <span className="text-sm text-white/85">SST · Situation à risque · Accident</span>
+            <b className="mt-1 block font-display text-2xl leading-tight">Espace Sécurité</b>
+            <span className="mt-1 block text-sm text-white/90">
+              Accident · SST · Situation à risque · Urgences
+            </span>
+            <AmbulanceSvg className="amb-roule mt-3 w-36" />
+            <span className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-extrabold text-[#B3202F]">
+              Ouvrir <ArrowRight size={16} />
+            </span>
           </span>
-          <ArrowRight size={20} />
         </Link>
       )}
 

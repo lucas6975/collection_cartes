@@ -178,6 +178,36 @@
 }
 
 /* ───────────── Espace Sécurité (test) ───────────── */
+.amb-roule {
+  animation: amb-roule 0.5s ease-in-out infinite alternate;
+}
+.amb-feu-r,
+.amb-flash-r {
+  animation: amb-clignote 0.8s steps(1) infinite;
+}
+.amb-feu-b,
+.amb-flash-b {
+  animation: amb-clignote 0.8s steps(1) 0.4s infinite;
+}
+@keyframes amb-roule {
+  to {
+    transform: translateY(-1.5px);
+  }
+}
+@keyframes amb-clignote {
+  50% {
+    opacity: 0.2;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .amb-roule,
+  .amb-feu-r,
+  .amb-flash-r,
+  .amb-feu-b,
+  .amb-flash-b {
+    animation: none;
+  }
+}
 .sec-gyro {
   background: conic-gradient(
     from 0deg,
