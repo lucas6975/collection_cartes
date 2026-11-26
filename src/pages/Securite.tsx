@@ -310,7 +310,7 @@ export const LOGO: Record<Onglet, string> = {
   remontee: 'securite/risque.webp',
   urgences: 'securite/urgences.webp',
   eps: 'mascotte.webp',
-  evacuation: 'mascotte.webp',
+  evacuation: 'securite/evacuation.webp',
 };
 
 /** Illustration de fond de chaque carte et cadrage. */
@@ -418,7 +418,7 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
               />
             ) : (
               <img
-                src={`${BASE}mascotte.webp`}
+                src={`${BASE}${c.id === 'evacuation' ? 'securite/evacuation-carte.webp' : 'mascotte.webp'}`}
                 alt=""
                 className="absolute -right-2 -bottom-3 h-[128px] w-auto"
               />
