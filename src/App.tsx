@@ -134,6 +134,8 @@ export function App() {
             <Route path="securite" element={<Securite />} />
             <Route path="remontees" element={<Remontees />} />
           </Route>
+          {/* Point de rassemblement ouvert depuis le bandeau d'évacuation (sans la barre d'onglets). */}
+          <Route path="rassemblement" element={<Rassemblement />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         {/* Cartes offertes par l'administrateur. */}
