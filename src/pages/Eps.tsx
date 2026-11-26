@@ -1,6 +1,14 @@
 // Échange Périodique de Sécurité (EPS), dans l'Espace Sécurité : les règles, le formulaire
 // d'interview (formules du fichier Excel), la liste des EPS et les statistiques annuelles.
-import { CheckCircle2, ChevronLeft, ChevronRight, Search, Star, Trash2 } from 'lucide-react';
+import {
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  FileSpreadsheet,
+  Search,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -14,7 +22,9 @@ import { ChargementUlysse } from '../components/ui/vivant';
 import { cx } from '../components/ui/primitives';
 import { ApiError, api, type DonneesEps, type LigneEps, type ReponseEps } from '../data/api';
 import { bravoStore } from '../data/bravo';
+import { creerXlsx, proposerFichier } from '../data/excel';
 import { useIdentite } from '../data/identite';
+import { MOIS, feuillesEps, recapEps } from '../domain/epsRecap';
 import {
   FREQUENCES,
   HISTORIQUE,
@@ -38,11 +48,12 @@ export const COULEUR_EPS = {
   doux: '#E7F6F4',
 };
 
-type Section = 'regles' | 'formulaire' | 'liste' | 'stats';
+type Section = 'regles' | 'formulaire' | 'liste' | 'recap' | 'stats';
 const SECTIONS: [Section, string][] = [
   ['regles', 'Règles'],
   ['formulaire', 'Formulaire'],
   ['liste', 'Liste'],
+  ['recap', 'Récap'],
   ['stats', 'Stats'],
 ];
 
@@ -87,14 +98,14 @@ export function OngletEps({ code, jeton }: { code: string | null; jeton: string 
 
   return (
     <div className="space-y-4">
-      <nav className="sticky top-2 z-10 grid grid-cols-4 gap-1 rounded-2xl bg-white/90 p-1 shadow-soft backdrop-blur">
+      <nav className="sticky top-2 z-10 grid grid-cols-5 gap-1 rounded-2xl bg-white/90 p-1 shadow-soft backdrop-blur">
         {SECTIONS.map(([id, nom]) => (
           <button
             key={id}
             type="button"
             onClick={() => aller(id)}
             className={cx(
-              'h-10 rounded-xl text-[13px] font-extrabold transition-colors',
+              'h-10 rounded-xl text-[12.5px] font-extrabold transition-colors',
               section === id ? 'text-white' : 'text-muted',
             )}
             style={section === id ? { background: COULEUR_EPS.vif } : undefined}
@@ -136,6 +147,7 @@ export function OngletEps({ code, jeton }: { code: string | null; jeton: string 
           onRecharger={() => void charger()}
         />
       )}
+      {section === 'recap' && donnees && <Recap donnees={donnees} />}
       {section === 'stats' && donnees && <Stats donnees={donnees} />}
     </div>
   );
@@ -1217,5 +1229,200 @@ function Stats({ donnees }: { donnees: DonneesEps }) {
         <Star size={12} /> Taux calculé sur le nombre d’inscrits à l’appli Team Ulysse
       </p>
     </div>
+  );
+}
+
+// ───────────── Récap et extraction Excel ─────────────
+
+function Recap({ donnees }: { donnees: DonneesEps }) {
+  const annees = useMemo(() => {
+    const s = new Set(donnees.eps.map((e) => Number(e.date.slice(0, 4))));
+    s.add(new Date().getFullYear());
+    return [...s].sort();
+  }, [donnees.eps]);
+  const [annee, setAnnee] = useState(annees[annees.length - 1]);
+  const [export_, setExport] = useState<'pret' | 'encours' | 'fait'>('pret');
+  const jour = aujourdhui();
+  const r = recapEps(donnees.eps, annee, jour);
+  const maxMois = Math.max(1, ...r.parMois);
+  const taux = donnees.inscrits ? Math.round((r.personnes / donnees.inscrits) * 100) : 0;
+
+  const extraire = async () => {
+    setExport('encours');
+    try {
+      const fichier = creerXlsx(feuillesEps(donnees.eps, donnees.inscrits, annee, jour));
+      await proposerFichier(fichier, `EPS-IMECA-${annee}-${jour}.xlsx`);
+      setExport('fait');
+    } catch {
+      setExport('pret');
+      alert('L’extraction n’a pas marché, réessaie.');
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Extraction Excel */}
+      <section
+        className="relative overflow-hidden rounded-3xl p-5 text-white shadow-lift"
+        style={{ background: 'linear-gradient(150deg, #2AA567 0%, #1D7A4B 55%, #0F4A2C 100%)' }}
+      >
+        <FileSpreadsheet className="absolute -right-4 -bottom-4 size-32 rotate-12 text-white/15" />
+        <p className="eyebrow text-white/80">📥 Extraction Excel</p>
+        <p className="mt-1 font-display text-[22px] leading-tight font-extrabold">
+          Toutes les EPS dans un fichier Excel
+        </p>
+        <p className="mt-1.5 max-w-[85%] text-sm text-white/90">
+          5 feuilles : liste des EPS, réponses détaillées, récap {annee}, interviewers et managers.
+        </p>
+        <button
+          type="button"
+          disabled={export_ === 'encours'}
+          onClick={() => void extraire()}
+          className="vi-elastique relative mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white font-extrabold text-[#1D7A4B] disabled:opacity-60"
+        >
+          <FileSpreadsheet size={19} />
+          {export_ === 'encours'
+            ? 'Préparation…'
+            : export_ === 'fait'
+              ? 'Extraire à nouveau'
+              : 'Extraire en Excel'}
+        </button>
+        {export_ === 'fait' && (
+          <p className="relative mt-2 text-center text-xs font-semibold text-white/90">
+            ✅ Fichier prêt : enregistre-le ou envoie-le par mail.
+          </p>
+        )}
+      </section>
+
+      <div className="flex gap-2 overflow-x-auto">
+        {annees.map((a) => (
+          <button
+            key={a}
+            type="button"
+            onClick={() => setAnnee(a)}
+            className={cx(
+              'h-10 shrink-0 rounded-full px-4 text-sm font-extrabold',
+              a === annee ? 'text-white' : 'bg-white text-muted shadow-soft',
+            )}
+            style={a === annee ? { background: COULEUR_EPS.vif } : undefined}
+          >
+            {a}
+          </button>
+        ))}
+      </div>
+
+      {/* Chiffres clés */}
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          [r.total, 'EPS réalisées'],
+          [r.personnes, 'personnes'],
+          [`${taux} %`, 'des inscrits'],
+        ].map(([v, t]) => (
+          <div key={t} className="panel p-3 text-center">
+            <p className="font-display text-2xl font-extrabold text-navy-950">{v}</p>
+            <p className="text-[11px] font-semibold text-muted">{t}</p>
+          </div>
+        ))}
+      </div>
+      <p className="px-1 text-xs text-muted">
+        {r.excel} EPS reprises du fichier Excel · {r.appli} faites dans l’appli
+      </p>
+
+      {/* Par mois */}
+      <section className="panel p-4">
+        <p className="eyebrow mb-3">EPS par mois</p>
+        <div className="flex h-32 items-end gap-1">
+          {r.parMois.map((n, i) => (
+            <div key={MOIS[i]} className="flex flex-1 flex-col items-center gap-1">
+              <span className="text-[10px] font-bold text-navy-950">{n || ''}</span>
+              <motion.span
+                className="w-full rounded-t-md"
+                style={{ background: n ? COULEUR_EPS.vif : '#E3E7EE' }}
+                initial={{ height: 0 }}
+                animate={{ height: `${Math.max(4, (n / maxMois) * 96)}px` }}
+                transition={{ duration: 0.5, delay: i * 0.03 }}
+              />
+              <span className="text-[9px] text-muted">{MOIS[i].slice(0, 3)}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <Classement titre="🎤 Interviewers les plus actifs" lignes={r.interviewers} />
+      <Classement titre="👔 Personnes interviewées par manager" lignes={r.managers} />
+
+      {r.plusieurs.length > 0 && (
+        <section className="panel p-4">
+          <p className="eyebrow mb-2">🔁 Interviewé(e)s plusieurs fois en {annee}</p>
+          <ul className="divide-y divide-line text-sm">
+            {r.plusieurs.map((p) => (
+              <li key={p.nom} className="flex items-center justify-between gap-2 py-2">
+                <b className="text-navy-950">{p.nom}</b>
+                <span className="text-right text-xs text-muted">
+                  {p.dates.map(dateFr).join(' · ')}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {r.enAttente.length > 0 && (
+        <section className="panel p-4">
+          <p className="eyebrow mb-2">⏳ Pas encore réinterviewables ({r.enAttente.length})</p>
+          <ul className="divide-y divide-line text-sm">
+            {r.enAttente.map((p) => (
+              <li key={p.nom} className="flex items-center justify-between gap-2 py-2">
+                <b className="text-navy-950">{p.nom}</b>
+                <span className="text-xs font-semibold text-[#C2410C]">
+                  à partir du {dateFr(p.libre)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {r.excel > 0 && (
+        <p className="rounded-2xl bg-[#E7F6F4] px-4 py-3 text-sm text-navy-950">
+          ℹ️ Les EPS reprises du fichier Excel contiennent la personne, la date, l’interviewer et le
+          manager. Leurs réponses (et donc leur niveau de Bradley) n’étaient pas dans le fichier.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function Classement({ titre, lignes }: { titre: string; lignes: { nom: string; n: number }[] }) {
+  const [tout, setTout] = useState(false);
+  const max = Math.max(1, ...lignes.map((l) => l.n));
+  return (
+    <section className="panel p-4">
+      <p className="eyebrow mb-2">{titre}</p>
+      <ul className="space-y-1.5">
+        {(tout ? lignes : lignes.slice(0, 8)).map((l) => (
+          <li key={l.nom} className="flex items-center gap-2 text-sm">
+            <span className="w-36 shrink-0 truncate font-semibold text-navy-950">{l.nom}</span>
+            <span className="h-2.5 flex-1 overflow-hidden rounded-full bg-canvas">
+              <span
+                className="block h-full rounded-full"
+                style={{ width: `${(l.n / max) * 100}%`, background: COULEUR_EPS.vif }}
+              />
+            </span>
+            <b className="w-6 text-right text-navy-950 tabular-nums">{l.n}</b>
+          </li>
+        ))}
+      </ul>
+      {lignes.length > 8 && (
+        <button
+          type="button"
+          onClick={() => setTout(!tout)}
+          className="mt-2 text-sm font-bold"
+          style={{ color: COULEUR_EPS.vif }}
+        >
+          {tout ? 'Voir moins' : `Voir les ${lignes.length}`}
+        </button>
+      )}
+    </section>
   );
 }
