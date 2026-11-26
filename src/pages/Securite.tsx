@@ -626,7 +626,49 @@ const lireRemontees = (): Remontee[] => {
   }
 };
 
+/** Destinataires des remontées (cochés d'office). Envoi via FormSubmit (aucun compte requis). */
+const DESTINATAIRES = [{ nom: 'Service EP', mail: 'compte-fonction.EP@imeca-technologies.com' }];
+
+async function envoyerMail(
+  mail: string,
+  r: { type: string; lieu: string; description: string; gravite: string; auteur: string },
+  photo: File | null,
+) {
+  const f = new FormData();
+  f.append(
+    '_subject',
+    `${r.gravite === 'Grave' ? '[GRAVE] ' : ''}Remontée : ${r.type} · ${r.lieu}`.slice(0, 120),
+  );
+  f.append('_template', 'table');
+  f.append('_captcha', 'false');
+  f.append('Type', r.type);
+  f.append('Lieu', r.lieu);
+  f.append('Gravité', r.gravite);
+  f.append('Description', r.description);
+  f.append('Signalé par', r.auteur);
+  f.append('Date', new Date().toLocaleString('fr-FR'));
+  f.append('Envoyé depuis', 'Appli Team Ulysse');
+  if (photo) f.append('attachment', photo, photo.name || 'photo.jpg');
+  const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(mail)}`, {
+    method: 'POST',
+    headers: { Accept: 'application/json' },
+    body: f,
+  });
+  const j = (await res.json().catch(() => ({}))) as {
+    success?: string | boolean;
+    message?: string;
+  };
+  if (!res.ok || String(j.success) === 'false')
+    throw new Error(j.message || `Erreur ${res.status}`);
+  return j.message ?? '';
+}
+
 function OngletRemontee() {
+  const { identite } = useIdentite();
+  const [coches, setCoches] = useState<string[]>(() => DESTINATAIRES.map((d) => d.mail));
+  const [fichier, setFichier] = useState<File | null>(null);
+  const [envoi, setEnvoi] = useState(false);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
   const [type, setType] = useState('Situation dangereuse');
   const [lieu, setLieu] = useState('');
   const [description, setDescription] = useState('');
@@ -635,7 +677,30 @@ function OngletRemontee() {
   const [anonyme, setAnonyme] = useState(false);
   const [liste, setListe] = useState<Remontee[]>(lireRemontees);
 
-  const envoyer = () => {
+  const envoyer = async () => {
+    setEnvoi(true);
+    setMessage(null);
+    const auteur = anonyme
+      ? 'Anonyme'
+      : identite
+        ? `${identite.prenom} ${identite.nom}`
+        : 'Administrateur Team Ulysse';
+    try {
+      for (const m of coches)
+        await envoyerMail(m, { type, lieu, description, gravite, auteur }, fichier);
+    } catch (err) {
+      setMessage({
+        ok: false,
+        texte: `L’envoi n’a pas marché (${err instanceof Error ? err.message : 'erreur réseau'}). Réessaie.`,
+      });
+      setEnvoi(false);
+      return;
+    }
+    setEnvoi(false);
+    setMessage({
+      ok: true,
+      texte: `Envoyée à ${coches.length} destinataire${coches.length > 1 ? 's' : ''} ✅`,
+    });
     const r: Remontee = {
       at: new Date().toISOString(),
       type,
@@ -655,10 +720,8 @@ function OngletRemontee() {
     setLieu('');
     setDescription('');
     setPhoto(null);
-    bravoStore.montrer(
-      'Merci pour ta vigilance ! 🦺',
-      'Ta remontée a bien été enregistrée (test).',
-    );
+    setFichier(null);
+    bravoStore.montrer('Merci pour ta vigilance ! 🦺', 'Ta remontée a été envoyée au service EP.');
   };
 
   return (
@@ -672,7 +735,7 @@ function OngletRemontee() {
         decor={<Panneau />}
       >
         <p className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur">
-          🧪 Mode test : rien n’est envoyé
+          🧪 Test : visible seulement par l’administrateur
         </p>
       </Bandeau>
 
@@ -763,7 +826,10 @@ function OngletRemontee() {
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
-              if (f) setPhoto(URL.createObjectURL(f));
+              if (f) {
+                setPhoto(URL.createObjectURL(f));
+                setFichier(f);
+              }
             }}
           />
         </label>
@@ -778,15 +844,47 @@ function OngletRemontee() {
           Envoyer sans mon nom
         </label>
 
+        <div className="rounded-2xl bg-blue-light p-3">
+          <p className="eyebrow mb-1.5">Envoyer à</p>
+          {DESTINATAIRES.map((d) => (
+            <label key={d.mail} className="flex items-center gap-2.5 py-1 text-sm text-navy-950">
+              <input
+                type="checkbox"
+                checked={coches.includes(d.mail)}
+                onChange={(e) =>
+                  setCoches((c) =>
+                    e.target.checked ? [...c, d.mail] : c.filter((x) => x !== d.mail),
+                  )
+                }
+                className="size-5 accent-[#1F5AA6]"
+              />
+              <span className="min-w-0">
+                <b className="block">{d.nom}</b>
+                <span className="block truncate text-xs text-muted">{d.mail}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+
         <button
           type="button"
           className="vi-elastique flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold text-white disabled:opacity-40"
           style={{ background: COULEUR.remontee.fond }}
-          disabled={!lieu.trim() || !description.trim()}
-          onClick={envoyer}
+          disabled={!lieu.trim() || !description.trim() || !coches.length || envoi}
+          onClick={() => void envoyer()}
         >
-          <ShieldAlert size={18} /> Envoyer ma remontée
+          <ShieldAlert size={18} /> {envoi ? 'Envoi…' : 'Envoyer ma remontée'}
         </button>
+        {message && (
+          <p
+            className={cx(
+              'rounded-xl px-3 py-2 text-sm font-semibold',
+              message.ok ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger',
+            )}
+          >
+            {message.texte}
+          </p>
+        )}
         {gravite === 'Grave' && (
           <p className="rounded-xl bg-danger/10 px-3 py-2 text-xs font-semibold text-danger">
             Danger immédiat ? Préviens aussi ton responsable tout de suite, de vive voix.
