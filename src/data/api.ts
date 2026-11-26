@@ -67,6 +67,19 @@ export interface ContactSst {
   lieu?: string | null;
 }
 
+/** Remontée de situation à risque (page « Remontées reçues »). */
+export interface RemonteeRecue {
+  id: string;
+  prenom: string;
+  nom: string;
+  type: string;
+  lieu: string;
+  description: string;
+  gravite: string;
+  cree_le: string;
+  traitee: boolean;
+}
+
 export interface Participant {
   id: string;
   prenom: string;
@@ -253,6 +266,11 @@ export const api = {
       p_description: r.description,
       p_gravite: r.gravite,
     }),
+
+  mesRemontees: (jeton: string | null, code: string | null) =>
+    rpc<RemonteeRecue[]>('mes_remontees', { p_jeton: jeton, p_code: code }),
+  traiterRemontee: (id: string, traitee: boolean, jeton: string | null, code: string | null) =>
+    rpc<null>('traiter_remontee', { p_id: id, p_traitee: traitee, p_jeton: jeton, p_code: code }),
 
   securiteSst: (code: string) => rpc<ContactSst[]>('securite_sst', { p_code: code }),
 

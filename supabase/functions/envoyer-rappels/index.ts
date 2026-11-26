@@ -206,7 +206,7 @@ async function prevenirRemontees(db: Base) {
     const msg = {
       title: `⚠️ ${r.gravite === 'Grave' ? '[GRAVE] ' : ''}${r.type} · ${r.lieu}`.slice(0, 120),
       body: `${r.prenom} ${r.nom} : ${r.description}`.slice(0, 240),
-      url: './#/securite',
+      url: './#/remontees',
       tag: `remontee-${r.id}`,
     };
     if (telephones.length) total += (await envoyerA(db, telephones, JSON.stringify(msg))).envoyes;

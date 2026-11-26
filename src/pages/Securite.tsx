@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate } from 'react-router';
 import { PAGE_TOURNE } from '../components/ui/tourne';
 import { ChargementUlysse } from '../components/ui/vivant';
 import { Button, cx } from '../components/ui/primitives';
@@ -825,6 +825,9 @@ function OngletRemontee() {
       {liste.length > 0 && (
         <section className="panel p-4">
           <p className="eyebrow mb-2">Mes remontées</p>
+          <Link to="/remontees" className="mb-2 block text-sm font-bold text-blue">
+            Voir toutes les remontées reçues →
+          </Link>
           <ul className="divide-y divide-line">
             {liste.map((r) => (
               <li key={r.at} className="py-2.5 text-sm">
