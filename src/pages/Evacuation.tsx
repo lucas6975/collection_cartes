@@ -70,7 +70,7 @@ const dateHeure = (iso: string) =>
 function QrRassemblement({ taille = 'grand' }: { taille?: 'grand' | 'moyen' }) {
   return (
     <img
-      src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(LIEN_RASSEMBLEMENT, { ecc: 'M', border: 1 }))}`}
+      src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(LIEN_RASSEMBLEMENT, { ecc: 'H', border: 1 }))}`}
       alt="QR code du point de rassemblement"
       className={cx(
         'mx-auto block rounded-2xl bg-white [image-rendering:pixelated]',
