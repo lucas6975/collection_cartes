@@ -627,7 +627,11 @@ const lireRemontees = (): Remontee[] => {
 };
 
 /** Destinataires des remontées (cochés d'office). Envoi via FormSubmit (aucun compte requis). */
-const DESTINATAIRES = [{ nom: 'Service EP', mail: 'compte-fonction.EP@imeca-technologies.com' }];
+// Test : envoi à deux adresses. Pour la vraie version : { nom: 'Service EP', mail: 'compte-fonction.EP@imeca-technologies.com' }.
+const DESTINATAIRES = [
+  { nom: 'L. Attard (test)', mail: 'l.attard@imeca-technologies.com' },
+  { nom: 'V. Masmejan (test)', mail: 'v.masmejan@imeca-technologies.com' },
+];
 
 async function envoyerMail(
   mail: string,
@@ -721,7 +725,7 @@ function OngletRemontee() {
     setDescription('');
     setPhoto(null);
     setFichier(null);
-    bravoStore.montrer('Merci pour ta vigilance ! 🦺', 'Ta remontée a été envoyée au service EP.');
+    bravoStore.montrer('Merci pour ta vigilance ! 🦺', 'Ta remontée a bien été envoyée.');
   };
 
   return (
