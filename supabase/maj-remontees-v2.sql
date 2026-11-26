@@ -2,12 +2,14 @@
 -- et pour l'administrateur, avec « marquer comme traitée ».
 -- À copier dans Supabase › SQL Editor › Run, après maj-remontees.sql (peut être relancé).
 
--- Destinataires : recherche tolérante (majuscules, espaces, accents dans le prénom).
+-- Destinataires : recherche tolérante (majuscules, espaces, accents : Masméjan = MASMEJAN).
 delete from public.remontees_destinataires;
 insert into public.remontees_destinataires (participant_id)
 select id from public.participants
-where (upper(trim(nom)) like '%ATTARD%' and upper(trim(prenom)) like 'LUCAS%')
-   or (upper(trim(nom)) like '%MASMEJAN%' and upper(trim(prenom)) like 'VINCENT%')
+where (translate(upper(trim(nom)), 'ÉÈÊËÀÂÄÎÏÔÖÙÛÜÇ', 'EEEEAAAIIOOUUUC') like '%ATTARD%'
+       and translate(upper(trim(prenom)), 'ÉÈÊËÀÂÄÎÏÔÖÙÛÜÇ', 'EEEEAAAIIOOUUUC') like 'LUCAS%')
+   or (translate(upper(trim(nom)), 'ÉÈÊËÀÂÄÎÏÔÖÙÛÜÇ', 'EEEEAAAIIOOUUUC') like '%MASMEJAN%'
+       and translate(upper(trim(prenom)), 'ÉÈÊËÀÂÄÎÏÔÖÙÛÜÇ', 'EEEEAAAIIOOUUUC') like 'VINCENT%')
 on conflict do nothing;
 
 -- Accès : un destinataire (par son jeton d'inscription) ou l'administrateur (par son code).
