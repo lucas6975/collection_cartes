@@ -14,6 +14,7 @@ import { ANNEE_AVENT, JOURS } from '../avent/jours';
 import { caseDuJour, joursAvantDebut } from '../avent/logic';
 import { useAvent } from '../avent/progress';
 import { NOEL, Neige } from '../avent/ui';
+import { useAccesSecurite } from '../data/accesSecurite';
 import { useIdentite } from '../data/identite';
 import { useGame } from '../data/store';
 import { cx } from '../components/ui/primitives';
@@ -52,6 +53,7 @@ export function Menu() {
   const avantDebut = joursAvantDebut(ANNEE_AVENT, now);
   const caseFaite = duJour ? !!avent[duJour] : false;
   const noel = useNoel();
+  const accesSecurite = useAccesSecurite();
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -225,7 +227,7 @@ export function Menu() {
         </motion.div>
       </div>
 
-      {codeAdmin && (
+      {accesSecurite && (
         <Link
           to="/securite"
           className="relative block overflow-hidden rounded-3xl p-5 text-white shadow-lift transition-transform active:scale-[0.99]"
@@ -244,7 +246,9 @@ export function Menu() {
             className="pointer-events-none absolute top-3 -right-4 h-36 w-auto"
           />
           <span className="relative block max-w-[64%]">
-            <span className="eyebrow text-sun">🧪 Test admin</span>
+            <span className="eyebrow text-sun">
+              {codeAdmin ? '🧪 Test admin' : '🧪 En avant-première'}
+            </span>
             <b className="mt-1 block font-display text-2xl leading-tight text-white">
               Espace Sécurité
             </b>

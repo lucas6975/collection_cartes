@@ -22,6 +22,7 @@ import { ChargementUlysse } from '../components/ui/vivant';
 import { Button, cx } from '../components/ui/primitives';
 import { ApiError, api, type ContactSst } from '../data/api';
 import { bravoStore } from '../data/bravo';
+import { useAccesSecurite } from '../data/accesSecurite';
 import { useIdentite } from '../data/identite';
 
 type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences';
@@ -200,13 +201,15 @@ const TITRES: Record<Onglet, string> = {
 };
 
 export function Securite() {
-  const { codeAdmin } = useIdentite();
+  const { codeAdmin, identite } = useIdentite();
+  const acces = useAccesSecurite();
   const navigate = useNavigate();
   const [vue, setVue] = useState<Vue>('accueil');
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [vue]);
-  if (!codeAdmin) return <Navigate to="/" replace />;
+  if (acces === false) return <Navigate to="/" replace />;
+  if (acces === null) return <ChargementUlysse texte="Ulysse ouvre l’espace Sécurité…" />;
 
   return (
     <div className="relative mx-auto max-w-2xl">
@@ -241,9 +244,19 @@ export function Securite() {
         transition={PAGE_TOURNE.transition}
         style={PAGE_TOURNE.style}
       >
-        {vue === 'accueil' && <Accueil onChoisir={setVue} />}
+        {vue === 'accueil' && (
+          <>
+            <Accueil onChoisir={setVue} />
+            <Link
+              to="/remontees"
+              className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-navy-950 text-base font-extrabold text-white shadow-soft"
+            >
+              📥 Suivi des remontées reçues
+            </Link>
+          </>
+        )}
         {vue === 'accident' && <OngletAccident onSst={() => setVue('sst')} />}
-        {vue === 'sst' && <OngletSst code={codeAdmin} />}
+        {vue === 'sst' && <OngletSst code={codeAdmin} jeton={identite?.jeton ?? null} />}
         {vue === 'remontee' && <OngletRemontee />}
         {vue === 'urgences' && <GrilleUrgences titre="Appeler les secours" />}
       </motion.div>
@@ -501,13 +514,13 @@ function ficheContact(c: ContactSst) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-function OngletSst({ code }: { code: string }) {
+function OngletSst({ code, jeton }: { code: string | null; jeton: string | null }) {
   const [contacts, setContacts] = useState<ContactSst[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
 
   useEffect(() => {
     api
-      .securiteSst(code)
+      .securiteSst(code, jeton)
       .then(setContacts)
       .catch((e: unknown) =>
         setErreur(
@@ -516,7 +529,7 @@ function OngletSst({ code }: { code: string }) {
             : 'Erreur de chargement',
         ),
       );
-  }, [code]);
+  }, [code, jeton]);
 
   return (
     <div className="space-y-4">
@@ -694,7 +707,7 @@ function OngletRemontee() {
         decor={<Panneau />}
       >
         <p className="mt-3 inline-block rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur">
-          🧪 Test : visible seulement par l’administrateur
+          🧪 Test : avant-première, pas encore ouvert à tous
         </p>
       </Bandeau>
 

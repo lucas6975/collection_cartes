@@ -272,7 +272,9 @@ export const api = {
   traiterRemontee: (id: string, traitee: boolean, jeton: string | null, code: string | null) =>
     rpc<null>('traiter_remontee', { p_id: id, p_traitee: traitee, p_jeton: jeton, p_code: code }),
 
-  securiteSst: (code: string) => rpc<ContactSst[]>('securite_sst', { p_code: code }),
+  securiteSst: (code: string | null, jeton: string | null) =>
+    rpc<ContactSst[]>('securite_sst', { p_code: code, p_jeton: jeton }),
+  accesSecurite: (jeton: string) => rpc<boolean>('acces_securite', { p_jeton: jeton }),
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 
