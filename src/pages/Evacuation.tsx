@@ -1,6 +1,15 @@
 // Espace Sécurité › Évacuation (Lucas, Vincent, administrateur) : lancer l'évacuation, faire
 // scanner le QR, suivre le total en direct, pointer avec la liste d'appel imprimée, terminer.
-import { CheckCircle2, FileSpreadsheet, Plus, Search, ShieldAlert, Trash2, X } from 'lucide-react';
+import {
+  CheckCircle2,
+  FileSpreadsheet,
+  Plus,
+  Search,
+  ShieldAlert,
+  Timer,
+  Trash2,
+  X,
+} from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { renderSVG } from 'uqr';
 import { cx } from '../components/ui/primitives';
@@ -14,6 +23,40 @@ export const COULEUR_EVACUATION = {
   vif: '#DC2626',
   doux: '#FEF2F2',
 };
+
+/** Durée en « 1 h 02 min 05 s » ou « 04:37 » (chronomètre). */
+export function duree(debut: string, fin: string | null, maintenant = Date.now()): string {
+  const s = Math.max(
+    0,
+    Math.floor(((fin ? Date.parse(fin) : maintenant) - Date.parse(debut)) / 1000),
+  );
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  const deux = (n: number) => String(n).padStart(2, '0');
+  return h ? `${h}:${deux(m)}:${deux(sec)}` : `${deux(m)}:${deux(sec)}`;
+}
+
+/** Chronomètre : part du lancement, s'arrête à la fin (même valeur sur tous les téléphones). */
+function Chrono({ debut, fin }: { debut: string; fin: string | null }) {
+  const [, setTic] = useState(0);
+  useEffect(() => {
+    if (fin) return;
+    const t = setInterval(() => setTic((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, [fin]);
+  return (
+    <div className="mt-3 flex items-center justify-between rounded-2xl bg-black/25 px-4 py-2.5">
+      <span className="flex items-center gap-2 text-sm font-bold">
+        <Timer size={18} className={fin ? '' : 'animate-pulse'} />
+        {fin ? 'Durée de l’évacuation' : 'Chronomètre'}
+      </span>
+      <span className="font-display text-[34px] leading-none font-extrabold tabular-nums">
+        {duree(debut, fin)}
+      </span>
+    </div>
+  );
+}
 
 const dateHeure = (iso: string) =>
   new Date(iso).toLocaleString('fr-FR', {
@@ -142,7 +185,8 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
                   >
                     <span className="font-semibold text-navy-950">{dateHeure(h.debut)}</span>
                     <span className="text-muted">
-                      {h.total} présent{h.total > 1 ? 's' : ''} ›
+                      {h.total} présent{h.total > 1 ? 's' : ''}
+                      {h.fin ? ` · ⏱ ${duree(h.debut, h.fin)}` : ' · en cours'} ›
                     </span>
                   </button>
                 </li>
@@ -248,6 +292,7 @@ function Suivi({
         lignes: [
           ['Évacuation', dateHeure(ev.debut)],
           ['Fin', ev.fin ? dateHeure(ev.fin) : 'En cours'],
+          ['Durée (chronomètre)', duree(ev.debut, ev.fin)],
           ['Présents enregistrés', presents.length],
           ...parStatut.map(([s, n]) => [`dont ${s}`, n] as [string, number]),
           ['Effectif liste d’appel', liste],
@@ -272,6 +317,7 @@ function Suivi({
           {enCours ? 'Depuis' : 'Du'} {dateHeure(ev.debut)}
           {ev.lance_par ? ` · lancée par ${ev.lance_par}` : ''}
         </p>
+        <Chrono debut={ev.debut} fin={ev.fin} />
         <div className="mt-3 flex items-end gap-3">
           <p className="font-display text-[64px] leading-none font-extrabold">{presents.length}</p>
           <p className="pb-2 text-lg font-bold">
