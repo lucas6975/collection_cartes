@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { MASCOTTE_URL } from '../components/cards/CardBack';
 import { RejoindreCoalition } from '../components/Coalition';
-import { LOGO, PASTEL } from './Securite';
 import { BanniereJeudiFou } from '../components/JeudiFou';
 import { RoueAccueil } from '../components/roue/RoueAccueil';
 import { ClassementAccueil } from '../components/classement/ClassementAccueil';
@@ -14,7 +13,6 @@ import { ANNEE_AVENT, JOURS } from '../avent/jours';
 import { caseDuJour, joursAvantDebut } from '../avent/logic';
 import { useAvent } from '../avent/progress';
 import { NOEL, Neige } from '../avent/ui';
-import { useAccesSecurite } from '../data/accesSecurite';
 import { useIdentite } from '../data/identite';
 import { useGame } from '../data/store';
 import { cx } from '../components/ui/primitives';
@@ -45,7 +43,7 @@ export function sousTitre(o: { packOuvert: boolean; caseDuJour: boolean; caseFai
 
 export function Menu() {
   const { progress, cards } = useGame();
-  const { identite, codeAdmin } = useIdentite();
+  const { identite } = useIdentite();
   const avent = useAvent();
   const [now] = useState(() => new Date());
   const packOuvert = packDuJourOuvert(progress, now);
@@ -53,7 +51,6 @@ export function Menu() {
   const avantDebut = joursAvantDebut(ANNEE_AVENT, now);
   const caseFaite = duJour ? !!avent[duJour] : false;
   const noel = useNoel();
-  const accesSecurite = useAccesSecurite();
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -226,72 +223,6 @@ export function Menu() {
           </Link>
         </motion.div>
       </div>
-
-      {accesSecurite && (
-        <Link
-          to="/securite"
-          className="relative block overflow-hidden rounded-3xl p-5 text-white shadow-lift transition-transform active:scale-[0.99]"
-          style={{ background: 'linear-gradient(140deg, #1F3F74 0%, #12305E 50%, #0B1A36 100%)' }}
-        >
-          <span
-            className="pointer-events-none absolute inset-0 opacity-[0.08]"
-            style={{
-              backgroundImage: 'radial-gradient(#fff 1px, transparent 1.2px)',
-              backgroundSize: '18px 18px',
-            }}
-          />
-          <img
-            src={MASCOTTE_URL}
-            alt=""
-            className="pointer-events-none absolute top-3 -right-4 h-36 w-auto"
-          />
-          <span className="relative block max-w-[64%]">
-            <span className="eyebrow text-sun">
-              {codeAdmin ? '🧪 Test admin' : '🧪 En avant-première'}
-            </span>
-            <b className="mt-1 block font-display text-2xl leading-tight text-white">
-              Espace Sécurité
-            </b>
-            <span className="mt-1 block text-sm text-white/80">
-              Les bons réflexes et les bons contacts, en un toucher.
-            </span>
-          </span>
-          <span className="relative mt-5 grid grid-cols-2 gap-2">
-            {(
-              [
-                ['accident', 'Accident'],
-                ['sst', 'SST'],
-                ['remontee', 'Situation à risque'],
-                ['urgences', 'Urgences'],
-                ['eps', 'EPS'],
-                ['evacuation', 'Évacuation'],
-              ] as const
-            ).map(([id, nom]) => (
-              <span
-                key={id}
-                className={cx(
-                  'flex items-center gap-2 rounded-2xl border px-2 py-2 text-sm font-bold',
-                )}
-                style={{
-                  background: PASTEL[id].fond,
-                  borderColor: PASTEL[id].bord,
-                  color: PASTEL[id].texte,
-                }}
-              >
-                <img
-                  src={`${import.meta.env.BASE_URL}${LOGO[id]}`}
-                  alt=""
-                  className="size-9 shrink-0 rounded-xl object-cover ring-2 ring-white"
-                />
-                <span className="leading-tight">{nom}</span>
-              </span>
-            ))}
-          </span>
-          <span className="relative mt-4 flex w-full items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-sm font-extrabold text-navy-950">
-            Ouvrir l’espace Sécurité <ArrowRight size={16} />
-          </span>
-        </Link>
-      )}
 
       <RejoindreCoalition />
     </div>

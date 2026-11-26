@@ -67,8 +67,16 @@ const aujourdhui = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-export function OngletEps({ code, jeton }: { code: string | null; jeton: string | null }) {
-  const [section, setSection] = useState<Section>('regles');
+export function OngletEps({
+  code,
+  jeton,
+  sectionInitiale,
+}: {
+  code: string | null;
+  jeton: string | null;
+  sectionInitiale?: Section;
+}) {
+  const [section, setSection] = useState<Section>(sectionInitiale ?? 'regles');
   const [donnees, setDonnees] = useState<DonneesEps | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [prefill, setPrefill] = useState<string | null>(null);

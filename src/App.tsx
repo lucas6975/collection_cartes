@@ -28,6 +28,10 @@ import { Menu } from './pages/Menu';
 import { Securite } from './pages/Securite';
 import { Remontees } from './pages/Remontees';
 import { Rassemblement } from './pages/Rassemblement';
+import { Portail } from './pages/Portail';
+import { EpsRecues } from './pages/EpsRecues';
+import { SecuriteShell } from './components/layout/SecuriteShell';
+import { PortailAuDemarrage } from './components/PortailAuDemarrage';
 
 export function App() {
   const { identite, codeAdmin } = useIdentite();
@@ -130,14 +134,21 @@ export function App() {
             <Route path="moi" element={<MesInscriptions />} />
             <Route path="admin" element={<Admin />} />
             <Route path="coalition" element={<CoalitionAdmin />} />
-            {/* Test administrateur : espace Sécurité. */}
+          </Route>
+          {/* Espace Sécurité (pour l'instant : Lucas, Vincent, administrateur), avec ses onglets. */}
+          <Route element={<SecuriteShell />}>
             <Route path="securite" element={<Securite />} />
+            <Route path="securite/eps-recues" element={<EpsRecues />} />
+            <Route path="securite/:vue" element={<Securite />} />
             <Route path="remontees" element={<Remontees />} />
           </Route>
+          <Route path="portail" element={<Portail />} />
           {/* Point de rassemblement ouvert depuis le bandeau d'évacuation (sans la barre d'onglets). */}
           <Route path="rassemblement" element={<Rassemblement />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        {/* Ouverture de l'appli : le portail, pour ceux qui ont l'Espace Sécurité. */}
+        <PortailAuDemarrage />
         {/* Cartes offertes par l'administrateur. */}
         <CadeauxRecus />
         {/* Ulysse qui félicite. */}

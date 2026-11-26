@@ -226,3 +226,16 @@ export function feuillesEps(
     },
   ];
 }
+
+/** EPS des 7 derniers jours (aujourd'hui compris), les plus récentes d'abord. */
+export function epsDeLaSemaine(eps: LigneEps[], maintenant = new Date()): LigneEps[] {
+  const debut = new Date(maintenant);
+  debut.setDate(debut.getDate() - 6);
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const de = iso(debut);
+  const a = iso(maintenant);
+  return eps
+    .filter((e) => e.date >= de && e.date <= a)
+    .sort((x, y) => y.date.localeCompare(x.date));
+}

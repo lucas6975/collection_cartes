@@ -17,15 +17,14 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
-import { PAGE_TOURNE } from '../components/ui/tourne';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import { ChargementUlysse } from '../components/ui/vivant';
 import { Button, cx } from '../components/ui/primitives';
 import { ApiError, api, type ContactSst } from '../data/api';
 import { bravoStore } from '../data/bravo';
-import { useAccesSecurite } from '../data/accesSecurite';
 import { useIdentite } from '../data/identite';
 import { COULEUR_EPS, OngletEps } from './Eps';
+import { epsDeLaSemaine } from '../domain/epsRecap';
 import { COULEUR_EVACUATION, OngletEvacuation } from './Evacuation';
 
 type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences' | 'eps' | 'evacuation';
@@ -219,21 +218,23 @@ const TITRES: Record<Onglet, string> = {
   evacuation: 'Évacuation',
 };
 
+const ONGLETS: Onglet[] = ['accident', 'sst', 'remontee', 'urgences', 'eps', 'evacuation'];
+
+/** Espace Sécurité : l'accueil (bandes) ou une rubrique, selon l'adresse (#/securite/eps…). */
 export function Securite() {
   const { codeAdmin, identite } = useIdentite();
-  const acces = useAccesSecurite();
   const navigate = useNavigate();
-  // La notification « Nouvelle EPS » ouvre directement l'onglet EPS (#/securite?vue=eps).
+  const { vue: param } = useParams();
   const [params] = useSearchParams();
-  const [vue, setVue] = useState<Vue>(() => {
-    const v = params.get('vue');
-    return v === 'eps' || v === 'evacuation' ? v : 'accueil';
-  });
+  const vue: Vue = ONGLETS.includes(param as Onglet) ? (param as Onglet) : 'accueil';
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [vue]);
-  if (acces === false) return <Navigate to="/" replace />;
-  if (acces === null) return <ChargementUlysse texte="Ulysse ouvre l’espace Sécurité…" />;
+  // Anciens liens (notifications) : #/securite?vue=eps → #/securite/eps.
+  const ancien = params.get('vue');
+  if (!param && ancien && ONGLETS.includes(ancien as Onglet))
+    return <Navigate to={`/securite/${ancien}`} replace />;
+  const ouvrir = (v: Vue) => navigate(v === 'accueil' ? '/securite' : `/securite/${v}`);
 
   return (
     <div className="relative mx-auto max-w-2xl">
@@ -242,53 +243,102 @@ export function Securite() {
         style={{ background: vue === 'accueil' ? '#EEF1F6' : COULEUR[vue].doux }}
         aria-hidden
       />
-      <header className="mb-5 flex items-center gap-3">
-        <button
-          type="button"
-          onClick={() => (vue === 'accueil' ? navigate('/') : setVue('accueil'))}
-          aria-label="Retour"
-          className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-navy-950 shadow-soft"
-        >
-          <ChevronLeft size={24} />
-        </button>
-        <div className="min-w-0">
-          <h1 className="font-display text-[28px] leading-tight font-extrabold text-navy-950">
-            {vue === 'accueil' ? 'Espace Sécurité' : TITRES[vue]}
-          </h1>
-          <p className="text-[15px] text-muted">
-            {vue === 'accueil' ? 'Choisis ce dont tu as besoin' : 'Espace Sécurité'}
-          </p>
-        </div>
-      </header>
+      {vue === 'accueil' ? (
+        <h1 className="mb-1 font-display text-[24px] leading-tight font-extrabold text-navy-950">
+          Choisis ce dont tu as besoin
+        </h1>
+      ) : (
+        <header className="mb-5 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => ouvrir('accueil')}
+            aria-label="Retour"
+            className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-navy-950 shadow-soft"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <div className="min-w-0">
+            <h1 className="font-display text-[28px] leading-tight font-extrabold text-navy-950">
+              {TITRES[vue]}
+            </h1>
+            <p className="text-[15px] text-muted">Espace Sécurité</p>
+          </div>
+        </header>
+      )}
 
       <motion.div
         key={vue}
-        initial={vue === 'accueil' ? false : PAGE_TOURNE.initial}
-        animate={PAGE_TOURNE.animate}
-        transition={PAGE_TOURNE.transition}
-        style={PAGE_TOURNE.style}
+        initial={vue === 'accueil' ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.16 }}
       >
         {vue === 'accueil' && (
           <>
-            <Accueil onChoisir={setVue} />
-            <Link
-              to="/remontees"
-              className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-navy-950 text-base font-extrabold text-white shadow-soft"
-            >
-              📥 Suivi des remontées reçues
-            </Link>
+            <Accueil onChoisir={ouvrir} />
+            <SuiviDestinataires />
           </>
         )}
-        {vue === 'accident' && <OngletAccident onSst={() => setVue('sst')} />}
+        {vue === 'accident' && <OngletAccident onSst={() => ouvrir('sst')} />}
         {vue === 'sst' && <OngletSst code={codeAdmin} jeton={identite?.jeton ?? null} />}
         {vue === 'remontee' && <OngletRemontee />}
         {vue === 'urgences' && <GrilleUrgences titre="Appeler les secours" />}
-        {vue === 'eps' && <OngletEps code={codeAdmin} jeton={identite?.jeton ?? null} />}
+        {vue === 'eps' && (
+          <OngletEps
+            code={codeAdmin}
+            jeton={identite?.jeton ?? null}
+            sectionInitiale={params.get('section') === 'liste' ? 'liste' : undefined}
+          />
+        )}
         {vue === 'evacuation' && (
           <OngletEvacuation code={codeAdmin} jeton={identite?.jeton ?? null} />
         )}
       </motion.div>
     </div>
+  );
+}
+
+/** Lucas, Vincent (et l'administrateur) : remontées et EPS reçues, avec leurs compteurs. */
+function SuiviDestinataires() {
+  const { codeAdmin, identite } = useIdentite();
+  const jeton = identite?.jeton ?? null;
+  const [aTraiter, setATraiter] = useState<number | null>(null);
+  const [nouvelles, setNouvelles] = useState<number | null>(null);
+  useEffect(() => {
+    api
+      .mesRemontees(jeton, codeAdmin)
+      .then((l) => setATraiter(l.filter((r) => !r.traitee).length))
+      .catch(() => undefined);
+    api
+      .epsDonnees(jeton, codeAdmin)
+      .then((d) => setNouvelles(epsDeLaSemaine(d.eps).length))
+      .catch(() => undefined);
+  }, [jeton, codeAdmin]);
+  const ligne = (to: string, emoji: string, titre: string, pastille: string | null) => (
+    <Link
+      to={to}
+      className="mt-3 flex items-center gap-3 rounded-[20px] bg-[#0F172A] px-4 py-4 text-white shadow-soft transition-transform active:scale-[0.98]"
+    >
+      <span className="text-xl">{emoji}</span>
+      <b className="flex-1 font-display text-base">{titre}</b>
+      {pastille && (
+        <span className="rounded-full bg-[#DC2626] px-2.5 py-0.5 text-xs font-extrabold">
+          {pastille}
+        </span>
+      )}
+      <ArrowRight size={18} />
+    </Link>
+  );
+  return (
+    <section className="mt-6">
+      <p className="eyebrow">Suivi · Lucas &amp; Vincent</p>
+      {ligne('/remontees', '📥', 'Remontées reçues', aTraiter ? `${aTraiter} à traiter` : null)}
+      {ligne(
+        '/securite/eps-recues',
+        '🗣️',
+        'EPS reçues',
+        nouvelles ? `${nouvelles} cette semaine` : null,
+      )}
+    </section>
   );
 }
 

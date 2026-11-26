@@ -63,7 +63,7 @@ export function Remontees() {
       <header className="mb-5 flex items-center gap-3">
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/securite')}
           aria-label="Retour"
           className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-navy-950 shadow-soft"
         >

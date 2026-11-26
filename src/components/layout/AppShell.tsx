@@ -21,6 +21,7 @@ import { useGame } from '../../data/store';
 import { packDuJourOuvert } from '../../domain/packs';
 import { BanniereEchange } from '../BanniereEchange';
 import { BanniereEvacuation } from '../BanniereEvacuation';
+import { useAccesSecurite } from '../../data/accesSecurite';
 import { AVATAR_NOEL_URL, Guirlande } from '../noel/Noel';
 import { Avatar, cx } from '../ui/primitives';
 
@@ -37,6 +38,7 @@ export function AppShell() {
   // On fige l'élément de route pour que la page sortante garde son contenu pendant la transition.
   const outlet = useOutlet();
   const { identite, codeAdmin } = useIdentite();
+  const accesSecurite = useAccesSecurite();
   const chemin = location.pathname;
   const section = chemin.startsWith('/avent')
     ? 'avent'
@@ -71,7 +73,9 @@ export function AppShell() {
               className="size-[42px] shrink-0 rounded-full bg-navy object-cover ring-2 ring-sun"
             />
             <div className="min-w-0 leading-tight">
-              <p className="font-display text-[17px] font-extrabold text-navy">Team Ulysse</p>
+              <p className="font-display text-[17px] font-extrabold whitespace-nowrap text-navy">
+                Team Ulysse
+              </p>
               <p className="hidden text-[11px] text-muted sm:block">
                 {section === 'avent'
                   ? 'Calendrier de l’Avent'
@@ -147,6 +151,15 @@ export function AppShell() {
               >
                 <Layers size={15} />
                 {progress.cards.length}/{cards.length}
+              </NavLink>
+            )}
+            {accesSecurite && (
+              <NavLink
+                to="/securite"
+                className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-[#0F172A] px-2.5 text-xs font-extrabold whitespace-nowrap text-white"
+                title="Espace Sécurité"
+              >
+                ⇄ Sécu
               </NavLink>
             )}
             {codeAdmin && (
