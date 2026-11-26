@@ -276,6 +276,13 @@ export const api = {
     rpc<ContactSst[]>('securite_sst', { p_code: code, p_jeton: jeton }),
   accesSecurite: (jeton: string) => rpc<boolean>('acces_securite', { p_jeton: jeton }),
 
+  epsDonnees: (jeton: string | null, code: string | null) =>
+    rpc<DonneesEps>('eps_donnees', { p_jeton: jeton, p_code: code }),
+  epsEnregistrer: (eps: NouvelleEps, jeton: string | null, code: string | null) =>
+    rpc<string>('eps_enregistrer', { p_eps: eps, p_jeton: jeton, p_code: code }),
+  epsSupprimer: (id: string, code: string) =>
+    rpc<null>('eps_supprimer', { p_id: id, p_code: code }),
+
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 
   // Les cartes manquantes ne sont envoyées que si supabase/maj-echanges-v2.sql a été lancé.
@@ -378,3 +385,51 @@ export const api = {
   adminSupprimer: (code: string, id: string) =>
     rpc<null>('admin_supprimer', { p_code: code, p_id: id }),
 };
+
+/** Réponse à une question d'EPS (type 1 à 4, fréquence 1 à 4). */
+export interface ReponseEps {
+  type: number;
+  interaction: string;
+  frequence: number;
+  resume: string;
+}
+
+/** Une EPS : importée du fichier Excel (sans le détail) ou faite dans l'appli. */
+export interface LigneEps {
+  id: string;
+  interviewe: string;
+  cle: string;
+  interviewer: string;
+  manager: string | null;
+  correspondant: string | null;
+  service: string | null;
+  secteur: string | null;
+  date: string;
+  reponses: ReponseEps[] | null;
+  niveaux: number[] | null;
+  score: number | null;
+  niveau: number | null;
+  source: string;
+}
+
+export interface DonneesEps {
+  eps: LigneEps[];
+  annuaire: { nom: string; service: string | null; manager: boolean }[];
+  volontaires: string[];
+  inscrits: number;
+}
+
+export interface NouvelleEps {
+  interviewe: string;
+  cle: string;
+  interviewer: string;
+  manager: string;
+  correspondant: string;
+  service: string;
+  secteur: string;
+  date: string;
+  reponses: ReponseEps[];
+  niveaux: number[];
+  score: number;
+  niveau: number;
+}

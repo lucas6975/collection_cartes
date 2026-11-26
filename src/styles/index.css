@@ -216,11 +216,36 @@
     opacity: 0;
   }
 }
+.sc-courbe {
+  stroke-dasharray: 8 7;
+  animation: sc-courbe 1.2s linear infinite;
+}
+.sc-etoile {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sc-etoile 2.4s ease-in-out infinite;
+}
+@keyframes sc-courbe {
+  to {
+    stroke-dashoffset: -30;
+  }
+}
+@keyframes sc-etoile {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.25) rotate(12deg);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .sc-gyro-r,
   .sc-gyro-b,
   .sc-bande,
-  .sc-onde {
+  .sc-onde,
+  .sc-courbe,
+  .sc-etoile {
     animation: none;
   }
 }

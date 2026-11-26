@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   HeartPulse,
   MapPin,
+  MessagesSquare,
   Phone,
   Plus,
   ShieldAlert,
@@ -24,8 +25,9 @@ import { ApiError, api, type ContactSst } from '../data/api';
 import { bravoStore } from '../data/bravo';
 import { useAccesSecurite } from '../data/accesSecurite';
 import { useIdentite } from '../data/identite';
+import { COULEUR_EPS, OngletEps } from './Eps';
 
-type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences';
+type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences' | 'eps';
 
 const BASE = import.meta.env.BASE_URL;
 const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
@@ -49,6 +51,7 @@ const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
     vif: '#172E5C',
     doux: '#EEF1F6',
   },
+  eps: COULEUR_EPS,
 };
 
 /** Bandeau illustré en haut de chaque onglet. */
@@ -191,6 +194,12 @@ const CARTES: {
     sous: '15 · 18 · 112 · 114',
     icone: Phone,
   },
+  {
+    id: 'eps',
+    titre: 'EPS',
+    sous: 'Échange Périodique de Sécurité',
+    icone: MessagesSquare,
+  },
 ];
 
 const TITRES: Record<Onglet, string> = {
@@ -198,6 +207,7 @@ const TITRES: Record<Onglet, string> = {
   sst: 'SST',
   remontee: 'Situation à risque',
   urgences: 'Numéros d’urgence',
+  eps: 'EPS',
 };
 
 export function Securite() {
@@ -259,6 +269,7 @@ export function Securite() {
         {vue === 'sst' && <OngletSst code={codeAdmin} jeton={identite?.jeton ?? null} />}
         {vue === 'remontee' && <OngletRemontee />}
         {vue === 'urgences' && <GrilleUrgences titre="Appeler les secours" />}
+        {vue === 'eps' && <OngletEps code={codeAdmin} jeton={identite?.jeton ?? null} />}
       </motion.div>
     </div>
   );
@@ -271,6 +282,7 @@ export const PASTEL: Record<Onglet, { fond: string; bord: string; texte: string;
     sst: { fond: '#1F9A63', bord: '#178151', texte: '#FFFFFF', accent: '#0F5C3A' },
     remontee: { fond: '#2E6ED0', bord: '#245CB3', texte: '#FFFFFF', accent: '#163E80' },
     urgences: { fond: '#5A45C2', bord: '#4A37A6', texte: '#FFFFFF', accent: '#2F2178' },
+    eps: { fond: '#14918B', bord: '#0F7F7A', texte: '#FFFFFF', accent: '#08403E' },
   };
 
 /** Ulysse en situation, pour chaque rubrique (illustrations officielles). */
@@ -279,10 +291,11 @@ export const LOGO: Record<Onglet, string> = {
   sst: 'securite/sst.webp',
   remontee: 'securite/risque.webp',
   urgences: 'securite/urgences.webp',
+  eps: 'mascotte.webp',
 };
 
 /** Illustration de fond de chaque carte et cadrage. */
-const FOND: Record<Onglet, { image: string; position: string }> = {
+const FOND: Partial<Record<Onglet, { image: string; position: string }>> = {
   accident: { image: 'securite/fond-accident.webp', position: '70% 30%' },
   sst: { image: 'securite/fond-sst.webp', position: '75% 35%' },
   remontee: { image: 'securite/fond-risque.webp', position: '85% 60%' },
@@ -313,6 +326,30 @@ function AnimCarte({ id }: { id: Onglet }) {
           strokeWidth="4"
           strokeLinecap="round"
           strokeLinejoin="round"
+        />
+      </svg>
+    );
+  if (id === 'eps')
+    return (
+      <svg
+        viewBox="0 0 200 80"
+        className="pointer-events-none absolute right-16 bottom-3 w-[46%] opacity-90"
+        aria-hidden
+      >
+        <path
+          d="M4 8 C 50 50, 110 66, 196 72"
+          fill="none"
+          stroke="#F5C542"
+          strokeWidth="4"
+          strokeLinecap="round"
+          className="sc-courbe"
+        />
+        <polygon
+          points="120,52 124,61 134,61 126,67 129,76 120,70 111,76 114,67 106,61 116,61"
+          fill="#F5C542"
+          stroke="#08403E"
+          strokeWidth="2"
+          className="sc-etoile"
         />
       </svg>
     );
@@ -353,12 +390,20 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
             className="relative flex min-h-[118px] w-full items-center gap-4 overflow-hidden rounded-[26px] border p-5 text-left shadow-soft transition-transform active:scale-[0.98]"
             style={{ background: t.fond, borderColor: t.bord, color: t.texte }}
           >
-            <img
-              src={`${BASE}${f.image}`}
-              alt=""
-              className="absolute inset-0 size-full object-cover"
-              style={{ objectPosition: f.position }}
-            />
+            {f ? (
+              <img
+                src={`${BASE}${f.image}`}
+                alt=""
+                className="absolute inset-0 size-full object-cover"
+                style={{ objectPosition: f.position }}
+              />
+            ) : (
+              <img
+                src={`${BASE}mascotte.webp`}
+                alt=""
+                className="absolute -right-2 -bottom-3 h-[128px] w-auto"
+              />
+            )}
             <span
               className="absolute inset-0"
               style={{
