@@ -367,6 +367,50 @@ async function prevenirInscrits(db: Base) {
   return total;
 }
 
+/**
+ * Prévient les destinataires de chaque remontée de situation à risque (table remontees,
+ * supabase/maj-remontees.sql) : les inscrits listés dans remontees_destinataires, plus les
+ * téléphones de l'administrateur.
+ */
+async function prevenirRemontees(db: Base) {
+  const { data: dues, error } = await db
+    .from('remontees')
+    .select('id, prenom, nom, type, lieu, description, gravite')
+    .is('envoye_le', null);
+  if (error || !dues?.length) return 0;
+  const { data: dest } = await db.from('remontees_destinataires').select('participant_id');
+  const ids = ((dest ?? []) as { participant_id: string }[]).map((d) => d.participant_id);
+  const parNom = ids.length
+    ? (((
+        await db.from('rappels_abonnes').select('endpoint, p256dh, auth').in('participant_id', ids)
+      ).data ?? []) as Abonne[])
+    : [];
+  const vus = new Set<string>();
+  const telephones = [...parNom, ...(await telephonesAdmin(db))].filter(
+    (a) => !vus.has(a.endpoint) && vus.add(a.endpoint),
+  );
+  let total = 0;
+  for (const r of dues as {
+    id: string;
+    prenom: string;
+    nom: string;
+    type: string;
+    lieu: string;
+    description: string;
+    gravite: string;
+  }[]) {
+    const msg = {
+      title: `⚠️ ${r.gravite === 'Grave' ? '[GRAVE] ' : ''}${r.type} · ${r.lieu}`.slice(0, 120),
+      body: `${r.prenom} ${r.nom} : ${r.description}`.slice(0, 240),
+      url: './#/securite',
+      tag: `remontee-${r.id}`,
+    };
+    if (telephones.length) total += (await envoyerA(db, telephones, JSON.stringify(msg))).envoyes;
+    await db.from('remontees').update({ envoye_le: new Date().toISOString() }).eq('id', r.id);
+  }
+  return total;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
   const m = momentParis(new Date());
@@ -454,6 +498,10 @@ Deno.serve(async (req) => {
   // Nouvelles inscriptions à annoncer à l'administrateur (appel dédié juste après chacune).
   const inscrits = await prevenirInscrits(db);
   if (corps?.inscrits) return repondre({ inscrits });
+
+  // Remontées de situation à risque (appel dédié juste après chacune).
+  const remontees = await prevenirRemontees(db);
+  if (corps?.remontees) return repondre({ remontees });
 
   // Personnes tirées au sort à prévenir (à chaque appel ; appel dédié juste après un tirage).
   const gagnants = await prevenirGagnants(db, m);

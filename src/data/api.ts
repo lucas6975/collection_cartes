@@ -237,6 +237,23 @@ export const api = {
     rpc<null>('noter_roue', { p_jeton: jeton, p_etape: etape, p_gain: gain ?? null }),
   adminRoue: (code: string) => rpc<SuiviRoue[]>('admin_roue', { p_code: code }),
 
+  envoyerRemontee: (r: {
+    prenom: string;
+    nom: string;
+    type: string;
+    lieu: string;
+    description: string;
+    gravite: string;
+  }) =>
+    rpc<null>('envoyer_remontee', {
+      p_prenom: r.prenom,
+      p_nom: r.nom,
+      p_type: r.type,
+      p_lieu: r.lieu,
+      p_description: r.description,
+      p_gravite: r.gravite,
+    }),
+
   securiteSst: (code: string) => rpc<ContactSst[]>('securite_sst', { p_code: code }),
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),

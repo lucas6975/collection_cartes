@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BookUser,
-  Camera,
   ChevronLeft,
   HeartPulse,
   MapPin,
@@ -607,15 +606,16 @@ function OngletSst({ code }: { code: string }) {
 }
 
 // ───────────── Remontée de situation à risque ─────────────
+// La remontée est enregistrée dans la base, et une notification part sur les téléphones choisis
+// (supabase/maj-remontees.sql + fonction envoyer-rappels).
 
 interface Remontee {
   at: string;
+  auteur: string;
   type: string;
   lieu: string;
   description: string;
   gravite: string;
-  photo: boolean;
-  anonyme: boolean;
 }
 const CLE = 'team-ulysse-test-remontees';
 const lireRemontees = (): Remontee[] => {
@@ -626,79 +626,34 @@ const lireRemontees = (): Remontee[] => {
   }
 };
 
-/** Destinataires des remontées (cochés d'office). Envoi via FormSubmit (aucun compte requis). */
-// Test : envoi à deux adresses. Pour la vraie version : { nom: 'Service EP', mail: 'compte-fonction.EP@imeca-technologies.com' }.
-const DESTINATAIRES = [
-  { nom: 'L. Attard (test)', mail: 'l.attard@imeca-technologies.com' },
-  { nom: 'V. Masmejan (test)', mail: 'v.masmejan@imeca-technologies.com' },
-];
-
-async function envoyerMail(
-  mail: string,
-  r: { type: string; lieu: string; description: string; gravite: string; auteur: string },
-  photo: File | null,
-) {
-  const f = new FormData();
-  f.append(
-    '_subject',
-    `${r.gravite === 'Grave' ? '[GRAVE] ' : ''}Remontée : ${r.type} · ${r.lieu}`.slice(0, 120),
-  );
-  f.append('_template', 'table');
-  f.append('_captcha', 'false');
-  f.append('Type', r.type);
-  f.append('Lieu', r.lieu);
-  f.append('Gravité', r.gravite);
-  f.append('Description', r.description);
-  f.append('Signalé par', r.auteur);
-  f.append('Date', new Date().toLocaleString('fr-FR'));
-  f.append('Envoyé depuis', 'Appli Team Ulysse');
-  if (photo) f.append('attachment', photo, photo.name || 'photo.jpg');
-  const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(mail)}`, {
-    method: 'POST',
-    headers: { Accept: 'application/json' },
-    body: f,
-  });
-  const j = (await res.json().catch(() => ({}))) as {
-    success?: string | boolean;
-    message?: string;
-  };
-  if (!res.ok || String(j.success) === 'false')
-    throw new Error(j.message || `Erreur ${res.status}`);
-  return j.message ?? '';
-}
+const champ =
+  'mt-1.5 h-11 w-full rounded-xl border border-line px-3 outline-none focus:border-blue focus:ring-4 focus:ring-blue/10';
 
 function OngletRemontee() {
   const { identite } = useIdentite();
-  const [coches, setCoches] = useState<string[]>(() => DESTINATAIRES.map((d) => d.mail));
-  const [fichier, setFichier] = useState<File | null>(null);
-  const [envoi, setEnvoi] = useState(false);
-  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
+  const [prenom, setPrenom] = useState(identite?.prenom ?? '');
+  const [nom, setNom] = useState(identite?.nom ?? '');
   const [type, setType] = useState('Situation dangereuse');
   const [lieu, setLieu] = useState('');
   const [description, setDescription] = useState('');
   const [gravite, setGravite] = useState('Moyenne');
-  const [photo, setPhoto] = useState<string | null>(null);
-  const [anonyme, setAnonyme] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null);
   const [liste, setListe] = useState<Remontee[]>(lireRemontees);
+  const complet = [prenom, nom, lieu, description].every((v) => v.trim());
 
   const envoyer = async () => {
     setEnvoi(true);
     setMessage(null);
-    const auteur = anonyme
-      ? 'Anonyme'
-      : identite
-        ? `${identite.prenom} ${identite.nom}`
-        : 'Administrateur Team Ulysse';
     try {
-      for (const m of coches)
-        await envoyerMail(m, { type, lieu, description, gravite, auteur }, fichier);
-    } catch (err) {
-      const m = err instanceof Error ? err.message : 'erreur réseau';
+      await api.envoyerRemontee({ prenom, nom, type, lieu, description, gravite });
+    } catch (e) {
       setMessage({
         ok: false,
-        texte: /activation/i.test(m)
-          ? 'Presque ! Chaque destinataire a reçu un mail « Activate Form » (regarde aussi les spams) : il faut cliquer dessus une fois, puis renvoyer la remontée.'
-          : `L’envoi n’a pas marché (${m}). Réessaie.`,
+        texte:
+          e instanceof ApiError
+            ? `L’envoi n’a pas marché : ${e.message} (as-tu lancé supabase/maj-remontees.sql ?)`
+            : 'L’envoi n’a pas marché, vérifie ta connexion et réessaie.',
       });
       setEnvoi(false);
       return;
@@ -706,16 +661,15 @@ function OngletRemontee() {
     setEnvoi(false);
     setMessage({
       ok: true,
-      texte: `Envoyée à ${coches.length} destinataire${coches.length > 1 ? 's' : ''} ✅`,
+      texte: 'Remontée envoyée ✅ Le service est prévenu sur son téléphone.',
     });
     const r: Remontee = {
       at: new Date().toISOString(),
+      auteur: `${prenom.trim()} ${nom.trim()}`,
       type,
       lieu,
       description,
       gravite,
-      photo: !!photo,
-      anonyme,
     };
     const l = [r, ...liste].slice(0, 20);
     setListe(l);
@@ -726,8 +680,6 @@ function OngletRemontee() {
     }
     setLieu('');
     setDescription('');
-    setPhoto(null);
-    setFichier(null);
     bravoStore.montrer('Merci pour ta vigilance ! 🦺', 'Ta remontée a bien été envoyée.');
   };
 
@@ -748,6 +700,30 @@ function OngletRemontee() {
 
       <section className="panel space-y-4 p-4">
         <div>
+          <p className="eyebrow">Qui signale ?</p>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="block">
+              <input
+                value={prenom}
+                onChange={(e) => setPrenom(e.target.value)}
+                placeholder="Prénom *"
+                autoComplete="given-name"
+                className={champ}
+              />
+            </label>
+            <label className="block">
+              <input
+                value={nom}
+                onChange={(e) => setNom(e.target.value)}
+                placeholder="Nom *"
+                autoComplete="family-name"
+                className={champ}
+              />
+            </label>
+          </div>
+        </div>
+
+        <div>
           <p className="eyebrow mb-2">Ce que tu as vu</p>
           <div className="grid grid-cols-2 gap-2">
             {[
@@ -759,7 +735,7 @@ function OngletRemontee() {
                 type="button"
                 onClick={() => setType(t)}
                 className={cx(
-                  'vi-elastique rounded-2xl border-2 p-3 text-left text-sm font-bold',
+                  'rounded-2xl border-2 p-3 text-left text-sm font-bold',
                   type === t ? 'border-blue bg-blue-light text-navy-950' : 'border-line text-muted',
                 )}
               >
@@ -771,21 +747,22 @@ function OngletRemontee() {
         </div>
 
         <label className="block">
-          <span className="eyebrow">Où ?</span>
+          <span className="eyebrow">Où ? *</span>
           <input
             value={lieu}
             onChange={(e) => setLieu(e.target.value)}
             placeholder="Ex. allée B, quai 3, atelier…"
-            className="mt-1.5 h-11 w-full rounded-xl border border-line px-3 outline-none focus:border-blue focus:ring-4 focus:ring-blue/10"
+            className={champ}
           />
         </label>
 
         <label className="block">
-          <span className="eyebrow">Que se passe-t-il ?</span>
+          <span className="eyebrow">Que se passe-t-il ? *</span>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
+            maxLength={1000}
             placeholder="Ex. palette mal filmée en hauteur, flaque d’huile près du chariot…"
             className="mt-1.5 w-full rounded-xl border border-line p-3 outline-none focus:border-blue focus:ring-4 focus:ring-blue/10"
           />
@@ -804,7 +781,7 @@ function OngletRemontee() {
                 type="button"
                 onClick={() => setGravite(g)}
                 className={cx(
-                  'vi-elastique flex items-center justify-center gap-1.5 rounded-xl border-2 py-2.5 text-sm font-bold',
+                  'flex items-center justify-center gap-1.5 rounded-xl border-2 py-2.5 text-sm font-bold',
                   gravite === g ? 'border-navy text-navy-950' : 'border-line text-muted',
                 )}
               >
@@ -814,74 +791,20 @@ function OngletRemontee() {
           </div>
         </div>
 
-        <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed border-line p-3">
-          {photo ? (
-            <img src={photo} alt="" className="size-14 rounded-xl object-cover" />
-          ) : (
-            <span className="grid size-14 place-items-center rounded-xl bg-canvas text-navy">
-              <Camera size={22} />
-            </span>
-          )}
-          <span className="text-sm">
-            <b className="text-navy-950">{photo ? 'Photo ajoutée' : 'Ajouter une photo'}</b>
-            <span className="block text-xs text-muted">Facultatif · évite les visages</span>
-          </span>
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) {
-                setPhoto(URL.createObjectURL(f));
-                setFichier(f);
-              }
-            }}
-          />
-        </label>
-
-        <label className="flex items-center gap-2 text-sm text-navy-950">
-          <input
-            type="checkbox"
-            checked={anonyme}
-            onChange={(e) => setAnonyme(e.target.checked)}
-            className="size-4 accent-[#0B2347]"
-          />
-          Envoyer sans mon nom
-        </label>
-
-        <div className="rounded-2xl bg-blue-light p-3">
-          <p className="eyebrow mb-1.5">Envoyer à</p>
-          {DESTINATAIRES.map((d) => (
-            <label key={d.mail} className="flex items-center gap-2.5 py-1 text-sm text-navy-950">
-              <input
-                type="checkbox"
-                checked={coches.includes(d.mail)}
-                onChange={(e) =>
-                  setCoches((c) =>
-                    e.target.checked ? [...c, d.mail] : c.filter((x) => x !== d.mail),
-                  )
-                }
-                className="size-5 accent-[#1F5AA6]"
-              />
-              <span className="min-w-0">
-                <b className="block">{d.nom}</b>
-                <span className="block truncate text-xs text-muted">{d.mail}</span>
-              </span>
-            </label>
-          ))}
-        </div>
-
         <button
           type="button"
-          className="vi-elastique flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold text-white disabled:opacity-40"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-xl text-base font-semibold text-white transition-transform active:scale-[0.98] disabled:opacity-40"
           style={{ background: COULEUR.remontee.fond }}
-          disabled={!lieu.trim() || !description.trim() || !coches.length || envoi}
+          disabled={!complet || envoi}
           onClick={() => void envoyer()}
         >
           <ShieldAlert size={18} /> {envoi ? 'Envoi…' : 'Envoyer ma remontée'}
         </button>
+        {!complet && (
+          <p className="text-center text-xs text-muted">
+            Prénom, nom, lieu et description sont obligatoires.
+          </p>
+        )}
         {message && (
           <p
             className={cx(
@@ -901,7 +824,7 @@ function OngletRemontee() {
 
       {liste.length > 0 && (
         <section className="panel p-4">
-          <p className="eyebrow mb-2">Mes remontées (test)</p>
+          <p className="eyebrow mb-2">Mes remontées</p>
           <ul className="divide-y divide-line">
             {liste.map((r) => (
               <li key={r.at} className="py-2.5 text-sm">
@@ -910,8 +833,6 @@ function OngletRemontee() {
                 </b>
                 <span className="block text-muted">
                   {r.description} · gravité {r.gravite.toLowerCase()}
-                  {r.photo && ' · 📷'}
-                  {r.anonyme && ' · anonyme'}
                 </span>
               </li>
             ))}
