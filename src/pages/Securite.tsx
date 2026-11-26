@@ -488,7 +488,7 @@ function ficheContact(c: ContactSst) {
     'VERSION:3.0',
     `N:${c.nom};${c.prenom};;;`,
     `FN:${c.prenom} ${c.nom}`,
-    `TITLE:${c.role}`,
+    `TITLE:${c.role}${c.lieu ? ` (${c.lieu})` : ''}`,
     'ORG:IMECA',
     `TEL;TYPE=CELL:${telLien(c.telephone)}`,
     'END:VCARD',
@@ -504,6 +504,9 @@ function ficheContact(c: ContactSst) {
 function OngletSst({ code }: { code: string }) {
   const [contacts, setContacts] = useState<ContactSst[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [lieu, setLieu] = useState<string>('Tous');
+  const lieux = [...new Set((contacts ?? []).map((c) => c.lieu || 'Autre'))];
+  const visibles = (contacts ?? []).filter((c) => lieu === 'Tous' || (c.lieu || 'Autre') === lieu);
 
   useEffect(() => {
     api
@@ -546,7 +549,27 @@ function OngletSst({ code }: { code: string }) {
         <p className="panel p-4 text-sm text-muted">Aucun SST enregistré pour l’instant.</p>
       )}
 
-      {contacts?.map((c) => (
+      {lieux.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {['Tous', ...lieux].map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => setLieu(l)}
+              className="rounded-full px-3.5 py-1.5 text-sm font-bold transition-colors"
+              style={
+                lieu === l
+                  ? { background: COULEUR.sst.vif, color: '#fff' }
+                  : { background: '#fff', color: COULEUR.sst.vif }
+              }
+            >
+              {l === 'Tous' ? `Tous (${contacts?.length ?? 0})` : `📍 ${l}`}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {visibles.map((c) => (
         <section
           key={`${c.prenom}${c.nom}`}
           className="panel border-l-[6px] p-4"
@@ -564,7 +587,14 @@ function OngletSst({ code }: { code: string }) {
               <p className="font-display text-lg font-extrabold text-navy-950">
                 {c.prenom} {c.nom}
               </p>
-              <p className="text-xs font-semibold text-success">➕ {c.role}</p>
+              <p className="text-xs font-semibold text-success">
+                ➕ {c.role}
+                {c.lieu && (
+                  <span className="ml-1.5 rounded-full bg-success/10 px-2 py-0.5 text-[11px] font-bold text-success">
+                    📍 {c.lieu}
+                  </span>
+                )}
+              </p>
               <p className="text-sm text-muted">{c.telephone}</p>
             </div>
           </div>

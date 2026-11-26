@@ -29,3 +29,18 @@ grant execute on function public.securite_sst(text) to anon, authenticated;
 
 -- Ajouter un SST (à faire dans Supabase, pas dans ce fichier) :
 -- insert into public.sst_contacts (prenom, nom, telephone) values ('Prénom', 'NOM', '06 00 00 00 00');
+
+-- ── Lieu de chaque SST (RDC, Étage, Atelier…) ──
+alter table public.sst_contacts add column if not exists lieu text;
+
+create or replace function public.securite_sst(p_code text) returns jsonb
+language plpgsql stable security definer set search_path = public as $$
+begin
+  perform verifier_code(p_code);
+  return coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'prenom', prenom, 'nom', nom, 'telephone', telephone, 'role', role, 'lieu', lieu
+    ) order by case lieu when 'RDC' then 1 when 'Étage' then 2 when 'Atelier' then 3 else 4 end,
+               ordre, nom)
+    from sst_contacts), '[]');
+end $$;

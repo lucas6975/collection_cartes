@@ -63,6 +63,8 @@ export interface ContactSst {
   nom: string;
   telephone: string;
   role: string;
+  /** Où le trouver : RDC, Étage, Atelier… (null si non renseigné). */
+  lieu?: string | null;
 }
 
 export interface Participant {
