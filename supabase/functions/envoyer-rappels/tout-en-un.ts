@@ -367,6 +367,21 @@ async function prevenirInscrits(db: Base) {
   return total;
 }
 
+/** Téléphones des destinataires (remontees_destinataires) et de l'administrateur, sans doublon. */
+async function telephonesDestinataires(db: Base): Promise<Abonne[]> {
+  const { data: dest } = await db.from('remontees_destinataires').select('participant_id');
+  const ids = ((dest ?? []) as { participant_id: string }[]).map((d) => d.participant_id);
+  const parNom = ids.length
+    ? (((
+        await db.from('rappels_abonnes').select('endpoint, p256dh, auth').in('participant_id', ids)
+      ).data ?? []) as Abonne[])
+    : [];
+  const vus = new Set<string>();
+  return [...parNom, ...(await telephonesAdmin(db))].filter(
+    (a) => !vus.has(a.endpoint) && vus.add(a.endpoint),
+  );
+}
+
 /**
  * Prévient les destinataires de chaque remontée de situation à risque (table remontees,
  * supabase/maj-remontees.sql) : les inscrits listés dans remontees_destinataires, plus les
@@ -378,17 +393,7 @@ async function prevenirRemontees(db: Base) {
     .select('id, prenom, nom, type, lieu, description, gravite')
     .is('envoye_le', null);
   if (error || !dues?.length) return 0;
-  const { data: dest } = await db.from('remontees_destinataires').select('participant_id');
-  const ids = ((dest ?? []) as { participant_id: string }[]).map((d) => d.participant_id);
-  const parNom = ids.length
-    ? (((
-        await db.from('rappels_abonnes').select('endpoint, p256dh, auth').in('participant_id', ids)
-      ).data ?? []) as Abonne[])
-    : [];
-  const vus = new Set<string>();
-  const telephones = [...parNom, ...(await telephonesAdmin(db))].filter(
-    (a) => !vus.has(a.endpoint) && vus.add(a.endpoint),
-  );
+  const telephones = await telephonesDestinataires(db);
   let total = 0;
   for (const r of dues as {
     id: string;
@@ -407,6 +412,42 @@ async function prevenirRemontees(db: Base) {
     };
     if (telephones.length) total += (await envoyerA(db, telephones, JSON.stringify(msg))).envoyes;
     await db.from('remontees').update({ envoye_le: new Date().toISOString() }).eq('id', r.id);
+  }
+  return total;
+}
+
+const NIVEAUX_EPS = ['', 'Réactif', 'Dépendant', 'Indépendant', 'Interdépendant'];
+
+/**
+ * Prévient les destinataires (Lucas, Vincent) et l'administrateur de chaque EPS enregistrée
+ * dans l'appli (table eps, supabase/maj-eps-notif.sql).
+ */
+async function prevenirEps(db: Base) {
+  const { data: dues, error } = await db
+    .from('eps')
+    .select('id, interviewe, interviewer, niveau, score')
+    .is('envoye_le', null);
+  if (error || !dues?.length) return 0;
+  const telephones = await telephonesDestinataires(db);
+  let total = 0;
+  for (const e of dues as {
+    id: string;
+    interviewe: string;
+    interviewer: string;
+    niveau: number | null;
+    score: number | null;
+  }[]) {
+    const niveau = e.niveau ? NIVEAUX_EPS[e.niveau] : '';
+    const score =
+      e.score === null ? '' : ` (${String(Number(e.score).toFixed(2)).replace('.', ',')}/4)`;
+    const msg = {
+      title: `🗣️ Nouvelle EPS : ${e.interviewe}`.slice(0, 120),
+      body: `Faite par ${e.interviewer}${niveau ? ` · ${niveau}${score}` : ''}`.slice(0, 240),
+      url: './#/securite?vue=eps',
+      tag: `eps-${e.id}`,
+    };
+    if (telephones.length) total += (await envoyerA(db, telephones, JSON.stringify(msg))).envoyes;
+    await db.from('eps').update({ envoye_le: new Date().toISOString() }).eq('id', e.id);
   }
   return total;
 }
@@ -502,6 +543,10 @@ Deno.serve(async (req) => {
   // Remontées de situation à risque (appel dédié juste après chacune).
   const remontees = await prevenirRemontees(db);
   if (corps?.remontees) return repondre({ remontees });
+
+  // EPS enregistrées dans l'appli (appel dédié juste après chacune).
+  const eps = await prevenirEps(db);
+  if (corps?.eps) return repondre({ eps });
 
   // Personnes tirées au sort à prévenir (à chaque appel ; appel dédié juste après un tirage).
   const gagnants = await prevenirGagnants(db, m);

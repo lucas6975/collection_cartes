@@ -140,6 +140,7 @@ export function OngletEps({ code, jeton }: { code: string | null; jeton: string 
         <Liste
           donnees={donnees}
           code={code}
+          jeton={jeton}
           onInterviewer={(nom) => {
             setPrefill(nom);
             aller('formulaire');
@@ -775,11 +776,13 @@ function Resultat({
 function Liste({
   donnees,
   code,
+  jeton,
   onInterviewer,
   onRecharger,
 }: {
   donnees: DonneesEps;
   code: string | null;
+  jeton: string | null;
   onInterviewer: (nom: string) => void;
   onRecharger: () => void;
 }) {
@@ -794,9 +797,9 @@ function Liste({
   );
 
   const supprimer = async (e: LigneEps) => {
-    if (!code || !confirm(`Supprimer l’EPS de ${e.interviewe} du ${dateFr(e.date)} ?`)) return;
+    if (!confirm(`Supprimer l’EPS de ${e.interviewe} du ${dateFr(e.date)} ?`)) return;
     try {
-      await api.epsSupprimer(e.id, code);
+      await api.epsSupprimer(e.id, jeton, code);
       onRecharger();
     } catch {
       alert('La suppression n’a pas marché.');
@@ -915,15 +918,13 @@ function Liste({
                       Importée du fichier Excel : pas de détail des réponses.
                     </p>
                   )}
-                  {code && (
-                    <button
-                      type="button"
-                      onClick={() => void supprimer(e)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-danger"
-                    >
-                      <Trash2 size={14} /> Supprimer (admin)
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => void supprimer(e)}
+                    className="mt-1 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl border-2 border-danger/30 bg-white text-sm font-bold text-danger"
+                  >
+                    <Trash2 size={16} /> Supprimer cette EPS
+                  </button>
                 </div>
               )}
             </li>

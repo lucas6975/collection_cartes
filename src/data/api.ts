@@ -280,8 +280,8 @@ export const api = {
     rpc<DonneesEps>('eps_donnees', { p_jeton: jeton, p_code: code }),
   epsEnregistrer: (eps: NouvelleEps, jeton: string | null, code: string | null) =>
     rpc<string>('eps_enregistrer', { p_eps: eps, p_jeton: jeton, p_code: code }),
-  epsSupprimer: (id: string, code: string) =>
-    rpc<null>('eps_supprimer', { p_id: id, p_code: code }),
+  epsSupprimer: (id: string, jeton: string | null, code: string | null) =>
+    rpc<null>('eps_supprimer', { p_id: id, p_jeton: jeton, p_code: code }),
 
   adminLancement: (code: string) => rpc<ChiffresLancement>('admin_lancement', { p_code: code }),
 

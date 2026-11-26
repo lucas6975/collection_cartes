@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import { PAGE_TOURNE } from '../components/ui/tourne';
 import { ChargementUlysse } from '../components/ui/vivant';
 import { Button, cx } from '../components/ui/primitives';
@@ -214,7 +214,9 @@ export function Securite() {
   const { codeAdmin, identite } = useIdentite();
   const acces = useAccesSecurite();
   const navigate = useNavigate();
-  const [vue, setVue] = useState<Vue>('accueil');
+  // La notification « Nouvelle EPS » ouvre directement l'onglet EPS (#/securite?vue=eps).
+  const [params] = useSearchParams();
+  const [vue, setVue] = useState<Vue>(() => (params.get('vue') === 'eps' ? 'eps' : 'accueil'));
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [vue]);
