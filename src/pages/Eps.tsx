@@ -246,53 +246,18 @@ function Regles({ onCommencer }: { onCommencer: () => void }) {
         </p>
       </Carte>
 
-      <Carte titre="📊 Bilan 2024 & 2025">
-        <div className="grid grid-cols-2 gap-2">
-          {([2024, 2025] as const).map((a) => (
-            <div key={a} className="rounded-2xl bg-canvas p-3 text-center">
-              <p className="text-xs font-bold text-muted">{a}</p>
-              <p className="font-display text-3xl font-extrabold text-navy-950">
-                {HISTORIQUE[a].taux} %
-              </p>
-              <p className="text-xs text-muted">de l’objectif réalisé</p>
-            </div>
-          ))}
-        </div>
-        <p className="pt-1 text-sm font-bold">Points forts</p>
-        <ul className="list-disc space-y-0.5 pl-5 text-sm">
-          <li>Participation aux EPS en hausse par rapport à 2024</li>
-          <li>Implication et support managérial</li>
-          <li>Intérêt pour les sensibilisations « fonctionnement des EPS »</li>
-          <li>EPS réalisées en distanciel</li>
-        </ul>
-      </Carte>
-
-      <Carte titre="🚀 Comment progresser en 2026 ?">
-        <p className="text-sm font-bold">✓ Réaliser son EPS</p>
-        <p className="pt-1 text-sm font-bold">Accentuer la vigilance partagée</p>
-        <ul className="list-disc space-y-0.5 pl-5 text-sm">
+      <Carte titre="🚀 Comment progresser ?">
+        <ul className="space-y-1.5 text-sm">
           <li>
-            <b>Oser dire</b> : corriger un écart, ou féliciter un comportement préventif
+            🗣️ <b>Vigilance partagée</b> : oser dire, savoir expliquer, accepter les remarques
           </li>
           <li>
-            <b>Savoir dire</b> : expliquer le sens, les conséquences et le risque encouru
+            ⚠️ <b>Remonter</b> les presque accidents et situations dangereuses
           </li>
           <li>
-            <b>Accepter de recevoir</b> les remarques sécurité d’un collègue
+            🦺 <b>Échanger</b> avec son correspondant sécurité et son manager (visites, quart
+            d’heure sécurité)
           </li>
-          <li>Utiliser les outils de remontée (presque accident, situation dangereuse…)</li>
-          <li>Intégrer la Team Ulysse 🦺</li>
-        </ul>
-        <p className="pt-1 text-sm font-bold">Échanger plus souvent avec les correspondants</p>
-        <ul className="list-disc space-y-0.5 pl-5 text-sm">
-          <li>Participer aux visites sécurité hebdomadaires</li>
-          <li>Participer aux évènements organisés par l’équipe EP</li>
-        </ul>
-        <p className="pt-1 text-sm font-bold">Échanger plus souvent avec les managers</p>
-        <ul className="list-disc space-y-0.5 pl-5 text-sm">
-          <li>Animer ou participer au quart d’heure sécurité en équipe</li>
-          <li>Participer au traitement des évènements sécurité</li>
-          <li>Parler sécurité en entretien individuel et en réunion d’équipe</li>
         </ul>
       </Carte>
 
@@ -500,14 +465,6 @@ function Formulaire({
                   />
                 </label>
               </div>
-              <label className="block">
-                <span className="eyebrow">Secteur ou îlot</span>
-                <input
-                  value={infos.secteur}
-                  onChange={(e) => maj('secteur', e.target.value)}
-                  className={champ}
-                />
-              </label>
             </section>
           )}
 
@@ -695,8 +652,22 @@ function EtapeQuestion({
         </section>
       )}
 
+      <section className="panel p-4">
+        <label className="block">
+          <span className="eyebrow">1 · On détaille d’abord : résumé de l’échange</span>
+          <textarea
+            value={reponse.resume}
+            onChange={(e) => onReponse({ resume: e.target.value })}
+            rows={4}
+            maxLength={800}
+            placeholder="Ce que la personne raconte…"
+            className="mt-1.5 w-full rounded-xl border border-line p-3 text-[15px] outline-none focus:border-[#0F7F7A] focus:ring-4 focus:ring-[#0F7F7A]/10"
+          />
+        </label>
+      </section>
+
       <section className="panel space-y-2 p-4">
-        <p className="eyebrow">Type de réponse *</p>
+        <p className="eyebrow">2 · Puis on coche : type de réponse *</p>
         {TYPES_REPONSE.map((t, k) => (
           <Choix
             key={t}
@@ -709,33 +680,10 @@ function EtapeQuestion({
         ))}
       </section>
 
-      <section className="panel space-y-2 p-4">
-        <p className="eyebrow">Type d’interaction</p>
-        <div className="flex flex-wrap gap-2">
-          {q.interactions.map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => onReponse({ interaction: t })}
-              className={cx(
-                'rounded-full border-2 px-3 py-1.5 text-sm font-bold',
-                reponse.interaction === t ? 'text-white' : 'border-line text-muted',
-              )}
-              style={
-                reponse.interaction === t
-                  ? { background: COULEUR_EPS.vif, borderColor: COULEUR_EPS.vif }
-                  : undefined
-              }
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </section>
-
       <section className={cx('panel space-y-2 p-4', reponse.type === 1 && 'opacity-50')}>
         <p className="eyebrow">
-          Fréquence de renforcement {reponse.type === 1 ? '(sans effet : pas de souvenir)' : '*'}
+          3 · Fréquence de renforcement{' '}
+          {reponse.type === 1 ? '(sans effet : pas de souvenir)' : '*'}
         </p>
         <div className="grid grid-cols-2 gap-2">
           {FREQUENCES.map((f, k) => (
@@ -749,20 +697,6 @@ function EtapeQuestion({
             </Choix>
           ))}
         </div>
-      </section>
-
-      <section className="panel p-4">
-        <label className="block">
-          <span className="eyebrow">Résumé de l’interaction</span>
-          <textarea
-            value={reponse.resume}
-            onChange={(e) => onReponse({ resume: e.target.value })}
-            rows={3}
-            maxLength={800}
-            placeholder="Ce que la personne raconte…"
-            className="mt-1.5 w-full rounded-xl border border-line p-3 text-[15px] outline-none focus:border-[#0F7F7A] focus:ring-4 focus:ring-[#0F7F7A]/10"
-          />
-        </label>
       </section>
 
       {/* Résultat de la question + moyenne en cours */}
@@ -949,7 +883,6 @@ function Liste({
                   <p>
                     📅 {dateFr(e.date)}
                     {e.service ? ` · ${e.service}` : ''}
-                    {e.secteur ? ` · ${e.secteur}` : ''}
                   </p>
                   {e.correspondant && <p>🦺 Correspondant sécurité : {e.correspondant}</p>}
                   {e.reponses ? (
@@ -966,7 +899,6 @@ function Liste({
                             </div>
                             <p className="text-xs text-muted">
                               {TYPES_REPONSE[r.type - 1]} · {FREQUENCES[r.frequence - 1] ?? '—'}
-                              {r.interaction ? ` · ${r.interaction}` : ''}
                             </p>
                             {r.resume && <p className="mt-1 whitespace-pre-line">{r.resume}</p>}
                           </div>
