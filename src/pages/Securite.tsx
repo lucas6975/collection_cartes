@@ -693,9 +693,12 @@ function OngletRemontee() {
       for (const m of coches)
         await envoyerMail(m, { type, lieu, description, gravite, auteur }, fichier);
     } catch (err) {
+      const m = err instanceof Error ? err.message : 'erreur réseau';
       setMessage({
         ok: false,
-        texte: `L’envoi n’a pas marché (${err instanceof Error ? err.message : 'erreur réseau'}). Réessaie.`,
+        texte: /activation/i.test(m)
+          ? 'Presque ! Chaque destinataire a reçu un mail « Activate Form » (regarde aussi les spams) : il faut cliquer dessus une fois, puis renvoyer la remontée.'
+          : `L’envoi n’a pas marché (${m}). Réessaie.`,
       });
       setEnvoi(false);
       return;
