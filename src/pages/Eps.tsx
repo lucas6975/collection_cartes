@@ -796,6 +796,7 @@ function Liste({
       [e.interviewe, e.interviewer, e.manager ?? ''].some((v) => v.toLowerCase().includes(filtre)),
   );
 
+  const faitesAppli = donnees.eps.filter((e) => e.source !== 'import');
   const supprimer = async (e: LigneEps) => {
     if (!confirm(`Supprimer l’EPS de ${e.interviewe} du ${dateFr(e.date)} ?`)) return;
     try {
@@ -808,6 +809,32 @@ function Liste({
 
   return (
     <div className="space-y-4">
+      {faitesAppli.length > 0 && (
+        <section className="panel p-4">
+          <p className="eyebrow mb-2">🧪 EPS faites dans l’appli ({faitesAppli.length})</p>
+          <ul className="divide-y divide-line">
+            {faitesAppli.map((e) => (
+              <li key={e.id} className="flex items-center gap-2 py-2">
+                <span className="min-w-0 flex-1">
+                  <b className="block truncate text-navy-950">{e.interviewe}</b>
+                  <span className="block truncate text-xs text-muted">
+                    {dateFr(e.date)} · par {e.interviewer}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => void supprimer(e)}
+                  aria-label={`Supprimer l’EPS de ${e.interviewe}`}
+                  className="flex h-9 shrink-0 items-center gap-1 rounded-full bg-danger/10 px-3 text-xs font-extrabold text-danger"
+                >
+                  <Trash2 size={14} /> Supprimer
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {donnees.volontaires.length > 0 && (
         <section className="panel p-4">
           <p className="eyebrow mb-2">🙋 Veulent être interviewé(e)s</p>
