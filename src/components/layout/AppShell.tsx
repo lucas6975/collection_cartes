@@ -72,7 +72,9 @@ export function AppShell() {
               height={42}
               className="size-[42px] shrink-0 rounded-full bg-navy object-cover ring-2 ring-sun"
             />
-            <div className="min-w-0 leading-tight">
+            {/* Avec le bouton « ⇄ Sécu » (Lucas, Vincent, admin), le titre n'a pas la place sur
+                téléphone : l'avatar suffit. */}
+            <div className={cx('min-w-0 leading-tight', accesSecurite && 'hidden sm:block')}>
               <p className="font-display text-[17px] font-extrabold whitespace-nowrap text-navy">
                 Team Ulysse
               </p>
