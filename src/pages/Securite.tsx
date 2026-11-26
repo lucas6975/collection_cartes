@@ -26,8 +26,9 @@ import { bravoStore } from '../data/bravo';
 import { useAccesSecurite } from '../data/accesSecurite';
 import { useIdentite } from '../data/identite';
 import { COULEUR_EPS, OngletEps } from './Eps';
+import { COULEUR_EVACUATION, OngletEvacuation } from './Evacuation';
 
-type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences' | 'eps';
+type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences' | 'eps' | 'evacuation';
 
 const BASE = import.meta.env.BASE_URL;
 const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
@@ -52,6 +53,7 @@ const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
     doux: '#EEF1F6',
   },
   eps: COULEUR_EPS,
+  evacuation: COULEUR_EVACUATION,
 };
 
 /** Bandeau illustré en haut de chaque onglet. */
@@ -200,6 +202,12 @@ const CARTES: {
     sous: 'Échange Périodique de Sécurité',
     icone: MessagesSquare,
   },
+  {
+    id: 'evacuation',
+    titre: 'Évacuation',
+    sous: 'Recensement au point de rassemblement',
+    icone: ShieldAlert,
+  },
 ];
 
 const TITRES: Record<Onglet, string> = {
@@ -208,6 +216,7 @@ const TITRES: Record<Onglet, string> = {
   remontee: 'Situation à risque',
   urgences: 'Numéros d’urgence',
   eps: 'EPS',
+  evacuation: 'Évacuation',
 };
 
 export function Securite() {
@@ -216,7 +225,10 @@ export function Securite() {
   const navigate = useNavigate();
   // La notification « Nouvelle EPS » ouvre directement l'onglet EPS (#/securite?vue=eps).
   const [params] = useSearchParams();
-  const [vue, setVue] = useState<Vue>(() => (params.get('vue') === 'eps' ? 'eps' : 'accueil'));
+  const [vue, setVue] = useState<Vue>(() => {
+    const v = params.get('vue');
+    return v === 'eps' || v === 'evacuation' ? v : 'accueil';
+  });
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [vue]);
@@ -272,6 +284,9 @@ export function Securite() {
         {vue === 'remontee' && <OngletRemontee />}
         {vue === 'urgences' && <GrilleUrgences titre="Appeler les secours" />}
         {vue === 'eps' && <OngletEps code={codeAdmin} jeton={identite?.jeton ?? null} />}
+        {vue === 'evacuation' && (
+          <OngletEvacuation code={codeAdmin} jeton={identite?.jeton ?? null} />
+        )}
       </motion.div>
     </div>
   );
@@ -285,6 +300,7 @@ export const PASTEL: Record<Onglet, { fond: string; bord: string; texte: string;
     remontee: { fond: '#2E6ED0', bord: '#245CB3', texte: '#FFFFFF', accent: '#163E80' },
     urgences: { fond: '#5A45C2', bord: '#4A37A6', texte: '#FFFFFF', accent: '#2F2178' },
     eps: { fond: '#14918B', bord: '#0F7F7A', texte: '#FFFFFF', accent: '#08403E' },
+    evacuation: { fond: '#E2471F', bord: '#C2410C', texte: '#FFFFFF', accent: '#7F1D1D' },
   };
 
 /** Ulysse en situation, pour chaque rubrique (illustrations officielles). */
@@ -294,6 +310,7 @@ export const LOGO: Record<Onglet, string> = {
   remontee: 'securite/risque.webp',
   urgences: 'securite/urgences.webp',
   eps: 'mascotte.webp',
+  evacuation: 'mascotte.webp',
 };
 
 /** Illustration de fond de chaque carte et cadrage. */

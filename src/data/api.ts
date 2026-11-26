@@ -276,6 +276,74 @@ export const api = {
     rpc<ContactSst[]>('securite_sst', { p_code: code, p_jeton: jeton }),
   accesSecurite: (jeton: string) => rpc<boolean>('acces_securite', { p_jeton: jeton }),
 
+  // Évacuation : recensement au point de rassemblement (supabase/maj-evacuation.sql).
+  rassemblementEtat: () => rpc<EtatRassemblement>('rassemblement_etat', {}),
+  rassemblementPresent: (p: {
+    prenom: string;
+    nom: string;
+    statut: string;
+    societe?: string;
+    appareil: string;
+    jeton?: string | null;
+  }) =>
+    rpc<{ deja: boolean; heure: string }>('rassemblement_present', {
+      p_prenom: p.prenom,
+      p_nom: p.nom,
+      p_statut: p.statut,
+      p_societe: p.societe ?? null,
+      p_appareil: p.appareil,
+      p_jeton: p.jeton ?? null,
+    }),
+  evacuationDemarrer: (par: string, jeton: string | null, code: string | null) =>
+    rpc<string>('evacuation_demarrer', { p_par: par, p_jeton: jeton, p_code: code }),
+  evacuationTerminer: (id: string, jeton: string | null, code: string | null) =>
+    rpc<null>('evacuation_terminer', { p_id: id, p_jeton: jeton, p_code: code }),
+  evacuationSuivi: (id: string | null, jeton: string | null, code: string | null) =>
+    rpc<SuiviEvacuation>('evacuation_suivi', { p_id: id, p_jeton: jeton, p_code: code }),
+  evacuationAjouter: (
+    id: string,
+    p: { prenom: string; nom: string; statut: string; societe: string },
+    jeton: string | null,
+    code: string | null,
+  ) =>
+    rpc<null>('evacuation_ajouter', {
+      p_id: id,
+      p_prenom: p.prenom,
+      p_nom: p.nom,
+      p_statut: p.statut,
+      p_societe: p.societe,
+      p_jeton: jeton,
+      p_code: code,
+    }),
+  evacuationPointer: (
+    present: string,
+    pointe: boolean,
+    jeton: string | null,
+    code: string | null,
+  ) =>
+    rpc<null>('evacuation_pointer', {
+      p_present: present,
+      p_pointe: pointe,
+      p_jeton: jeton,
+      p_code: code,
+    }),
+  evacuationRetirer: (present: string, jeton: string | null, code: string | null) =>
+    rpc<null>('evacuation_retirer', { p_present: present, p_jeton: jeton, p_code: code }),
+  evacuationEffectif: (
+    id: string,
+    effectif: number | null,
+    jeton: string | null,
+    code: string | null,
+  ) =>
+    rpc<null>('evacuation_effectif', {
+      p_id: id,
+      p_effectif: effectif,
+      p_jeton: jeton,
+      p_code: code,
+    }),
+  evacuationSupprimer: (id: string, jeton: string | null, code: string | null) =>
+    rpc<null>('evacuation_supprimer', { p_id: id, p_jeton: jeton, p_code: code }),
+
   epsDonnees: (jeton: string | null, code: string | null) =>
     rpc<DonneesEps>('eps_donnees', { p_jeton: jeton, p_code: code }),
   epsEnregistrer: (eps: NouvelleEps, jeton: string | null, code: string | null) =>
@@ -432,4 +500,35 @@ export interface NouvelleEps {
   niveaux: number[];
   score: number;
   niveau: number;
+}
+
+export interface EtatRassemblement {
+  active: boolean;
+  id: string | null;
+  debut: string | null;
+}
+
+export interface PresentEvacuation {
+  id: string;
+  prenom: string;
+  nom: string;
+  statut: string;
+  societe: string | null;
+  appli: boolean;
+  ajoute_par: string;
+  pointe: boolean;
+  heure: string;
+}
+
+export interface SuiviEvacuation {
+  active: string | null;
+  evacuation: {
+    id: string;
+    debut: string;
+    fin: string | null;
+    lance_par: string | null;
+    effectif_liste: number | null;
+  } | null;
+  presents: PresentEvacuation[];
+  historique: { id: string; debut: string; fin: string | null; total: number }[];
 }

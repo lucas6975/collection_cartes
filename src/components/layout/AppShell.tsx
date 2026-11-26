@@ -20,6 +20,7 @@ import { useNoel } from '../../data/noel';
 import { useGame } from '../../data/store';
 import { packDuJourOuvert } from '../../domain/packs';
 import { BanniereEchange } from '../BanniereEchange';
+import { BanniereEvacuation } from '../BanniereEvacuation';
 import { AVATAR_NOEL_URL, Guirlande } from '../noel/Noel';
 import { Avatar, cx } from '../ui/primitives';
 
@@ -182,6 +183,7 @@ export function AppShell() {
         </div>
       </header>
 
+      <BanniereEvacuation />
       <main className="mx-auto w-full max-w-[1180px] px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:pb-16 md:pt-8">
         <AnimatePresence mode="wait">
           <motion.div

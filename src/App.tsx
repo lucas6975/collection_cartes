@@ -27,6 +27,7 @@ import { Home } from './pages/Home';
 import { Menu } from './pages/Menu';
 import { Securite } from './pages/Securite';
 import { Remontees } from './pages/Remontees';
+import { Rassemblement } from './pages/Rassemblement';
 
 export function App() {
   const { identite, codeAdmin } = useIdentite();
@@ -35,6 +36,14 @@ export function App() {
   const [codeEchangeNavigateur, setCodeEchangeNavigateur] = useState(() =>
     /#\/echange\?/.test(location.hash) ? lireCode(location.hash) : null,
   );
+  const [rassemblement, setRassemblement] = useState(() =>
+    location.hash.startsWith('#/rassemblement'),
+  );
+  useEffect(() => {
+    const suivre = () => setRassemblement(location.hash.startsWith('#/rassemblement'));
+    window.addEventListener('hashchange', suivre);
+    return () => window.removeEventListener('hashchange', suivre);
+  }, []);
   // Change quand l'écran des rappels est terminé, pour réafficher l'appli.
   const [, setEtapeFinie] = useState(0);
 
@@ -57,6 +66,9 @@ export function App() {
     // Pastille « 1 » sur l'icône tant que le pack du jour n'est pas ouvert.
     demarrerPastille();
   }, []);
+
+  // QR du point de rassemblement : page ouverte à tous, sans inscription ni installation.
+  if (rassemblement) return <Rassemblement />;
 
   // Lien d'échange ouvert dans le navigateur : l'échange se fait dans l'appli installée.
   if (navigateur && codeEchangeNavigateur) {

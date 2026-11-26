@@ -263,14 +263,14 @@ export function Menu() {
                 ['sst', 'SST'],
                 ['remontee', 'Situation à risque'],
                 ['urgences', 'Urgences'],
-                ['eps', 'EPS · Échange Périodique'],
+                ['eps', 'EPS'],
+                ['evacuation', 'Évacuation'],
               ] as const
             ).map(([id, nom]) => (
               <span
                 key={id}
                 className={cx(
                   'flex items-center gap-2 rounded-2xl border px-2 py-2 text-sm font-bold',
-                  id === 'eps' && 'col-span-2',
                 )}
                 style={{
                   background: PASTEL[id].fond,
