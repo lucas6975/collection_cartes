@@ -341,6 +341,13 @@ export const api = {
       p_jeton: jeton,
       p_code: code,
     }),
+  evacuationListeAppel: (
+    id: string,
+    noms: string[] | null,
+    jeton: string | null,
+    code: string | null,
+  ) =>
+    rpc<null>('evacuation_liste_appel', { p_id: id, p_noms: noms, p_jeton: jeton, p_code: code }),
   evacuationSupprimer: (id: string, jeton: string | null, code: string | null) =>
     rpc<null>('evacuation_supprimer', { p_id: id, p_jeton: jeton, p_code: code }),
 
@@ -531,6 +538,8 @@ export interface SuiviEvacuation {
     lance_par: string | null;
     effectif_liste: number | null;
     test?: boolean;
+    /** Noms de la liste d'appel du poste de garde (scannée ou saisie). */
+    liste_appel?: string[] | null;
   } | null;
   /** Téléphones abonnés aux notifications (prévenus lors d'une vraie évacuation). */
   abonnes?: number;

@@ -17,6 +17,8 @@ import { ApiError, api, type SuiviEvacuation } from '../data/api';
 import { STATUTS, LIEN_RASSEMBLEMENT, heureFr } from '../data/evacuation';
 import { creerXlsx, proposerFichier } from '../data/excel';
 import { useIdentite } from '../data/identite';
+import { ListeAppel } from '../components/evacuation/ListeAppel';
+import { comparer } from '../domain/appel';
 
 export const COULEUR_EVACUATION = {
   fond: 'linear-gradient(150deg, #F97316 0%, #DC2626 55%, #7F1D1D 100%)',
@@ -251,22 +253,19 @@ function Suivi({
   const [recherche, setRecherche] = useState('');
   const [ajout, setAjout] = useState(false);
   const [nouveau, setNouveau] = useState({ prenom: '', nom: '', statut: 'Visiteur', societe: '' });
-  const [effectif, setEffectif] = useState(ev.effectif_liste?.toString() ?? '');
   const [qrOuvert, setQrOuvert] = useState(true);
 
   const presents = suivi.presents;
-  const pointes = presents.filter((p) => p.pointe).length;
-  const liste = Number(effectif) || null;
+  const comparaison = ev.liste_appel?.length
+    ? comparer(ev.liste_appel, presents, (p) => `${p.prenom} ${p.nom}`)
+    : null;
+  const surListe = new Set(comparaison?.ensemble.map((e) => e.present.id) ?? []);
   const filtre = recherche.trim().toLowerCase();
   const visibles = presents.filter(
     (p) => !filtre || `${p.prenom} ${p.nom} ${p.societe ?? ''}`.toLowerCase().includes(filtre),
   );
   const parStatut = STATUTS.map((s) => [s, presents.filter((p) => p.statut === s).length] as const);
 
-  const pointer = async (id: string, v: boolean) => {
-    await api.evacuationPointer(id, v, jeton, code).catch(() => undefined);
-    onRecharger();
-  };
   const retirer = async (id: string, nom: string) => {
     if (!confirm(`Retirer ${nom} de la liste des présents ?`)) return;
     await api.evacuationRetirer(id, jeton, code).catch(() => undefined);
@@ -278,11 +277,6 @@ function Suivi({
     setNouveau({ prenom: '', nom: '', statut: 'Visiteur', societe: '' });
     setAjout(false);
     onRecharger();
-  };
-  const enregistrerEffectif = async () => {
-    await api
-      .evacuationEffectif(ev.id, effectif ? Number(effectif) : null, jeton, code)
-      .catch(() => undefined);
   };
   const supprimer = async () => {
     if (!confirm('Supprimer définitivement cette évacuation (exercice ou test) ?')) return;
@@ -304,7 +298,7 @@ function Suivi({
             p.societe,
             heureFr(p.heure),
             p.ajoute_par === 'manuel' ? 'Ajout manuel' : p.appli ? 'Appli' : 'QR code',
-            p.pointe ? 'Pointé' : 'Non pointé',
+            !comparaison ? '' : surListe.has(p.id) ? 'Sur la liste' : 'Absent de la liste',
           ]),
         ],
       },
@@ -317,11 +311,24 @@ function Suivi({
           ['Durée (chronomètre)', duree(ev.debut, ev.fin)],
           ['Présents enregistrés', presents.length],
           ...parStatut.map(([s, n]) => [`dont ${s}`, n] as [string, number]),
-          ['Effectif liste d’appel', liste],
-          ['Pointés sur la liste d’appel', pointes],
-          ['Écart liste d’appel − présents', liste === null ? null : liste - presents.length],
+          ['Personnes sur la liste d’appel', ev.liste_appel?.length ?? null],
+          ['Sur la liste et dans l’appli', comparaison?.ensemble.length ?? null],
+          ['Sur la liste, pas dans l’appli (à retrouver)', comparaison?.manquants.length ?? null],
+          ['Dans l’appli, pas sur la liste', comparaison?.horsListe.length ?? null],
         ],
       },
+      ...(comparaison
+        ? [
+            {
+              nom: 'À retrouver',
+              largeurs: [40],
+              lignes: [
+                ['Sur la liste d’appel, pas déclaré(e)s présent(e)s'],
+                ...comparaison.manquants.map((n) => [n]),
+              ],
+            },
+          ]
+        : []),
     ]);
     await proposerFichier(fichier, `Evacuation-${jour}.xlsx`);
   };
@@ -373,53 +380,15 @@ function Suivi({
         </section>
       )}
 
-      {/* Comparaison avec la liste d'appel imprimée */}
-      <section className="panel space-y-3 p-4">
-        <p className="eyebrow">Comparaison avec la liste d’appel</p>
-        <label className="flex items-center gap-3">
-          <span className="flex-1 text-sm font-semibold text-navy-950">
-            Nombre de personnes sur la liste d’appel
-          </span>
-          <input
-            inputMode="numeric"
-            value={effectif}
-            onChange={(e) => setEffectif(e.target.value.replace(/\D/g, ''))}
-            onBlur={() => void enregistrerEffectif()}
-            placeholder="—"
-            className="h-12 w-20 rounded-xl border border-line text-center text-lg font-bold"
-          />
-        </label>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-2xl bg-canvas p-2.5">
-            <p className="font-display text-2xl font-extrabold text-navy-950">{presents.length}</p>
-            <p className="text-[11px] text-muted">dans l’appli</p>
-          </div>
-          <div className="rounded-2xl bg-canvas p-2.5">
-            <p className="font-display text-2xl font-extrabold text-navy-950">{pointes}</p>
-            <p className="text-[11px] text-muted">pointés sur la liste</p>
-          </div>
-          <div
-            className={cx(
-              'rounded-2xl p-2.5',
-              liste !== null && liste - pointes > 0 ? 'bg-danger/10' : 'bg-canvas',
-            )}
-          >
-            <p
-              className={cx(
-                'font-display text-2xl font-extrabold',
-                liste !== null && liste - pointes > 0 ? 'text-danger' : 'text-navy-950',
-              )}
-            >
-              {liste === null ? '—' : Math.max(0, liste - pointes)}
-            </p>
-            <p className="text-[11px] text-muted">de la liste non retrouvés</p>
-          </div>
-        </div>
-        <p className="text-xs text-muted">
-          Pour chaque nom de la liste d’appel, cherche-le ci-dessous et coche-le. Les noms de la
-          liste jamais cochés sont les personnes manquantes.
-        </p>
-      </section>
+      {/* Liste d'appel du poste de garde : scan, comparaison vert / rouge */}
+      <ListeAppel
+        liste={ev.liste_appel ?? null}
+        comparaison={comparaison}
+        onEnregistrer={async (noms) => {
+          await api.evacuationListeAppel(ev.id, noms, jeton, code);
+          onRecharger();
+        }}
+      />
 
       {/* Liste des présents */}
       <section className="panel p-4">
@@ -497,19 +466,25 @@ function Suivi({
         <ul className="divide-y divide-line">
           {visibles.map((p) => (
             <li key={p.id} className="flex items-center gap-3 py-2.5">
-              <button
-                type="button"
-                onClick={() => void pointer(p.id, !p.pointe)}
-                aria-label={p.pointe ? 'Décocher' : 'Pointer sur la liste d’appel'}
+              <span
+                title={
+                  !comparaison
+                    ? ''
+                    : surListe.has(p.id)
+                      ? 'Sur la liste d’appel'
+                      : 'Absent de la liste'
+                }
                 className={cx(
-                  'grid size-9 shrink-0 place-items-center rounded-xl border-2',
-                  p.pointe
-                    ? 'border-[#16A34A] bg-[#16A34A] text-white'
-                    : 'border-line text-transparent',
+                  'grid size-9 shrink-0 place-items-center rounded-xl text-white',
+                  !comparaison
+                    ? 'bg-canvas text-muted'
+                    : surListe.has(p.id)
+                      ? 'bg-[#16A34A]'
+                      : 'bg-[#DC2626]',
                 )}
               >
-                <CheckCircle2 size={20} />
-              </button>
+                {!comparaison ? '•' : surListe.has(p.id) ? <CheckCircle2 size={18} /> : '!'}
+              </span>
               <span className="min-w-0 flex-1">
                 <b className="block truncate text-navy-950">
                   {p.nom.toUpperCase()} {p.prenom}
