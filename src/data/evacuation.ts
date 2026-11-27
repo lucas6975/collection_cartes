@@ -5,8 +5,20 @@ import { api, type EtatRassemblement } from './api';
 
 export const STATUTS = ['Salarié IMECA', 'Intérimaire', 'Prestataire', 'Visiteur'] as const;
 
-/** Lien du QR code à afficher au point de rassemblement (permanent : il sert à chaque évacuation). */
-export const LIEN_RASSEMBLEMENT = 'https://lucas6975.github.io/collection_cartes/#/rassemblement';
+const SITE = 'https://lucas6975.github.io/collection_cartes/';
+
+/**
+ * Lien du QR code du point de rassemblement (permanent : il sert à chaque évacuation). Il contient
+ * un code secret : se déclarer présent exige de l'avoir scanné (affiche ou téléphone de
+ * Lucas / Vincent), pour qu'on ne puisse pas le faire depuis chez soi.
+ */
+export const lienRassemblement = (codeLieu: string) => `${SITE}#/rassemblement?p=${codeLieu}`;
+
+/** Code du point de rassemblement contenu dans un lien ou un QR scanné (ou null). */
+export function codeLieuDe(texte: string): string | null {
+  const m = /#\/rassemblement\?(?:.*&)?p=([0-9a-f]{6,32})/i.exec(texte);
+  return m ? m[1].toLowerCase() : null;
+}
 
 const CLE_APPAREIL = 'team-ulysse-appareil';
 const CLE_PRESENT = 'team-ulysse-present';

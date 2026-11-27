@@ -285,6 +285,10 @@ export const api = {
     societe?: string;
     appareil: string;
     jeton?: string | null;
+    /** Code secret contenu dans le QR du point de rassemblement (preuve d'être sur place). */
+    lieu?: string | null;
+    /** Code administrateur (dispensé du QR). */
+    code?: string | null;
   }) =>
     rpc<{ deja: boolean; heure: string }>('rassemblement_present', {
       p_prenom: p.prenom,
@@ -293,7 +297,11 @@ export const api = {
       p_societe: p.societe ?? null,
       p_appareil: p.appareil,
       p_jeton: p.jeton ?? null,
+      p_lieu: p.lieu ?? null,
+      p_code: p.code ?? null,
     }),
+  evacuationCodeLieu: (jeton: string | null, code: string | null) =>
+    rpc<string>('evacuation_code_lieu', { p_jeton: jeton, p_code: code }),
   evacuationDemarrer: (par: string, test: boolean, jeton: string | null, code: string | null) =>
     rpc<string>('evacuation_demarrer', { p_par: par, p_test: test, p_jeton: jeton, p_code: code }),
   evacuationTerminer: (id: string, jeton: string | null, code: string | null) =>

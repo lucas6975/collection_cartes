@@ -1,12 +1,15 @@
 // Page ouverte par le QR code du point de rassemblement : chacun se déclare présent, même sans
 // l'appli (visiteurs, prestataires…). Pour un inscrit, le nom est déjà rempli : un seul bouton.
-import { CheckCircle2, MapPin, ShieldAlert } from 'lucide-react';
+import { Camera, CheckCircle2, MapPin, ShieldAlert } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState } from 'react';
+import { ScannerQR } from '../components/ScannerQR';
 import { cx } from '../components/ui/primitives';
+import { useAccesSecurite } from '../data/accesSecurite';
 import { ApiError, api } from '../data/api';
 import {
   STATUTS,
+  codeLieuDe,
   dejaPresent,
   heureFr,
   identifiantAppareil,
@@ -21,7 +24,14 @@ const champ =
 
 export function Rassemblement() {
   const etat = useEvacuation(15_000);
-  const { identite } = useIdentite();
+  const { identite, codeAdmin } = useIdentite();
+  // Lucas, Vincent et l'administrateur n'ont pas besoin de scanner le QR.
+  const dispense = useAccesSecurite() === true;
+  // Code du point de rassemblement : présent dans le lien du QR scanné avec l'appareil photo,
+  // ou lu par le scanner de l'appli. Sans lui, on ne peut pas se déclarer présent.
+  const [lieu, setLieu] = useState<string | null>(() => codeLieuDe(location.href));
+  const [scanner, setScanner] = useState(false);
+  const [mauvaisQr, setMauvaisQr] = useState(false);
   const [prenom, setPrenom] = useState(identite?.prenom ?? '');
   const [nom, setNom] = useState(identite?.nom ?? '');
   const [statut, setStatut] = useState<string>(identite ? 'Salarié IMECA' : '');
@@ -58,6 +68,8 @@ export function Rassemblement() {
         societe: statut === 'Salarié IMECA' ? '' : societe.trim(),
         appareil: identifiantAppareil(),
         jeton: identite?.jeton ?? null,
+        lieu,
+        code: codeAdmin,
       });
       const v = { evacuation: etat.id, heure: r.heure, nom: `${prenom.trim()} ${nom.trim()}` };
       if (!autre) noterPresent(v);
@@ -135,7 +147,49 @@ export function Rassemblement() {
           </motion.section>
         )}
 
-        {etat?.active && !deja && (
+        {etat?.active && !deja && !lieu && !dispense && (
+          <section className="mt-5 rounded-3xl bg-[#DC2626] p-5 text-center text-white shadow-lift">
+            <ShieldAlert className="mx-auto" size={40} />
+            <p className="mt-2 font-display text-[24px] leading-tight font-extrabold">
+              Évacuation en cours
+            </p>
+            <p className="mt-2 text-[15px] text-white/95">
+              Une fois au point de rassemblement, <b>scanne le QR code</b> affiché sur place (ou sur
+              le téléphone d’un membre EP) pour être compté(e) présent(e).
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setMauvaisQr(false);
+                setScanner(true);
+              }}
+              className="mt-5 flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-white text-lg font-extrabold text-[#B91C1C]"
+            >
+              <Camera size={24} /> Scanner le QR code
+            </button>
+            {mauvaisQr && (
+              <p className="mt-3 rounded-xl bg-white/20 px-3 py-2 text-sm font-bold">
+                Ce n’est pas le QR code du point de rassemblement. Réessaie.
+              </p>
+            )}
+            <p className="mt-4 text-xs text-white/85">
+              Pas de téléphone ou pas de caméra ? Donne ton prénom et ton nom à un membre EP.
+            </p>
+          </section>
+        )}
+        {scanner && (
+          <ScannerQR
+            onCode={(texte) => {
+              const c = codeLieuDe(texte);
+              setScanner(false);
+              if (c) setLieu(c);
+              else setMauvaisQr(true);
+            }}
+            onFermer={() => setScanner(false)}
+          />
+        )}
+
+        {etat?.active && !deja && (lieu || dispense) && (
           <>
             <section className="mt-5 flex items-center gap-3 rounded-3xl bg-[#DC2626] p-4 text-white shadow-lift">
               <ShieldAlert className="shrink-0" size={34} />

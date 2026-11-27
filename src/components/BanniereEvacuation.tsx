@@ -2,13 +2,15 @@
 // « Je suis au point de rassemblement » (prénom et nom déjà connus). Si on la ferme, un bandeau
 // rouge reste en haut. Rien ne s'affiche une fois déclaré présent, ni à la fin de l'évacuation.
 // Évacuation test : seuls Lucas, Vincent et l'administrateur la voient.
-import { CheckCircle2, ChevronRight, ShieldAlert } from 'lucide-react';
+import { Camera, CheckCircle2, ChevronRight, ShieldAlert } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router';
 import { useAccesSecurite } from '../data/accesSecurite';
+import { ScannerQR } from './ScannerQR';
 import { api } from '../data/api';
 import {
+  codeLieuDe,
   dejaPresent,
   heureFr,
   identifiantAppareil,
@@ -27,7 +29,9 @@ function depuis(debut: string) {
 export function BanniereEvacuation() {
   const etat = useEvacuation(20_000);
   const acces = useAccesSecurite();
-  const { identite } = useIdentite();
+  const { identite, codeAdmin } = useIdentite();
+  const [scanner, setScanner] = useState(false);
+  const [mauvaisQr, setMauvaisQr] = useState(false);
   const [fermee, setFermee] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [ok, setOk] = useState<{ heure: string } | null>(null);
@@ -49,9 +53,16 @@ export function BanniereEvacuation() {
 
   if (!visible) return null;
 
-  const present = async () => {
+  // Lucas, Vincent et l'administrateur : un toucher. Les autres doivent scanner le QR du point
+  // de rassemblement (preuve d'être sur place : pas de déclaration depuis le télétravail).
+  const present = async (lieu: string | null = null) => {
     if (!identite) {
       location.hash = '#/rassemblement';
+      return;
+    }
+    if (!acces && !lieu) {
+      setMauvaisQr(false);
+      setScanner(true);
       return;
     }
     setEnvoi(true);
@@ -63,6 +74,8 @@ export function BanniereEvacuation() {
         statut: 'Salarié IMECA',
         appareil: identifiantAppareil(),
         jeton: identite.jeton ?? null,
+        lieu,
+        code: codeAdmin,
       });
       noterPresent({
         evacuation: etat!.id!,
@@ -80,6 +93,17 @@ export function BanniereEvacuation() {
 
   return (
     <>
+      {scanner && (
+        <ScannerQR
+          onCode={(texte) => {
+            const c = codeLieuDe(texte);
+            setScanner(false);
+            if (c) void present(c);
+            else setMauvaisQr(true);
+          }}
+          onFermer={() => setScanner(false)}
+        />
+      )}
       <AnimatePresence>
         {(plein || ok) && (
           <motion.div
@@ -148,12 +172,26 @@ export function BanniereEvacuation() {
                   onClick={() => void present()}
                   className="-mt-2 flex min-h-16 w-full max-w-sm items-center justify-center gap-2 rounded-[20px] bg-white px-4 font-display text-[18px] font-extrabold text-[#15803D] shadow-[0_10px_24px_rgba(0,0,0,.25)] disabled:opacity-70"
                 >
-                  <CheckCircle2 size={24} />
-                  {envoi ? 'Envoi…' : 'Je suis au point de rassemblement'}
+                  {acces ? <CheckCircle2 size={24} /> : <Camera size={24} />}
+                  {envoi
+                    ? 'Envoi…'
+                    : acces
+                      ? 'Je suis au point de rassemblement'
+                      : 'Scanner le QR du point de rassemblement'}
                 </button>
+                {!acces && (
+                  <p className="mt-2 max-w-sm text-xs text-white/85">
+                    Le QR est affiché au point de rassemblement et sur le téléphone des membres EP.
+                  </p>
+                )}
+                {mauvaisQr && (
+                  <p className="mt-3 rounded-xl bg-white/20 px-3 py-2 text-sm font-bold">
+                    Ce n’est pas le QR code du point de rassemblement. Réessaie.
+                  </p>
+                )}
                 {erreur && (
                   <p className="mt-3 rounded-xl bg-white/20 px-3 py-2 text-sm font-bold">
-                    Pas de réseau : réessaie, ou donne ton nom à un membre EP.
+                    Ça n’a pas marché : réessaie, ou donne ton nom à un membre EP.
                   </p>
                 )}
                 {etat!.debut && (

@@ -89,7 +89,7 @@ export function ScannerQR({
   }, []);
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex flex-col items-center justify-center bg-black px-6 text-center text-white">
+    <div className="fixed inset-0 z-[500] flex flex-col items-center justify-center bg-black px-6 text-center text-white">
       <button
         onClick={onFermer}
         className="fixed right-4 top-4 z-10 grid size-11 place-items-center rounded-full bg-white/15 hover:bg-white/25"

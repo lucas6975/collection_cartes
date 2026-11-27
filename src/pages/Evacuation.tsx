@@ -14,7 +14,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { renderSVG } from 'uqr';
 import { cx } from '../components/ui/primitives';
 import { ApiError, api, type SuiviEvacuation } from '../data/api';
-import { STATUTS, LIEN_RASSEMBLEMENT, heureFr } from '../data/evacuation';
+import { STATUTS, heureFr, lienRassemblement } from '../data/evacuation';
 import { creerXlsx, proposerFichier } from '../data/excel';
 import { useIdentite } from '../data/identite';
 import { ListeAppel } from '../components/evacuation/ListeAppel';
@@ -69,10 +69,29 @@ const dateHeure = (iso: string) =>
     minute: '2-digit',
   });
 
-function QrRassemblement({ taille = 'grand' }: { taille?: 'grand' | 'moyen' }) {
+/** Code secret du point de rassemblement (contenu dans le QR), pour Lucas, Vincent et l'admin. */
+function useCodeLieu(jeton: string | null, code: string | null) {
+  const [codeLieu, setCodeLieu] = useState<string | null>(null);
+  useEffect(() => {
+    api
+      .evacuationCodeLieu(jeton, code)
+      .then(setCodeLieu)
+      .catch(() => undefined);
+  }, [jeton, code]);
+  return codeLieu;
+}
+
+function QrRassemblement({
+  codeLieu,
+  taille = 'grand',
+}: {
+  codeLieu: string | null;
+  taille?: 'grand' | 'moyen';
+}) {
+  if (!codeLieu) return <p className="py-6 text-sm text-muted">Chargement du QR…</p>;
   return (
     <img
-      src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(LIEN_RASSEMBLEMENT, { ecc: 'H', border: 1 }))}`}
+      src={`data:image/svg+xml;utf8,${encodeURIComponent(renderSVG(lienRassemblement(codeLieu), { ecc: 'H', border: 1 }))}`}
       alt="QR code du point de rassemblement"
       className={cx(
         'mx-auto block rounded-2xl bg-white [image-rendering:pixelated]',
@@ -88,6 +107,7 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
   const [suivi, setSuivi] = useState<SuiviEvacuation | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [occupe, setOccupe] = useState(false);
+  const codeLieu = useCodeLieu(jeton, code);
 
   const charger = useCallback(async () => {
     try {
@@ -186,7 +206,7 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
 
         <section className="panel p-4 text-center">
           <p className="eyebrow mb-2">QR code permanent</p>
-          <QrRassemblement taille="moyen" />
+          <QrRassemblement codeLieu={codeLieu} taille="moyen" />
           <p className="mt-2 text-sm text-muted">
             Le même QR sert à chaque évacuation : il peut être imprimé et affiché au point de
             rassemblement. Il ne fonctionne que pendant une évacuation lancée ici.
@@ -223,6 +243,7 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
 
   return (
     <Suivi
+      codeLieu={codeLieu}
       suivi={suivi}
       code={code}
       jeton={jeton}
@@ -234,6 +255,7 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
 }
 
 function Suivi({
+  codeLieu,
   suivi,
   code,
   jeton,
@@ -247,6 +269,7 @@ function Suivi({
   onRecharger: () => void;
   onTerminer: () => void;
   onFermer: () => void;
+  codeLieu: string | null;
 }) {
   const ev = suivi.evacuation!;
   const enCours = !ev.fin;
@@ -376,7 +399,7 @@ function Suivi({
           >
             {qrOuvert ? 'Faites scanner ce QR code ▾' : 'Afficher le QR code ▸'}
           </button>
-          {qrOuvert && <QrRassemblement />}
+          {qrOuvert && <QrRassemblement codeLieu={codeLieu} />}
         </section>
       )}
 
