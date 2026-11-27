@@ -363,6 +363,43 @@
     stroke-dashoffset: 100;
   }
 }
+.sc-bulle {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: sc-bulle 3.6s ease-out infinite;
+}
+@keyframes sc-bulle {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  6% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  10%,
+  30% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+.sc-point {
+  animation: sc-point 0.6s ease-in-out infinite alternate;
+}
+@keyframes sc-point {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
 .sc-picto {
   opacity: 0;
   animation: sc-picto 2.8s ease-out infinite;
@@ -441,6 +478,8 @@
 @media (prefers-reduced-motion: reduce) {
   .sc-feu,
   .sc-picto,
+  .sc-bulle,
+  .sc-point,
   .sc-coche-l,
   .sc-danger,
   .sc-sos-onde,

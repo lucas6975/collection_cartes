@@ -394,6 +394,7 @@ const FOND: Partial<Record<Onglet, { image: string; position: string; decale?: s
   urgences: { image: 'securite/fond-urgences.webp', position: '50% 50%' },
   evacuation: { image: 'securite/fond-evacuation.webp', position: '50% 35%', decale: '30%' },
   visites: { image: 'securite/fond-visites.webp', position: '50% 50%', decale: '30%' },
+  eps: { image: 'securite/fond-eps.webp', position: '50% 50%', decale: '30%' },
 };
 
 /**
@@ -453,27 +454,45 @@ function AnimCarte({ id }: { id: Onglet }) {
     );
   if (id === 'eps')
     return (
-      <svg
-        viewBox="0 0 200 80"
-        className="pointer-events-none absolute right-16 bottom-3 w-[46%] opacity-90"
-        aria-hidden
-      >
-        <path
-          d="M4 8 C 50 50, 110 66, 196 72"
-          fill="none"
-          stroke="#F5C542"
-          strokeWidth="4"
-          strokeLinecap="round"
-          className="sc-courbe"
-        />
-        <polygon
-          points="120,52 124,61 134,61 126,67 129,76 120,70 111,76 114,67 106,61 116,61"
-          fill="#F5C542"
-          stroke="#08403E"
-          strokeWidth="2"
-          className="sc-etoile"
-        />
-      </svg>
+      <Calque largeur="70%" l={1672} h={941}>
+        {/* L'échange : Ulysse réfléchit (?), son collègue répond (…), puis l'idée jaillit (!). */}
+        <g className="sc-bulle" style={{ animationDelay: '0s' }}>
+          <path
+            d="M860 60 h170 a40 40 0 0 1 40 40 v70 a40 40 0 0 1 -40 40 h-110 l-50 45 l10 -45 h-20 a40 40 0 0 1 -40 -40 v-70 a40 40 0 0 1 40 -40 z"
+            fill="#FFFFFF"
+            stroke="#0F172A"
+            strokeWidth="8"
+          />
+          <text x="945" y="178" textAnchor="middle" fontSize="120" fontWeight="900" fill="#14918B">
+            ?
+          </text>
+        </g>
+        <g className="sc-bulle" style={{ animationDelay: '1.2s' }}>
+          <path
+            d="M1000 250 h170 a40 40 0 0 1 40 40 v60 a40 40 0 0 1 -40 40 h-20 l10 45 l-50 -45 h-110 a40 40 0 0 1 -40 -40 v-60 a40 40 0 0 1 40 -40 z"
+            fill="#FFFFFF"
+            stroke="#0F172A"
+            strokeWidth="8"
+          />
+          {[1040, 1085, 1130].map((x, i) => (
+            <circle
+              key={x}
+              cx={x}
+              cy="320"
+              r="16"
+              fill="#0F172A"
+              className="sc-point"
+              style={{ animationDelay: `${1.2 + i * 0.18}s` }}
+            />
+          ))}
+        </g>
+        <g className="sc-bulle" style={{ animationDelay: '2.4s' }}>
+          <circle cx="945" cy="135" r="78" fill="#F5C542" stroke="#0F172A" strokeWidth="8" />
+          <text x="945" y="178" textAnchor="middle" fontSize="120" fontWeight="900" fill="#0F172A">
+            !
+          </text>
+        </g>
+      </Calque>
     );
   if (id === 'evacuation')
     return (
