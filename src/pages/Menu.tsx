@@ -8,7 +8,6 @@ import { BanniereJeudiFou } from '../components/JeudiFou';
 import { RoueAccueil } from '../components/roue/RoueAccueil';
 import { ClassementAccueil } from '../components/classement/ClassementAccueil';
 import { PropositionRappels } from '../components/Rappels';
-import { PackArt } from '../components/cards/Pack';
 import { ANNEE_AVENT, JOURS } from '../avent/jours';
 import { caseDuJour, joursAvantDebut } from '../avent/logic';
 import { useAvent } from '../avent/progress';
@@ -17,6 +16,7 @@ import { useIdentite } from '../data/identite';
 import { useGame } from '../data/store';
 import { cx } from '../components/ui/primitives';
 import { packDuJourOuvert } from '../domain/packs';
+import { ScenePack } from '../components/cards/ScenePack';
 import { useNoel } from '../data/noel';
 import { FOND_HERO_NOEL, ULYSSE_NOEL_URL } from '../components/noel/Noel';
 
@@ -183,27 +183,23 @@ export function Menu() {
         >
           <Link
             to="/cartes"
-            className="group relative flex h-full min-h-72 flex-col overflow-hidden rounded-3xl bg-[#15171C] p-6 text-white shadow-lift transition-transform hover:-translate-y-1"
+            className="group relative flex h-full min-h-80 flex-col overflow-hidden rounded-3xl bg-[#15171C] p-5 text-white shadow-lift transition-transform hover:-translate-y-1"
           >
+            {/* Ulysse ouvre le vrai pack du jeu, les vraies cartes en sortent. */}
+            <ScenePack ouvert={packOuvert} decalage="7%" />
             <div
-              className="absolute inset-0 opacity-90"
+              className="absolute inset-0"
               style={{
                 background:
-                  'repeating-linear-gradient(135deg, rgba(245,197,66,0.14) 0 18px, transparent 18px 36px)',
+                  'linear-gradient(90deg, rgba(10,12,18,.96) 0%, rgba(10,12,18,.85) 28%, rgba(10,12,18,.15) 46%, transparent 56%)',
               }}
             />
-            <motion.div
-              className="absolute -right-6 bottom-[-28px] w-40 rotate-[10deg] transition-transform duration-300 group-hover:rotate-[4deg] sm:w-48"
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <PackArt opened={packOuvert} />
-            </motion.div>
-            <div className="relative max-w-[60%]">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-sun px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-navy-950">
+            <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-[#0A0C12]/85 to-transparent" />
+            <div className="relative max-w-[42%]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sun px-2.5 py-1 text-[11px] font-extrabold tracking-wider whitespace-nowrap text-navy-950 uppercase">
                 <Layers size={12} /> Tous les jours
               </span>
-              <h2 className="mt-3 font-display text-2xl font-extrabold leading-tight sm:text-3xl">
+              <h2 className="mt-3 font-display text-[21px] leading-tight font-extrabold sm:text-3xl">
                 Cartes à collectionner
               </h2>
               <p className="mt-2 text-sm text-white/70">
