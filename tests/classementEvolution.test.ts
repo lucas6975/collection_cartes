@@ -1,17 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import { evolution, majRangs } from '../src/data/classement';
+import { evolution, type LigneClassement } from '../src/data/classement';
+
+const l = (o: Partial<LigneClassement>): LigneClassement => ({
+  cle: 'a',
+  prenom: 'A',
+  nom: 'B.',
+  cartes: 10,
+  legendaires: 0,
+  echanges: 0,
+  moi: false,
+  photo: true,
+  ...o,
+});
 
 describe('montées et descentes du classement', () => {
-  it('le premier jour, pas de flèche', () => {
-    const s = majRangs({ ref: null, dernier: null }, '2026-11-27', { a: 1, b: 2 });
-    expect(evolution(s.ref, 'a', 1)).toBe(0);
+  it('compare la place en direct à celle de la photo du jour', () => {
+    expect(evolution(l({ avant_cartes: 4 }), 'cartes', 2)).toBe(2);
+    expect(evolution(l({ avant_cartes: 1 }), 'cartes', 3)).toBe(-2);
+    expect(evolution(l({ avant_echanges: 5 }), 'echanges', 5)).toBe(0);
   });
-  it('compare à la veille, même après plusieurs passages dans la journée', () => {
-    let s = majRangs({ ref: null, dernier: null }, '2026-11-27', { a: 1, b: 2, c: 3 });
-    s = majRangs(s, '2026-11-28', { a: 3, b: 1, c: 2 });
-    s = majRangs(s, '2026-11-28', { a: 3, b: 1, c: 2 });
-    expect(evolution(s.ref, 'b', 1)).toBe(1); // monte d'une place
-    expect(evolution(s.ref, 'a', 3)).toBe(-2); // descend de deux places
-    expect(evolution(s.ref, 'd', 4)).toBeNull(); // nouveau
+  it('nouveau venu, ou pas encore de photo', () => {
+    expect(evolution(l({ avant_cartes: null }), 'cartes', 7)).toBeNull();
+    expect(evolution(l({ photo: false }), 'cartes', 7)).toBe(0);
   });
 });

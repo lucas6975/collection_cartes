@@ -1,20 +1,10 @@
 import { ChargementUlysse, UlysseAttend } from '../components/ui/vivant';
 import { ArrowLeft, Repeat } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { Avatar, cx } from '../components/ui/primitives';
 import { CARDS } from '../content/cards';
-import {
-  avatarDe,
-  ecrireRangs,
-  evolution,
-  lireRangs,
-  majRangs,
-  trier,
-  useClassement,
-  type Tri,
-} from '../data/classement';
-import { aujourdhui } from '../domain/visitesSecurite';
+import { avatarDe, evolution, trier, useClassement, type Tri } from '../data/classement';
 import { useGame } from '../data/store';
 import { PodiumAnime } from '../components/classement/PodiumAnime';
 
@@ -48,16 +38,6 @@ export function Classement() {
   const max = Math.max(1, ...t.map((x) => (tri === 'cartes' ? x.cartes : x.echanges)));
   const manque = CARDS.length - progress.cards.length;
   // Montées / descentes depuis la veille (comme un classement de foot).
-  const rangs = Object.fromEntries(t.map((x) => [x.cle, x.rang]));
-  const vide = !t.length;
-  // Lecture simple (peu de joueurs) ; la référence de la veille ne bouge pas dans la journée.
-  const stock = vide ? null : majRangs(lireRangs(tri), aujourdhui(), rangs);
-  const cleRangs = JSON.stringify(rangs);
-  useEffect(() => {
-    if (cleRangs === '{}') return;
-    const r = JSON.parse(cleRangs) as Record<string, number>;
-    ecrireRangs(tri, majRangs(lireRangs(tri), aujourdhui(), r));
-  }, [tri, cleRangs]);
 
   return (
     <div className="mx-auto max-w-md pb-40">
@@ -140,7 +120,7 @@ export function Classement() {
                     >
                       {l.rang}
                     </span>
-                    <Evolution n={stock ? evolution(stock.ref, l.cle, l.rang) : 0} />
+                    <Evolution n={evolution(l, tri, l.rang)} />
                   </span>
                   <Avatar user={avatarDe(l)} size={34} />
                   <div className="min-w-0 flex-1">
@@ -176,7 +156,8 @@ export function Classement() {
         </>
       )}
       <p className="mt-3 text-center text-[11.5px] text-muted">
-        À égalité, le plus de légendaires passe devant. Tu peux masquer ton nom dans l’onglet Moi.
+        ▲ ▼ : places gagnées ou perdues depuis ce matin. À égalité, le plus de légendaires passe
+        devant. Tu peux masquer ton nom dans l’onglet Moi.
       </p>
 
       {manque > 0 && (
