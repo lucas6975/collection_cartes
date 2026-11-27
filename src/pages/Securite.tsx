@@ -388,10 +388,10 @@ export const LOGO: Record<Onglet, string> = {
 /** Illustration de fond de chaque carte et cadrage. */
 /** decale : la scène commence plus à droite (personnage à gauche dans l'image d'origine). */
 const FOND: Partial<Record<Onglet, { image: string; position: string; decale?: string }>> = {
-  accident: { image: 'securite/fond-accident.webp', position: '70% 30%' },
+  accident: { image: 'securite/fond-accident.webp', position: '50% 50%', decale: '47%' },
   sst: { image: 'securite/fond-sst.webp', position: '50% 50%', decale: '52%' },
   remontee: { image: 'securite/fond-risque.webp', position: '50% 50%', decale: '30%' },
-  urgences: { image: 'securite/fond-urgences.webp', position: '50% 50%', decale: '47%' },
+  urgences: { image: 'securite/fond-urgences.webp', position: '50% 50%' },
   evacuation: { image: 'securite/fond-evacuation.webp', position: '50% 35%', decale: '30%' },
   visites: { image: 'securite/fond-visites.webp', position: '50% 50%', decale: '30%' },
   eps: { image: 'securite/fond-eps.webp', position: '50% 50%', decale: '30%' },
@@ -430,10 +430,43 @@ function AnimCarte({ id }: { id: Onglet }) {
   const c = '#FFFFFF';
   if (id === 'accident')
     return (
-      <span className="pointer-events-none absolute inset-y-0 right-0 w-1/2" aria-hidden>
-        <span className="sc-gyro-r absolute -top-6 right-10 size-28 rounded-full bg-[#ff4d5e] blur-2xl" />
-        <span className="sc-gyro-b absolute -top-6 right-0 size-28 rounded-full bg-[#4d8dff] blur-2xl" />
-      </span>
+      <Calque largeur="53%" l={855} h={680}>
+        {/* Gyrophares de l'ambulance. */}
+        <circle
+          cx="705"
+          cy="88"
+          r="38"
+          fill="#3B82F6"
+          className="sc-gyro-b"
+          filter="url(#sc-flou)"
+        />
+        <circle
+          cx="775"
+          cy="88"
+          r="38"
+          fill="#EF4444"
+          className="sc-gyro-r"
+          filter="url(#sc-flou)"
+        />
+        <defs>
+          <filter id="sc-flou">
+            <feGaussianBlur stdDeviation="10" />
+          </filter>
+        </defs>
+        {/* Ondes radio du talkie-walkie. */}
+        {[40, 75, 110].map((r, i) => (
+          <path
+            key={r}
+            d={`M${655 + r * 0.26} ${160 - r * 0.97} A${r} ${r} 0 0 1 ${655 + r * 0.97} ${160 - r * 0.26}`}
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="12"
+            strokeLinecap="round"
+            className="sc-radio"
+            style={{ animationDelay: `${i * 0.25}s` }}
+          />
+        ))}
+      </Calque>
     );
   if (id === 'sst')
     return (
@@ -592,40 +625,19 @@ function AnimCarte({ id }: { id: Onglet }) {
     );
   if (id === 'urgences')
     return (
-      <Calque largeur="53%" l={855} h={680}>
-        {/* Gyrophares de l'ambulance. */}
-        <circle
-          cx="705"
-          cy="88"
-          r="38"
-          fill="#3B82F6"
-          className="sc-gyro-b"
-          filter="url(#sc-flou)"
-        />
-        <circle
-          cx="775"
-          cy="88"
-          r="38"
-          fill="#EF4444"
-          className="sc-gyro-r"
-          filter="url(#sc-flou)"
-        />
-        <defs>
-          <filter id="sc-flou">
-            <feGaussianBlur stdDeviation="10" />
-          </filter>
-        </defs>
-        {/* Ondes radio du talkie-walkie. */}
-        {[40, 75, 110].map((r, i) => (
-          <path
-            key={r}
-            d={`M${655 + r * 0.26} ${160 - r * 0.97} A${r} ${r} 0 0 1 ${655 + r * 0.97} ${160 - r * 0.26}`}
+      <Calque largeur="100%" l={900} h={362}>
+        {/* L'écran SOS est dessiné dans l'image ; ici, l'onde d'appel autour du bouton. */}
+        {[0, 0.8].map((d) => (
+          <circle
+            key={d}
+            cx="660"
+            cy="262"
+            r="40"
             fill="none"
             stroke="#FFFFFF"
-            strokeWidth="12"
-            strokeLinecap="round"
-            className="sc-radio"
-            style={{ animationDelay: `${i * 0.25}s` }}
+            strokeWidth="6"
+            className="sc-sos-onde"
+            style={{ animationDelay: `${d}s` }}
           />
         ))}
       </Calque>
