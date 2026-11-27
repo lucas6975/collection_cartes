@@ -11,8 +11,9 @@ N° | NOM | PRÉNOM | SOCIÉTÉ | ENTRÉE
 2 MARTIN Julie IMECA 08:01
 3 LEFÈVRE Victor ACME 08:15
 3 LEFÈVRE Victor ACME 08:15
-Total : 3`;
-    expect(extraireNoms(texte)).toEqual(['DUPONT JEAN', 'MARTIN JULIE', 'LEFEVRE VICTOR']);
+Total : 3
+LL LORS CARS PERE RT TTE NN EI`;
+    expect(extraireNoms(texte)).toEqual(['DUPONT JEAN', 'MARTIN JULIE', 'LEFEVRE VICTOR ACME']);
   });
 
   it('reconnaît la même personne malgré l’ordre, les accents et l’OCR', () => {
@@ -22,7 +23,12 @@ Total : 3`;
     expect(memeNom('DUP0NT Jean', 'Jean Dupont')).toBe(true); // 0 lu au lieu de O
     expect(memeNom('MARTlN Julie', 'Julie Martin')).toBe(true); // l au lieu de I
     expect(memeNom('BERNARD Jean Pierre', 'Jean Bernard')).toBe(true);
+    expect(memeNom('MARTIN Jute', 'Julie Martin')).toBe(true);
+    expect(memeNom('Visteur ROUSSEAU Carnalle', 'Camille Rousseau')).toBe(true);
+    expect(memeNom('INTERIM PLUS NGUYEN TRU LAN', 'Thi Lan Nguyen')).toBe(true);
+    expect(memeNom('IMECA B1021 MASMÉJAN Vincent 07:05', 'Vincent Masméjan')).toBe(true);
     expect(memeNom('DUPONT Jean', 'DUPONT Paul')).toBe(false);
+    expect(memeNom('DUPONT Jean', 'DURAND Jean')).toBe(false);
     expect(memeNom('MARTIN Julie', 'MARTINEZ Julien')).toBe(false);
   });
 

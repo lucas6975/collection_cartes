@@ -49,6 +49,42 @@ export function binariser(img: Image1): Image1 {
 }
 
 /**
+ * Noir et blanc « adaptatif » (méthode de Bradley) : chaque pixel est comparé à la moyenne de son
+ * voisinage, pas à un seuil unique. Une ombre ou un éclairage inégal sur la feuille ne noircit
+ * donc plus toute une zone.
+ */
+export function binariserAdaptatif(img: Image1, sensibilite = 0.15): Image1 {
+  const { px, w, h } = img;
+  const r = Math.max(8, Math.round(Math.max(w, h) / 48));
+  // Image intégrale : somme des pixels au-dessus et à gauche, pour des moyennes en O(1).
+  const integ = new Float64Array((w + 1) * (h + 1));
+  for (let y = 0; y < h; y++) {
+    let ligne = 0;
+    for (let x = 0; x < w; x++) {
+      ligne += px[y * w + x];
+      integ[(y + 1) * (w + 1) + x + 1] = integ[y * (w + 1) + x + 1] + ligne;
+    }
+  }
+  const out = new Uint8Array(w * h);
+  for (let y = 0; y < h; y++) {
+    const y0 = Math.max(0, y - r);
+    const y1 = Math.min(h, y + r + 1);
+    for (let x = 0; x < w; x++) {
+      const x0 = Math.max(0, x - r);
+      const x1 = Math.min(w, x + r + 1);
+      const somme =
+        integ[y1 * (w + 1) + x1] -
+        integ[y0 * (w + 1) + x1] -
+        integ[y1 * (w + 1) + x0] +
+        integ[y0 * (w + 1) + x0];
+      const moyenne = somme / ((x1 - x0) * (y1 - y0));
+      out[y * w + x] = px[y * w + x] < moyenne * (1 - sensibilite) ? 0 : 255;
+    }
+  }
+  return { px: out, w, h };
+}
+
+/**
  * Angle (en degrés) dont il faut tourner l'image pour que les lignes de texte soient
  * horizontales : celui qui rend le profil des lignes le plus « contrasté ». Calculé sur le centre
  * de la photo (les bords sombres autour de la feuille faussent le calcul).
@@ -158,7 +194,10 @@ export function transformer(img: Image1, degres: number, echelle: number): Image
  * effacés.
  */
 export function preparerPourOcr(gris: Image1): { image: Image1; angle: number } {
-  const angle = estimerAngle(binariser(gris));
+  const angle = estimerAngle(binariserAdaptatif(gris));
   const echelle = gris.w < 1800 ? Math.min(2, 2400 / gris.w) : 1;
-  return { image: effacerTraits(binariser(transformer(gris, angle, echelle))), angle };
+  return {
+    image: effacerTraits(binariserAdaptatif(transformer(gris, angle, echelle))),
+    angle,
+  };
 }

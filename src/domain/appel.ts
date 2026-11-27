@@ -44,6 +44,17 @@ const IGNORES = new Set(
     'n',
     'no',
     'num',
+    'arrivee',
+    'emargement',
+    'depart',
+    'edition',
+    'edite',
+    'imprime',
+    'heure',
+    'matricule',
+    'telephone',
+    'contact',
+    'motif',
     'personnes',
     'presentes',
     'present',
@@ -57,34 +68,45 @@ const IGNORES = new Set(
   ].map((m) => m.toUpperCase()),
 );
 
-/** Mots (lettres seulement, en majuscules sans accent) d'un nom. */
+/** Mots (lettres seulement, en majuscules sans accent) d'un nom ou d'une ligne lue. */
 export function mots(nom: string): string[] {
-  return (
-    sansAccent(nom)
-      .toUpperCase()
-      // Chiffres lus à la place de lettres au milieu d'un mot (« DUP0NT », « MART1N »).
-      .replace(/(?<=[A-Z])0|0(?=[A-Z])/g, 'O')
-      .replace(/(?<=[A-Z])1|1(?=[A-Z])/g, 'I')
-      .replace(/[^A-Z' -]/g, ' ')
-      .split(/[\s']+/)
-      .map((m) => m.replace(/^-+|-+$/g, ''))
-      .filter((m) => m.length >= 2 && !IGNORES.has(m))
-  );
+  const resultat: string[] = [];
+  for (const brut of sansAccent(nom)
+    .toUpperCase()
+    .split(/[\s|;,:/()[\]{}!?"*_=+<>.]+/)) {
+    if (!brut) continue;
+    const chiffres = (brut.match(/\d/g) ?? []).length;
+    const lettres = (brut.match(/[A-Z]/g) ?? []).length;
+    // Badge, heure, numéro (« B1021 », « 07:42 ») : on ignore. Un ou deux chiffres lus à la
+    // place de lettres dans un vrai mot (« DUP0NT », « MART1N ») : on les corrige.
+    if (chiffres && (lettres < 4 || chiffres / (chiffres + lettres) > 0.25)) continue;
+    const mot = brut
+      .replace(/0/g, 'O')
+      .replace(/1/g, 'I')
+      .replace(/[^A-Z'-]/g, '')
+      .split(/'/)
+      .map((m) => m.replace(/^-+|-+$/g, ''));
+    for (const m of mot) if (m.length >= 2 && !IGNORES.has(m)) resultat.push(m);
+  }
+  return resultat;
 }
 
 /**
- * Noms lus sur une liste (texte de l'OCR ou collé) : une personne par ligne, on garde les 2 ou 3
- * premiers mots en lettres (prénom et nom), on enlève numéros, heures, en-têtes et doublons.
+ * Lignes lues sur une liste (texte de l'OCR ou collé) : une personne par ligne. On garde tous
+ * les mots en lettres de la ligne (la société, le nom et le prénom, dans n'importe quel ordre) ;
+ * numéros, badges, heures, en-têtes, lignes parasites et doublons sont retirés.
  */
 export function extraireNoms(texte: string): string[] {
   const vus = new Set<string>();
   const noms: string[] = [];
   for (const ligne of texte.split(/\r?\n/)) {
-    const m = mots(ligne);
-    if (m.length < 2) continue;
-    // Prénom et nom : les 2 premiers mots (la société ou l'heure viennent après).
-    const nom = m.slice(0, 2).join(' ');
-    const cle = [...mots(nom)].sort().join(' ');
+    const m = mots(ligne).slice(0, 8);
+    // Au moins deux mots, dont un d'au moins 4 lettres : sinon c'est du bruit de lecture.
+    if (m.length < 2 || !m.some((x) => x.length >= 4)) continue;
+    // Trop de fragments de 2 lettres (« LL RT NN EI ») : bord de feuille ou tache, pas un nom.
+    if (m.filter((x) => x.length <= 2).length * 2 >= m.length) continue;
+    const nom = m.join(' ');
+    const cle = [...m].sort().join(' ');
     if (vus.has(cle)) continue;
     vus.add(cle);
     noms.push(nom);
@@ -107,14 +129,24 @@ function distance(a: string, b: string): number {
   return d[b.length];
 }
 
-/** Deux mots se ressemblent : 1 lettre d’écart, 2 si les deux mots font 7 lettres ou plus. */
+/** Très proches : 1 lettre d'écart, 2 si les deux mots font 7 lettres ou plus. */
 const proches = (a: string, b: string) =>
   a === b || distance(a, b) <= (Math.min(a.length, b.length) >= 7 ? 2 : 1);
 
 /**
- * Même personne ? Tous les mots du nom le plus court doivent avoir un mot proche dans l'autre
- * (l'ordre prénom / NOM et un 2ᵉ prénom ne comptent pas). Un prénom réduit à l'initiale
- * (« J. DUPONT ») suffit si le nom de famille correspond.
+ * Assez proches pour un mot mal lu par la caméra : même première lettre, longueur à une lettre
+ * près, et au plus ~45 % de lettres différentes (« JUTE » = JULIE, « CARNALLE » = CAMILLE).
+ */
+const ressemblants = (a: string, b: string) =>
+  proches(a, b) ||
+  (a[0] === b[0] &&
+    Math.abs(a.length - b.length) <= 1 &&
+    distance(a, b) <= Math.max(2, Math.floor(Math.max(a.length, b.length) * 0.45)));
+
+/**
+ * Même personne ? Chaque mot du nom le plus court doit ressembler à un mot de l'autre (l'ordre,
+ * la société sur la même ligne et un 2ᵉ prénom ne comptent pas), et au moins un mot (le nom de
+ * famille, en général) doit être très proche.
  */
 export function memeNom(a: string, b: string): boolean {
   const ma = mots(a);
@@ -122,12 +154,15 @@ export function memeNom(a: string, b: string): boolean {
   if (!ma.length || !mb.length) return false;
   const [court, long] = ma.length <= mb.length ? [ma, mb] : [mb, ma];
   const restants = [...long];
+  let solide = false;
   for (const m of court) {
-    const i = restants.findIndex((r) => proches(m, r));
+    let i = restants.findIndex((r) => proches(m, r));
+    if (i >= 0) solide ||= m.length >= 3;
+    else i = restants.findIndex((r) => ressemblants(m, r));
     if (i < 0) return false;
     restants.splice(i, 1);
   }
-  return true;
+  return solide;
 }
 
 export interface Comparaison<P> {
