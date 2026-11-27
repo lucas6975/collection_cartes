@@ -1,38 +1,10 @@
 import { Repeat } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
-import {
-  avatarDe,
-  pourTop,
-  trier,
-  useClassement,
-  type LigneClassement,
-} from '../../data/classement';
+import { pourTop, trier, useClassement } from '../../data/classement';
 import { useIdentite } from '../../data/identite';
 import { useGame } from '../../data/store';
-import { Avatar } from '../ui/primitives';
-
-const MEDAILLES = ['🥇', '🥈', '🥉'];
-
-function Podium({ l, place }: { l: LigneClassement; place: number }) {
-  const grand = place === 0;
-  return (
-    <div className="flex w-[31%] flex-col items-center gap-1.5 text-center">
-      <div className="relative">
-        <div className={grand ? 'rounded-full ring-[3px] ring-sun' : ''}>
-          <Avatar user={avatarDe(l)} size={grand ? 58 : 46} />
-        </div>
-        <span className="absolute -bottom-1.5 -right-1 text-base">{MEDAILLES[place]}</span>
-      </div>
-      <p className="w-full truncate text-[13px] font-bold text-navy-950">
-        {l.moi ? 'Toi' : `${l.prenom} ${l.nom}`}
-      </p>
-      <p className="font-display text-[15px] font-extrabold text-navy">
-        {l.cartes} <span className="font-sans text-[11px] font-semibold text-muted">cartes</span>
-      </p>
-    </div>
-  );
-}
+import { PodiumAnime } from './PodiumAnime';
 
 /** Accueil : top 3 des collectionneurs et ma place. */
 export function ClassementAccueil() {
@@ -57,7 +29,6 @@ export function ClassementAccueil() {
   const t = trier(lignes, 'cartes');
   const moi = t.find((x) => x.moi);
   const manque = pourTop(lignes);
-  const ordre = [t[1], t[0], t[2]];
 
   return (
     <motion.section
@@ -68,10 +39,8 @@ export function ClassementAccueil() {
       <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8a97ab]">
         Classement des collectionneurs
       </p>
-      <div className="mt-3.5 flex items-end justify-between px-1.5">
-        {ordre.map((l) => (
-          <Podium key={l.cle} l={l} place={t.indexOf(l)} />
-        ))}
+      <div className="mt-3">
+        <PodiumAnime top={t.slice(0, 3)} valeur={(l) => l.cartes} unite="cartes" />
       </div>
       <div className="my-3.5 h-px bg-line" />
       {moi ? (

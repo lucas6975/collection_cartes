@@ -6,6 +6,7 @@ import { Avatar, cx } from '../components/ui/primitives';
 import { CARDS } from '../content/cards';
 import { avatarDe, trier, useClassement, type Tri } from '../data/classement';
 import { useGame } from '../data/store';
+import { PodiumAnime } from '../components/classement/PodiumAnime';
 
 export function Classement() {
   const { lignes, erreur } = useClassement();
@@ -65,56 +66,68 @@ export function Classement() {
           texte="Ouvre ton pack du jour : tu seras le premier du classement !"
         />
       ) : (
-        <ul className="rounded-[22px] bg-white px-2 shadow-[0_1px_2px_rgba(11,35,71,.04),0_6px_20px_rgba(11,35,71,.06)]">
-          {t.map((l) => {
-            const v = tri === 'cartes' ? l.cartes : l.echanges;
-            return (
-              <li
-                key={l.cle}
-                className={cx(
-                  'flex items-center gap-3 border-b border-line px-2 py-2.5 last:border-0',
-                  l.moi && 'my-1 rounded-2xl border-0 bg-[#fffaf0]',
-                )}
-              >
-                <span
+        <>
+          {t.length >= 3 && (
+            <div className="mb-3">
+              <PodiumAnime
+                key={tri}
+                top={t.slice(0, 3)}
+                valeur={(l) => (tri === 'cartes' ? l.cartes : l.echanges)}
+                unite={tri === 'cartes' ? 'cartes' : 'échanges'}
+              />
+            </div>
+          )}
+          <ul className="rounded-[22px] bg-white px-2 shadow-[0_1px_2px_rgba(11,35,71,.04),0_6px_20px_rgba(11,35,71,.06)]">
+            {t.map((l) => {
+              const v = tri === 'cartes' ? l.cartes : l.echanges;
+              return (
+                <li
+                  key={l.cle}
                   className={cx(
-                    'w-6 text-center font-display text-sm font-extrabold',
-                    l.rang === 1 ? 'text-[#d4a017]' : 'text-[#8a97ab]',
+                    'flex items-center gap-3 border-b border-line px-2 py-2.5 last:border-0',
+                    l.moi && 'my-1 rounded-2xl border-0 bg-[#fffaf0]',
                   )}
                 >
-                  {l.rang}
-                </span>
-                <Avatar user={avatarDe(l)} size={34} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold text-navy-950">
-                    {l.moi ? 'Toi' : `${l.prenom} ${l.nom}`}
-                  </p>
-                  <p className="truncate text-[11.5px] text-[#8a97ab]">
-                    {tri === 'cartes'
-                      ? [
-                          l.legendaires
-                            ? `${l.legendaires} légendaire${l.legendaires > 1 ? 's' : ''}`
-                            : null,
-                          `🔁 ${l.echanges}`,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')
-                      : `${l.cartes} cartes`}
-                  </p>
-                  <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-line">
-                    <div
-                      className={cx('h-full rounded-full', l.moi ? 'bg-sun' : 'bg-navy')}
-                      style={{ width: `${(v / max) * 100}%` }}
-                    />
+                  <span
+                    className={cx(
+                      'w-6 text-center font-display text-sm font-extrabold',
+                      l.rang === 1 ? 'text-[#d4a017]' : 'text-[#8a97ab]',
+                    )}
+                  >
+                    {l.rang}
+                  </span>
+                  <Avatar user={avatarDe(l)} size={34} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-bold text-navy-950">
+                      {l.moi ? 'Toi' : `${l.prenom} ${l.nom}`}
+                    </p>
+                    <p className="truncate text-[11.5px] text-[#8a97ab]">
+                      {tri === 'cartes'
+                        ? [
+                            l.legendaires
+                              ? `${l.legendaires} légendaire${l.legendaires > 1 ? 's' : ''}`
+                              : null,
+                            `🔁 ${l.echanges}`,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')
+                        : `${l.cartes} cartes`}
+                    </p>
+                    <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-line">
+                      <div
+                        className={cx('h-full rounded-full', l.moi ? 'bg-sun' : 'bg-navy')}
+                        style={{ width: `${(v / max) * 100}%` }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <span className="min-w-7 text-right font-display text-base font-extrabold text-navy-950">
-                  {v}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
+                  <span className="min-w-7 text-right font-display text-base font-extrabold text-navy-950">
+                    {v}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
       <p className="mt-3 text-center text-[11.5px] text-muted">
         À égalité, le plus de légendaires passe devant. Tu peux masquer ton nom dans l’onglet Moi.

@@ -496,6 +496,43 @@
     translate: 0 -3px;
   }
 }
+.podium-rayons {
+  animation: podium-rayons 14s linear infinite;
+}
+@keyframes podium-rayons {
+  to {
+    rotate: 360deg;
+  }
+}
+.podium-confetti {
+  opacity: 0;
+  animation: podium-confetti 3s linear infinite;
+}
+@keyframes podium-confetti {
+  0% {
+    transform: translateY(-10px) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(240px) rotate(540deg);
+    opacity: 0;
+  }
+}
+.podium-reflet {
+  animation: podium-reflet 4s ease-in-out 1.6s infinite;
+}
+@keyframes podium-reflet {
+  0% {
+    transform: translateX(0);
+  }
+  35%,
+  100% {
+    transform: translateX(480%);
+  }
+}
 .pt-etincelle {
   opacity: 0;
   animation: pt-etincelle 1.9s ease-out infinite;
@@ -621,6 +658,9 @@
   .sc-feu,
   .sc-picto,
   .pt-flotte,
+  .podium-rayons,
+  .podium-confetti,
+  .podium-reflet,
   .pt-etincelle,
   .pt-reflet > span,
   .pt-appui,
