@@ -338,6 +338,7 @@ function SuiviDestinataires() {
         'EPS reçues',
         nouvelles ? `${nouvelles} cette semaine` : null,
       )}
+      {ligne('/securite/bilans', '📊', 'Bilans des évacuations', null)}
     </section>
   );
 }

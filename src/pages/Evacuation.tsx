@@ -9,8 +9,10 @@ import {
   Timer,
   Trash2,
   X,
+  ChevronRight,
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 import { renderSVG } from 'uqr';
 import { cx } from '../components/ui/primitives';
 import { ApiError, api, type SuiviEvacuation } from '../data/api';
@@ -103,6 +105,7 @@ function QrRassemblement({
 
 export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: string | null }) {
   const { identite } = useIdentite();
+  const navigate = useNavigate();
   const [vue, setVue] = useState<string | null>(null);
   const [suivi, setSuivi] = useState<SuiviEvacuation | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -154,7 +157,7 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
     if (!suivi?.evacuation || !confirm('Terminer l’évacuation ? Plus personne ne pourra scanner.'))
       return;
     await api.evacuationTerminer(suivi.evacuation.id, jeton, code);
-    setVue(suivi.evacuation.id);
+    navigate(`/securite/bilans/${suivi.evacuation.id}`);
   };
 
   if (erreur)
@@ -213,31 +216,20 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
           </p>
         </section>
 
-        {suivi.historique.length > 0 && (
-          <section className="panel p-4">
-            <p className="eyebrow mb-2">Évacuations et exercices passés</p>
-            <ul className="divide-y divide-line">
-              {suivi.historique.map((h) => (
-                <li key={h.id}>
-                  <button
-                    type="button"
-                    onClick={() => setVue(h.id)}
-                    className="flex w-full items-center justify-between gap-2 py-2.5 text-left text-sm"
-                  >
-                    <span className="font-semibold text-navy-950">
-                      {h.test ? '🧪 ' : '🚨 '}
-                      {dateHeure(h.debut)}
-                    </span>
-                    <span className="text-muted">
-                      {h.total} présent{h.total > 1 ? 's' : ''}
-                      {h.fin ? ` · ⏱ ${duree(h.debut, h.fin)}` : ' · en cours'} ›
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        <Link
+          to="/securite/bilans"
+          className="flex items-center gap-3 rounded-[20px] bg-[#0F172A] px-4 py-4 text-white shadow-soft"
+        >
+          <span className="text-2xl">📊</span>
+          <span className="min-w-0 flex-1">
+            <b className="block font-display text-base">Bilans des évacuations</b>
+            <span className="text-xs text-white/75">
+              {suivi.historique.filter((h) => h.fin).length} exercice(s) ou évacuation(s) terminé(s)
+              · statistiques détaillées
+            </span>
+          </span>
+          <ChevronRight size={20} />
+        </Link>
       </div>
     );
 

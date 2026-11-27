@@ -30,7 +30,12 @@ export function SecuriteShell() {
     { to: '/securite/urgences', label: 'Urgences', icon: Phone },
     { to: '/securite/remontee', label: 'Remontée', icon: TriangleAlert },
     { to: '/securite/eps', label: 'EPS', icon: MessagesSquare },
-    { to: '/securite/evacuation', label: 'Évacuation', icon: ShieldAlert },
+    {
+      to: '/securite/evacuation',
+      label: 'Évacuation',
+      icon: ShieldAlert,
+      actif: pathname === '/securite/evacuation' || pathname.startsWith('/securite/bilans'),
+    },
   ];
 
   return (

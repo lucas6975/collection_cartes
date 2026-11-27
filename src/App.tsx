@@ -30,6 +30,7 @@ import { Remontees } from './pages/Remontees';
 import { Rassemblement } from './pages/Rassemblement';
 import { Portail } from './pages/Portail';
 import { EpsRecues } from './pages/EpsRecues';
+import { BilansEvacuation } from './pages/BilansEvacuation';
 import { SecuriteShell } from './components/layout/SecuriteShell';
 import { PortailAuDemarrage } from './components/PortailAuDemarrage';
 
@@ -139,6 +140,8 @@ export function App() {
           <Route element={<SecuriteShell />}>
             <Route path="securite" element={<Securite />} />
             <Route path="securite/eps-recues" element={<EpsRecues />} />
+            <Route path="securite/bilans" element={<BilansEvacuation />} />
+            <Route path="securite/bilans/:id" element={<BilansEvacuation />} />
             <Route path="securite/:vue" element={<Securite />} />
             <Route path="remontees" element={<Remontees />} />
           </Route>
