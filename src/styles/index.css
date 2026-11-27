@@ -239,7 +239,92 @@
     transform: scale(1.25) rotate(12deg);
   }
 }
+.sc-feu {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: sc-feu 0.55s ease-in-out infinite alternate;
+}
+.sc-feu-2 {
+  animation-duration: 0.7s;
+  animation-delay: 0.2s;
+}
+@keyframes sc-feu {
+  from {
+    transform: scale(0.92, 0.85) skewX(-3deg);
+  }
+  to {
+    transform: scale(1.05, 1.12) skewX(4deg);
+  }
+}
+.sc-mousse {
+  opacity: 0;
+  animation: sc-mousse 1.4s ease-out infinite;
+}
+@keyframes sc-mousse {
+  0% {
+    transform: translate(0, 0) scale(0.5);
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-92px, -4px) scale(1.9);
+    opacity: 0;
+  }
+}
+.sc-coche {
+  stroke-dasharray: 22;
+  stroke-dashoffset: 22;
+  animation: sc-coche 2.4s ease-out infinite;
+}
+@keyframes sc-coche {
+  0%,
+  8% {
+    stroke-dashoffset: 22;
+  }
+  25%,
+  85% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 22;
+  }
+}
+.sc-loupe {
+  animation: sc-loupe 2.4s ease-in-out infinite;
+}
+@keyframes sc-loupe {
+  0%,
+  100% {
+    transform: translate(-30px, -6px);
+  }
+  33% {
+    transform: translate(-26px, 14px);
+  }
+  66% {
+    transform: translate(-22px, 34px);
+  }
+}
+.sc-flotte {
+  transform-origin: 50% 100%;
+  animation: sc-flotte 2.6s ease-in-out infinite;
+}
+@keyframes sc-flotte {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-1.5deg);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
+  .sc-feu,
+  .sc-mousse,
+  .sc-coche,
+  .sc-loupe,
+  .sc-flotte,
   .sc-gyro-r,
   .sc-gyro-b,
   .sc-bande,

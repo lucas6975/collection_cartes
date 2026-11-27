@@ -444,6 +444,98 @@ function AnimCarte({ id }: { id: Onglet }) {
         />
       </svg>
     );
+  if (id === 'evacuation')
+    return (
+      <svg
+        viewBox="0 0 140 90"
+        className="pointer-events-none absolute right-[104px] bottom-0 w-[132px]"
+        aria-hidden
+      >
+        {/* Flammes qui vacillent, puis s'éteignent sous la mousse. */}
+        <g className="sc-feu">
+          <path
+            d="M14 88 C2 72 12 58 20 46 C22 60 30 62 28 48 C40 60 42 78 34 88 Z"
+            fill="#FDBA2D"
+          />
+          <path
+            d="M18 88 C12 78 18 68 22 60 C25 70 30 70 29 62 C35 72 34 82 30 88 Z"
+            fill="#FEF3C7"
+          />
+        </g>
+        <g className="sc-feu sc-feu-2">
+          <path
+            d="M34 88 C26 76 32 66 38 58 C40 68 46 68 45 60 C53 70 52 82 48 88 Z"
+            fill="#F97316"
+          />
+          <path
+            d="M37 88 C34 82 37 76 40 72 C42 78 45 78 45 74 C48 80 47 85 45 88 Z"
+            fill="#FEF3C7"
+          />
+        </g>
+        {/* Jet de l'extincteur : nuages de mousse qui partent de la lance. */}
+        {[0, 0.22, 0.44, 0.66, 0.88, 1.1].map((d, i) => (
+          <circle
+            key={d}
+            cx="130"
+            cy={60 + (i % 3) * 3}
+            r={8 + (i % 2) * 3}
+            fill="#FFFFFF"
+            className="sc-mousse"
+            style={{ animationDelay: `${d}s` }}
+          />
+        ))}
+      </svg>
+    );
+  if (id === 'visites')
+    return (
+      <svg
+        viewBox="0 0 110 110"
+        className="pointer-events-none absolute right-[96px] bottom-2 w-[96px]"
+        aria-hidden
+      >
+        <g transform="rotate(-8 50 58)">
+          <rect
+            x="18"
+            y="18"
+            width="64"
+            height="84"
+            rx="8"
+            fill="#FFFFFF"
+            stroke="#713F12"
+            strokeWidth="3"
+          />
+          <rect x="36" y="12" width="28" height="12" rx="4" fill="#0F172A" />
+          {[40, 60, 80].map((y, i) => (
+            <g key={y}>
+              <path
+                d={`M28 ${y} l5 5 l9 -10`}
+                fill="none"
+                stroke="#16A34A"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="sc-coche"
+                style={{ animationDelay: `${i * 0.6}s` }}
+              />
+              <rect x="48" y={y - 2} width="24" height="5" rx="2.5" fill="#CBD5E1" />
+            </g>
+          ))}
+        </g>
+        {/* Loupe qui inspecte la check-list. */}
+        <g className="sc-loupe">
+          <circle
+            cx="78"
+            cy="44"
+            r="13"
+            fill="#FEF9C3"
+            fillOpacity="0.55"
+            stroke="#0F172A"
+            strokeWidth="4"
+          />
+          <path d="M87 54 L100 68" stroke="#0F172A" strokeWidth="6" strokeLinecap="round" />
+        </g>
+      </svg>
+    );
   if (id === 'remontee')
     return (
       <span className="sc-bande pointer-events-none absolute inset-x-0 bottom-0 h-2" aria-hidden />
@@ -492,7 +584,10 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
               <img
                 src={`${BASE}${c.id === 'evacuation' ? 'securite/evacuation-carte.webp' : 'mascotte.webp'}`}
                 alt=""
-                className="absolute -right-2 -bottom-3 h-[128px] w-auto"
+                className={cx(
+                  'absolute -right-2 -bottom-3 h-[128px] w-auto',
+                  (c.id === 'evacuation' || c.id === 'visites') && 'sc-flotte',
+                )}
               />
             )}
             <span
