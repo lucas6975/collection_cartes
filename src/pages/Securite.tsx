@@ -386,11 +386,13 @@ export const LOGO: Record<Onglet, string> = {
 };
 
 /** Illustration de fond de chaque carte et cadrage. */
-const FOND: Partial<Record<Onglet, { image: string; position: string }>> = {
+/** decale : la scène commence plus à droite (personnage à gauche dans l'image d'origine). */
+const FOND: Partial<Record<Onglet, { image: string; position: string; decale?: string }>> = {
   accident: { image: 'securite/fond-accident.webp', position: '70% 30%' },
   sst: { image: 'securite/fond-sst.webp', position: '75% 35%' },
   remontee: { image: 'securite/fond-risque.webp', position: '85% 60%' },
   urgences: { image: 'securite/fond-urgences.webp', position: '70% 50%' },
+  evacuation: { image: 'securite/fond-evacuation.webp', position: '50% 35%', decale: '30%' },
 };
 
 /** Petite animation propre à chaque carte. */
@@ -446,45 +448,25 @@ function AnimCarte({ id }: { id: Onglet }) {
     );
   if (id === 'evacuation')
     return (
-      <svg
-        viewBox="0 0 140 90"
-        className="pointer-events-none absolute right-[104px] bottom-0 w-[132px]"
-        aria-hidden
-      >
-        {/* Flammes qui vacillent, puis s'éteignent sous la mousse. */}
-        <g className="sc-feu">
-          <path
-            d="M14 88 C2 72 12 58 20 46 C22 60 30 62 28 48 C40 60 42 78 34 88 Z"
-            fill="#FDBA2D"
-          />
-          <path
-            d="M18 88 C12 78 18 68 22 60 C25 70 30 70 29 62 C35 72 34 82 30 88 Z"
-            fill="#FEF3C7"
-          />
-        </g>
-        <g className="sc-feu sc-feu-2">
-          <path
-            d="M34 88 C26 76 32 66 38 58 C40 68 46 68 45 60 C53 70 52 82 48 88 Z"
-            fill="#F97316"
-          />
-          <path
-            d="M37 88 C34 82 37 76 40 72 C42 78 45 78 45 74 C48 80 47 85 45 88 Z"
-            fill="#FEF3C7"
-          />
-        </g>
-        {/* Jet de l'extincteur : nuages de mousse qui partent de la lance. */}
-        {[0, 0.22, 0.44, 0.66, 0.88, 1.1].map((d, i) => (
-          <circle
+      <span className="pointer-events-none absolute inset-0" aria-hidden>
+        {/* Le feu vit : lueur qui pulse et étincelles qui montent. */}
+        <span className="sc-lueur absolute -top-6 -right-10 h-[150%] w-[38%] rounded-full bg-[#FF9A1F] blur-2xl" />
+        {[0, 0.5, 1, 1.5, 2].map((d, i) => (
+          <span
             key={d}
-            cx="130"
-            cy={60 + (i % 3) * 3}
-            r={8 + (i % 2) * 3}
-            fill="#FFFFFF"
-            className="sc-mousse"
-            style={{ animationDelay: `${d}s` }}
+            className="sc-etincelle absolute bottom-3 size-1.5 rounded-full bg-[#FFE08A]"
+            style={{ right: `${4 + i * 4}%`, animationDelay: `${d}s` }}
           />
         ))}
-      </svg>
+        {/* La mousse de l'extincteur qui part de la lance vers le feu. */}
+        {[0, 0.3, 0.6, 0.9].map((d, i) => (
+          <span
+            key={d}
+            className="sc-jet absolute size-5 rounded-full bg-white/90 blur-[2px]"
+            style={{ left: '74%', top: `${58 + (i % 2) * 6}%`, animationDelay: `${d}s` }}
+          />
+        ))}
+      </span>
     );
   if (id === 'visites')
     return (
@@ -577,8 +559,11 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
               <img
                 src={`${BASE}${f.image}`}
                 alt=""
-                className="absolute inset-0 size-full object-cover"
-                style={{ objectPosition: f.position }}
+                className="absolute inset-y-0 right-0 h-full object-cover"
+                style={{
+                  objectPosition: f.position,
+                  width: f.decale ? `calc(100% - ${f.decale})` : '100%',
+                }}
               />
             ) : (
               <img

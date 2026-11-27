@@ -306,6 +306,45 @@
     transform: translate(-22px, 34px);
   }
 }
+.sc-lueur {
+  animation: sc-lueur 0.9s ease-in-out infinite alternate;
+}
+@keyframes sc-lueur {
+  from {
+    opacity: 0.15;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+.sc-etincelle {
+  opacity: 0;
+  animation: sc-etincelle 2.5s ease-out infinite;
+}
+@keyframes sc-etincelle {
+  0% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-14px, -90px);
+    opacity: 0;
+  }
+}
+.sc-jet {
+  opacity: 0;
+  animation: sc-jet 1.2s ease-out infinite;
+}
+@keyframes sc-jet {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(48px, 6px) scale(2.2);
+    opacity: 0;
+  }
+}
 .sc-flotte {
   transform-origin: 50% 100%;
   animation: sc-flotte 2.6s ease-in-out infinite;
@@ -321,6 +360,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .sc-feu,
+  .sc-lueur,
+  .sc-etincelle,
+  .sc-jet,
   .sc-mousse,
   .sc-coche,
   .sc-loupe,
