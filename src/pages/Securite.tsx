@@ -565,28 +565,20 @@ function AnimCarte({ id }: { id: Onglet }) {
   if (id === 'urgences')
     return (
       <Calque largeur="100%" l={900} h={362}>
-        {/* L'écran du téléphone devient un écran d'appel d'urgence. */}
-        <rect x="622" y="10" width="70" height="18" rx="9" fill="#0F172A" />
-        <text
-          x="712"
-          y="105"
-          textAnchor="middle"
-          fontSize="60"
-          fontWeight="900"
-          fill="#DC2626"
-          fontFamily="system-ui, sans-serif"
-        >
-          SOS
-        </text>
-        <circle cx="716" cy="250" r="40" fill="#DC2626" className="sc-sos-onde" />
-        <circle cx="716" cy="250" r="40" fill="#DC2626" />
-        <g transform="translate(2 -43)">
-          <path
-            d="M694 272c3-3 8-3 10 1l5 9c2 3 1 6-2 8l-4 3c3 7 9 13 16 16l3-4c2-3 5-4 8-2l9 5c4 2 4 7 1 10l-5 5c-4 4-10 5-15 3-17-7-30-20-37-37-2-5-1-11 3-15z"
-            fill="#FFFFFF"
-            className="sc-sonne"
+        {/* L'écran SOS est dessiné dans l'image ; ici, l'onde d'appel autour du bouton. */}
+        {[0, 0.8].map((d) => (
+          <circle
+            key={d}
+            cx="660"
+            cy="262"
+            r="40"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="6"
+            className="sc-sos-onde"
+            style={{ animationDelay: `${d}s` }}
           />
-        </g>
+        ))}
       </Calque>
     );
   if (id === 'remontee')
