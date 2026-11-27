@@ -26,7 +26,8 @@ export interface EcartVisite {
   id: string;
   numero: number;
   zone: string | null;
-  description: string;
+  libelle: string;
+  description: string | null;
   photo: boolean;
   statut: 'a_traiter' | 'traite';
   cree_par: string | null;
@@ -334,13 +335,21 @@ export const api = {
   visiteEcartPhoto: (ecart: string, jeton: string | null, code: string | null) =>
     rpc<string | null>('visite_ecart_photo', { p_ecart: ecart, p_jeton: jeton, p_code: code }),
   visiteEcartAjouter: (
-    e: { visite: string; zone: string; description: string; photo: string | null; par: string },
+    e: {
+      visite: string;
+      zone: string;
+      libelle: string;
+      description: string;
+      photo: string | null;
+      par: string;
+    },
     jeton: string | null,
     code: string | null,
   ) =>
     rpc<number>('visite_ecart_ajouter', {
       p_visite: e.visite,
       p_zone: e.zone,
+      p_libelle: e.libelle,
       p_description: e.description,
       p_photo: e.photo,
       p_par: e.par,

@@ -570,6 +570,7 @@ function Ecarts({
   const [form, setForm] = useState(false);
   const [photo, setPhoto] = useState<string | null>(null);
   const [zone, setZone] = useState('');
+  const [libelle, setLibelle] = useState('');
   const [description, setDescription] = useState('');
   const [occupe, setOccupe] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -596,6 +597,7 @@ function Ecarts({
         {
           visite: visite.id,
           zone,
+          libelle: libelle.trim(),
           description: description.trim(),
           photo,
           par: identite ? `${identite.prenom} ${identite.nom}` : '',
@@ -605,6 +607,7 @@ function Ecarts({
       );
       setForm(false);
       setPhoto(null);
+      setLibelle('');
       setDescription('');
       charger();
       onChange();
@@ -655,28 +658,21 @@ function Ecarts({
           }}
           className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#DC2626] text-base font-extrabold text-white shadow-soft"
         >
-          <Camera size={22} /> Relever l’écart n°{prochain}
+          <Plus size={22} /> Relever l’écart n°{prochain}
         </button>
       ) : (
         <section className="space-y-3 rounded-[24px] bg-white p-4 shadow-soft">
           <p className="font-display text-lg font-extrabold text-navy-950">Écart n°{prochain}</p>
-          <label className="relative grid min-h-40 cursor-pointer place-items-center overflow-hidden rounded-2xl border-2 border-dashed border-navy-950/20 bg-[#F8FAFC]">
-            {photo ? (
-              <img src={photo} alt="Photo de l’écart" className="max-h-72 w-full object-contain" />
-            ) : (
-              <span className="flex flex-col items-center gap-1 text-sm font-bold text-navy-950">
-                <Camera size={30} /> Prendre la photo
-              </span>
-            )}
+          <label className="block">
+            <span className="text-sm font-bold text-navy-950">
+              Libellé de l’écart <span className="text-[#DC2626]">*</span>
+            </span>
             <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="absolute inset-0 opacity-0"
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                if (f) setPhoto(await compresser(f));
-              }}
+              value={libelle}
+              onChange={(e) => setLibelle(e.target.value)}
+              maxLength={120}
+              placeholder="Ex. : Allée piétonne encombrée"
+              className="mt-1 h-11 w-full rounded-xl border border-black/10 px-3 text-[15px] font-semibold"
             />
           </label>
           <label className="block">
@@ -693,14 +689,36 @@ function Ecarts({
             </select>
           </label>
           <label className="block">
-            <span className="text-sm font-bold text-navy-950">Description de l’écart</span>
+            <span className="text-sm font-bold text-navy-950">
+              Description <span className="font-semibold text-muted">(détails, facultatif)</span>
+            </span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               maxLength={1000}
-              placeholder="Ex. : palette en travers de l’allée piétonne"
+              placeholder="Ex. : palette posée devant l’armoire électrique, accès bloqué depuis ce matin"
               className="mt-1 w-full rounded-xl border border-black/10 p-3 text-[15px]"
+            />
+          </label>
+          <label className="relative grid min-h-28 cursor-pointer place-items-center overflow-hidden rounded-2xl border-2 border-dashed border-navy-950/20 bg-[#F8FAFC]">
+            {photo ? (
+              <img src={photo} alt="Photo de l’écart" className="max-h-72 w-full object-contain" />
+            ) : (
+              <span className="flex flex-col items-center gap-1 text-sm font-bold text-navy-950">
+                <Camera size={30} /> Ajouter une photo
+                <span className="text-xs font-semibold text-muted">Facultatif</span>
+              </span>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="absolute inset-0 opacity-0"
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (f) setPhoto(await compresser(f));
+              }}
             />
           </label>
           {erreur && <p className="text-sm font-semibold text-red-700">{erreur}</p>}
@@ -717,7 +735,7 @@ function Ecarts({
             </button>
             <button
               type="button"
-              disabled={occupe || !description.trim()}
+              disabled={occupe || !libelle.trim()}
               onClick={() => void enregistrer()}
               className="h-12 flex-[2] rounded-xl bg-[#0F172A] text-sm font-extrabold text-white disabled:opacity-40"
             >
@@ -777,28 +795,38 @@ function LigneEcart({
   const traite = e.statut === 'traite';
   return (
     <article className="flex gap-3 rounded-[22px] bg-white p-3 shadow-soft">
-      <button
-        type="button"
-        onClick={() => photo && setGrand(true)}
-        className="relative size-24 shrink-0 overflow-hidden rounded-2xl bg-[#F1F5F9]"
-      >
-        {photo ? (
-          <img src={photo} alt="" className="size-full object-cover" />
-        ) : (
-          <Camera size={24} className="m-auto text-muted" />
-        )}
-        <span className="absolute top-1 left-1 rounded-full bg-[#DC2626] px-2 py-0.5 text-xs font-extrabold text-white">
-          n°{e.numero}
+      {e.photo ? (
+        <button
+          type="button"
+          onClick={() => photo && setGrand(true)}
+          aria-label={`Voir la photo de l’écart n°${e.numero}`}
+          className="relative size-24 shrink-0 overflow-hidden rounded-2xl bg-[#F1F5F9]"
+        >
+          {photo ? (
+            <img src={photo} alt="" className="size-full object-cover" />
+          ) : (
+            <Camera size={24} className="m-auto text-muted" />
+          )}
+          <span className="absolute top-1 left-1 rounded-full bg-[#DC2626] px-2 py-0.5 text-xs font-extrabold text-white">
+            n°{e.numero}
+          </span>
+        </button>
+      ) : (
+        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[#DC2626] font-display text-lg font-extrabold text-white">
+          {e.numero}
         </span>
-      </button>
+      )}
       <div className="min-w-0 flex-1">
-        <b className="block text-[15px] text-navy-950">Écart n°{e.numero}</b>
+        <span className="block text-xs font-extrabold text-[#DC2626]">Écart n°{e.numero}</span>
+        <b className="block text-[15px] leading-snug break-words text-navy-950">{e.libelle}</b>
         {e.zone && (
           <span className="flex items-center gap-1 text-xs font-bold text-[#A16207]">
             <MapPin size={12} /> {e.zone}
           </span>
         )}
-        <p className="mt-1 text-sm break-words text-navy-950">{e.description}</p>
+        {e.description && (
+          <p className="mt-1 text-sm break-words text-navy-950/80">{e.description}</p>
+        )}
         {e.cree_par && <p className="text-xs text-muted">Relevé par {e.cree_par}</p>}
         <div className="mt-2 flex gap-2">
           <button
