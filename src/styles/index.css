@@ -466,6 +466,24 @@
     opacity: 0;
   }
 }
+.sc-gyro-fort-r {
+  animation: sc-gyro-fort 0.9s steps(1) infinite;
+}
+.sc-gyro-fort-b {
+  animation: sc-gyro-fort 0.9s steps(1) 0.45s infinite;
+}
+@keyframes sc-gyro-fort {
+  0% {
+    opacity: 0.95;
+  }
+  25% {
+    opacity: 0.25;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
 .sc-picto {
   opacity: 0;
   animation: sc-picto 2.8s ease-out infinite;
@@ -544,6 +562,8 @@
 @media (prefers-reduced-motion: reduce) {
   .sc-feu,
   .sc-picto,
+  .sc-gyro-fort-r,
+  .sc-gyro-fort-b,
   .sc-appui,
   .sc-impact,
   .sc-radio,

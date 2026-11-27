@@ -430,43 +430,28 @@ function AnimCarte({ id }: { id: Onglet }) {
   const c = '#FFFFFF';
   if (id === 'accident')
     return (
-      <Calque largeur="53%" l={855} h={680}>
-        {/* Gyrophares de l'ambulance. */}
-        <circle
-          cx="705"
-          cy="88"
-          r="38"
-          fill="#3B82F6"
-          className="sc-gyro-b"
-          filter="url(#sc-flou)"
-        />
-        <circle
-          cx="775"
-          cy="88"
-          r="38"
-          fill="#EF4444"
-          className="sc-gyro-r"
-          filter="url(#sc-flou)"
-        />
-        <defs>
-          <filter id="sc-flou">
-            <feGaussianBlur stdDeviation="10" />
-          </filter>
-        </defs>
-        {/* Ondes radio du talkie-walkie. */}
-        {[40, 75, 110].map((r, i) => (
-          <path
-            key={r}
-            d={`M${655 + r * 0.26} ${160 - r * 0.97} A${r} ${r} 0 0 1 ${655 + r * 0.97} ${160 - r * 0.26}`}
-            fill="none"
-            stroke="#FFFFFF"
-            strokeWidth="12"
-            strokeLinecap="round"
-            className="sc-radio"
-            style={{ animationDelay: `${i * 0.25}s` }}
-          />
-        ))}
-      </Calque>
+      <>
+        {/* Gyrophares : grands éclats rouge et bleu qui alternent, comme sur l'ancienne carte. */}
+        <span className="pointer-events-none absolute inset-y-0 right-0 w-1/2" aria-hidden>
+          <span className="sc-gyro-fort-r absolute inset-y-0 right-0 w-[34%] bg-gradient-to-l from-[#ff2e45] via-[#ff2e45]/60 to-transparent mix-blend-screen" />
+          <span className="sc-gyro-fort-b absolute inset-y-0 right-0 w-[34%] bg-gradient-to-l from-[#2e7bff] via-[#2e7bff]/60 to-transparent mix-blend-screen" />
+        </span>
+        <Calque largeur="53%" l={855} h={680}>
+          {/* Ondes radio du talkie-walkie : Ulysse appelle les secours. */}
+          {[45, 85, 125].map((r, i) => (
+            <path
+              key={r}
+              d={`M${655 + r * 0.26} ${160 - r * 0.97} A${r} ${r} 0 0 1 ${655 + r * 0.97} ${160 - r * 0.26}`}
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="18"
+              strokeLinecap="round"
+              className="sc-radio"
+              style={{ animationDelay: `${i * 0.25}s` }}
+            />
+          ))}
+        </Calque>
+      </>
     );
   if (id === 'sst')
     return (
