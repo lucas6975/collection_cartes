@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ArrowRight,
   BookUser,
+  ClipboardCheck,
   ChevronLeft,
   HeartPulse,
   MapPin,
@@ -26,8 +27,9 @@ import { useIdentite } from '../data/identite';
 import { COULEUR_EPS, OngletEps } from './Eps';
 import { epsDeLaSemaine } from '../domain/epsRecap';
 import { COULEUR_EVACUATION, OngletEvacuation } from './Evacuation';
+import { COULEUR_VISITES, OngletVisites } from './Visites';
 
-type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences' | 'eps' | 'evacuation';
+type Onglet = 'sst' | 'remontee' | 'accident' | 'urgences' | 'eps' | 'evacuation' | 'visites';
 
 const BASE = import.meta.env.BASE_URL;
 const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
@@ -53,6 +55,7 @@ const COULEUR: Record<Onglet, { fond: string; vif: string; doux: string }> = {
   },
   eps: COULEUR_EPS,
   evacuation: COULEUR_EVACUATION,
+  visites: COULEUR_VISITES,
 };
 
 /** Bandeau illustré en haut de chaque onglet. */
@@ -207,6 +210,12 @@ const CARTES: {
     sous: 'Recensement au point de rassemblement',
     icone: ShieldAlert,
   },
+  {
+    id: 'visites',
+    titre: 'Visite sécurité',
+    sous: 'Règles, inscriptions et écarts',
+    icone: ClipboardCheck,
+  },
 ];
 
 const TITRES: Record<Onglet, string> = {
@@ -216,9 +225,18 @@ const TITRES: Record<Onglet, string> = {
   urgences: 'Numéros d’urgence',
   eps: 'EPS',
   evacuation: 'Évacuation',
+  visites: 'Visite sécurité',
 };
 
-const ONGLETS: Onglet[] = ['accident', 'sst', 'remontee', 'urgences', 'eps', 'evacuation'];
+const ONGLETS: Onglet[] = [
+  'accident',
+  'sst',
+  'remontee',
+  'urgences',
+  'eps',
+  'evacuation',
+  'visites',
+];
 
 /** Espace Sécurité : l'accueil (bandes) ou une rubrique, selon l'adresse (#/securite/eps…). */
 export function Securite() {
@@ -292,6 +310,7 @@ export function Securite() {
         {vue === 'evacuation' && (
           <OngletEvacuation code={codeAdmin} jeton={identite?.jeton ?? null} />
         )}
+        {vue === 'visites' && <OngletVisites code={codeAdmin} jeton={identite?.jeton ?? null} />}
       </motion.div>
     </div>
   );
@@ -352,6 +371,7 @@ export const PASTEL: Record<Onglet, { fond: string; bord: string; texte: string;
     urgences: { fond: '#5A45C2', bord: '#4A37A6', texte: '#FFFFFF', accent: '#2F2178' },
     eps: { fond: '#14918B', bord: '#0F7F7A', texte: '#FFFFFF', accent: '#08403E' },
     evacuation: { fond: '#E2471F', bord: '#C2410C', texte: '#FFFFFF', accent: '#7F1D1D' },
+    visites: { fond: '#CA8A04', bord: '#A16207', texte: '#FFFFFF', accent: '#713F12' },
   };
 
 /** Ulysse en situation, pour chaque rubrique (illustrations officielles). */
@@ -362,6 +382,7 @@ export const LOGO: Record<Onglet, string> = {
   urgences: 'securite/urgences.webp',
   eps: 'mascotte.webp',
   evacuation: 'securite/evacuation.webp',
+  visites: 'mascotte.webp',
 };
 
 /** Illustration de fond de chaque carte et cadrage. */

@@ -506,6 +506,71 @@ async function prevenirEps(db: Base) {
   return total;
 }
 
+/**
+ * Rappels des visites sécurité (supabase/maj-visites-securite.sql) : la veille (appel de
+ * l'après-midi) et le matin du jour J, uniquement sur les téléphones des personnes inscrites
+ * à la visite (et reliées à l'appli). Chaque inscription n'est prévenue qu'une fois par rappel.
+ */
+async function prevenirVisites(db: Base, m: MomentParis) {
+  const iso = (decalage: number) =>
+    new Date(Date.UTC(m.annee, m.mois - 1, m.jour + decalage)).toISOString().slice(0, 10);
+  const passes: {
+    date: string;
+    colonne: 'rappel_veille_le' | 'rappel_jour_le';
+    veille: boolean;
+  }[] = [];
+  if (m.heure >= 12) passes.push({ date: iso(1), colonne: 'rappel_veille_le', veille: true });
+  if (m.heure >= 6 && m.heure < 13)
+    passes.push({ date: iso(0), colonne: 'rappel_jour_le', veille: false });
+  let total = 0;
+  for (const p of passes) {
+    const { data: visite } = await db
+      .from('visites_securite')
+      .select('id, horaire, zones')
+      .eq('date_visite', p.date)
+      .maybeSingle();
+    if (!visite) continue;
+    const { data: inscrits } = await db
+      .from('visite_secu_inscriptions')
+      .select('id, participant_id')
+      .eq('visite_id', visite.id)
+      .is(p.colonne, null);
+    if (!inscrits?.length) continue;
+    const zones = ((visite.zones ?? []) as { zones: string }[]).map((z) => z.zones).join(' · ');
+    const msg = JSON.stringify({
+      title: p.veille ? '🦺 Visite sécurité demain' : '🦺 Visite sécurité aujourd’hui',
+      body: `${visite.horaire} · RDV guichet magasin PDR · Gilet, chaussures de sécurité, bouchons d’oreille.${zones ? ` Zones : ${zones}` : ''}`.slice(
+        0,
+        240,
+      ),
+      url: './#/securite/visites',
+      tag: `visite-${p.date}-${p.veille ? 'veille' : 'jour'}`,
+    });
+    const personnes = [
+      ...new Set(
+        (inscrits as { participant_id: string | null }[])
+          .map((i) => i.participant_id)
+          .filter((x): x is string => Boolean(x)),
+      ),
+    ];
+    if (personnes.length) {
+      const { data: abonnes } = await db
+        .from('rappels_abonnes')
+        .select('endpoint, p256dh, auth')
+        .in('participant_id', personnes);
+      if (abonnes?.length) total += (await envoyerA(db, abonnes as Abonne[], msg)).envoyes;
+    }
+    await db
+      .from('visite_secu_inscriptions')
+      .update({ [p.colonne]: new Date().toISOString() })
+      .in(
+        'id',
+        (inscrits as { id: string }[]).map((i) => i.id),
+      );
+  }
+  return total;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
   const m = momentParis(new Date());
@@ -605,6 +670,10 @@ Deno.serve(async (req) => {
   // EPS enregistrées dans l'appli (appel dédié juste après chacune).
   const eps = await prevenirEps(db);
   if (corps?.eps) return repondre({ eps });
+
+  // Visites sécurité : rappel la veille et le jour J aux seuls inscrits.
+  const visites = await prevenirVisites(db, m);
+  if (corps?.visites) return repondre({ visites });
 
   // Personnes tirées au sort à prévenir (à chaque appel ; appel dédié juste après un tirage).
   const gagnants = await prevenirGagnants(db, m);

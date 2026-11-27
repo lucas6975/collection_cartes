@@ -5,6 +5,34 @@ import type { LigneClassement } from './classement';
 import type { SuiviPacks } from './packsAdmin';
 import type { ChiffresVisites } from './visites';
 
+export type RoleVisite = 'ep' | 'salarie' | 'prestataire' | 'codir';
+export interface InscritVisite {
+  id: string;
+  role: RoleVisite;
+  nom: string;
+  /** Relié à un compte Team Ulysse (reçoit les rappels). */
+  appli: boolean;
+}
+export interface VisiteSecurite {
+  id: string;
+  date: string;
+  horaire: string;
+  zones: { pilote: string; zones: string }[];
+  inscrits: InscritVisite[];
+  ecarts: number;
+  ecarts_a_traiter: number;
+}
+export interface EcartVisite {
+  id: string;
+  numero: number;
+  zone: string | null;
+  description: string;
+  photo: boolean;
+  statut: 'a_traiter' | 'traite';
+  cree_par: string | null;
+  cree_le: string;
+}
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -275,6 +303,63 @@ export const api = {
   securiteSst: (code: string | null, jeton: string | null) =>
     rpc<ContactSst[]>('securite_sst', { p_code: code, p_jeton: jeton }),
   accesSecurite: (jeton: string) => rpc<boolean>('acces_securite', { p_jeton: jeton }),
+
+  // Visites sécurité (supabase/maj-visites-securite.sql).
+  visitesPlanning: (jeton: string | null, code: string | null) =>
+    rpc<VisiteSecurite[]>('visites_planning', { p_jeton: jeton, p_code: code }),
+  visiteInscrire: (
+    visite: string,
+    role: RoleVisite,
+    nom: string,
+    moi: boolean,
+    jeton: string | null,
+    code: string | null,
+  ) =>
+    rpc<null>('visite_inscrire', {
+      p_visite: visite,
+      p_role: role,
+      p_nom: nom,
+      p_moi: moi,
+      p_jeton: jeton,
+      p_code: code,
+    }),
+  visiteDesinscrire: (inscription: string, jeton: string | null, code: string | null) =>
+    rpc<null>('visite_desinscrire', { p_inscription: inscription, p_jeton: jeton, p_code: code }),
+  visiteEcarts: (visite: string, jeton: string | null, code: string | null) =>
+    rpc<EcartVisite[]>('visite_secu_ecarts_liste', {
+      p_visite: visite,
+      p_jeton: jeton,
+      p_code: code,
+    }),
+  visiteEcartPhoto: (ecart: string, jeton: string | null, code: string | null) =>
+    rpc<string | null>('visite_ecart_photo', { p_ecart: ecart, p_jeton: jeton, p_code: code }),
+  visiteEcartAjouter: (
+    e: { visite: string; zone: string; description: string; photo: string | null; par: string },
+    jeton: string | null,
+    code: string | null,
+  ) =>
+    rpc<number>('visite_ecart_ajouter', {
+      p_visite: e.visite,
+      p_zone: e.zone,
+      p_description: e.description,
+      p_photo: e.photo,
+      p_par: e.par,
+      p_jeton: jeton,
+      p_code: code,
+    }),
+  visiteEcartModifier: (
+    ecart: string,
+    m: { statut?: 'a_traiter' | 'traite'; supprimer?: boolean },
+    jeton: string | null,
+    code: string | null,
+  ) =>
+    rpc<null>('visite_ecart_modifier', {
+      p_ecart: ecart,
+      p_statut: m.statut ?? null,
+      p_supprimer: m.supprimer ?? false,
+      p_jeton: jeton,
+      p_code: code,
+    }),
 
   // Évacuation : recensement au point de rassemblement (supabase/maj-evacuation.sql).
   rassemblementEtat: () => rpc<EtatRassemblement>('rassemblement_etat', {}),

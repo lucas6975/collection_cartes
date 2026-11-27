@@ -25,7 +25,7 @@ export function SecuriteShell() {
         pathname === '/securite' ||
         pathname === '/remontees' ||
         pathname === '/securite/eps-recues' ||
-        ['/securite/accident', '/securite/sst'].includes(pathname),
+        ['/securite/accident', '/securite/sst', '/securite/visites'].includes(pathname),
     },
     { to: '/securite/urgences', label: 'Urgences', icon: Phone },
     { to: '/securite/remontee', label: 'Remontée', icon: TriangleAlert },
