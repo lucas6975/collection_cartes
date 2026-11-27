@@ -400,6 +400,72 @@
     opacity: 1;
   }
 }
+.sc-appui {
+  animation: sc-appui 0.55s ease-in infinite;
+}
+@keyframes sc-appui {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  45% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+}
+.sc-impact {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sc-impact 0.55s ease-out infinite;
+}
+@keyframes sc-impact {
+  0%,
+  55% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.sc-radio {
+  animation: sc-radio 1.2s ease-out infinite;
+}
+@keyframes sc-radio {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+}
+.sc-alerte {
+  transform-box: fill-box;
+  transform-origin: 50% 60%;
+  animation: sc-alerte 1.3s ease-out infinite;
+}
+@keyframes sc-alerte {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
 .sc-picto {
   opacity: 0;
   animation: sc-picto 2.8s ease-out infinite;
@@ -478,6 +544,10 @@
 @media (prefers-reduced-motion: reduce) {
   .sc-feu,
   .sc-picto,
+  .sc-appui,
+  .sc-impact,
+  .sc-radio,
+  .sc-alerte,
   .sc-bulle,
   .sc-point,
   .sc-coche-l,

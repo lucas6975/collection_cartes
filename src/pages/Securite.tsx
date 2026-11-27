@@ -389,9 +389,9 @@ export const LOGO: Record<Onglet, string> = {
 /** decale : la scène commence plus à droite (personnage à gauche dans l'image d'origine). */
 const FOND: Partial<Record<Onglet, { image: string; position: string; decale?: string }>> = {
   accident: { image: 'securite/fond-accident.webp', position: '70% 30%' },
-  sst: { image: 'securite/fond-sst.webp', position: '75% 35%' },
-  remontee: { image: 'securite/fond-risque.webp', position: '85% 60%' },
-  urgences: { image: 'securite/fond-urgences.webp', position: '50% 50%' },
+  sst: { image: 'securite/fond-sst.webp', position: '50% 50%', decale: '52%' },
+  remontee: { image: 'securite/fond-risque.webp', position: '50% 50%', decale: '30%' },
+  urgences: { image: 'securite/fond-urgences.webp', position: '50% 50%', decale: '47%' },
   evacuation: { image: 'securite/fond-evacuation.webp', position: '50% 35%', decale: '30%' },
   visites: { image: 'securite/fond-visites.webp', position: '50% 50%', decale: '30%' },
   eps: { image: 'securite/fond-eps.webp', position: '50% 50%', decale: '30%' },
@@ -437,20 +437,48 @@ function AnimCarte({ id }: { id: Onglet }) {
     );
   if (id === 'sst')
     return (
-      <svg
-        viewBox="0 0 300 60"
-        className="sec-pouls pointer-events-none absolute right-0 bottom-2 w-[62%]"
-        aria-hidden
-      >
-        <path
-          d="M0 34 H90 L104 34 L114 10 L126 54 L136 22 L144 34 H300"
-          fill="none"
-          stroke={c}
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <>
+        <Calque largeur="48%" l={1188} h={880}>
+          {/* Massage cardiaque : appuis au rythme de 110 par minute sur la poitrine. */}
+          {[0, 1].map((i) => (
+            <path
+              key={i}
+              d={`M555 ${640 + i * 40} l45 30 l45 -30`}
+              fill="none"
+              stroke="#FFFFFF"
+              strokeWidth="14"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="sc-appui"
+              style={{ animationDelay: `${i * 0.08}s` }}
+            />
+          ))}
+          <ellipse
+            cx="600"
+            cy="815"
+            rx="90"
+            ry="34"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="10"
+            className="sc-impact"
+          />
+        </Calque>
+        <svg
+          viewBox="0 0 300 60"
+          className="sec-pouls pointer-events-none absolute right-0 bottom-2 w-[62%]"
+          aria-hidden
+        >
+          <path
+            d="M0 34 H90 L104 34 L114 10 L126 54 L136 22 L144 34 H300"
+            fill="none"
+            stroke={c}
+            strokeWidth="4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </>
     );
   if (id === 'eps')
     return (
@@ -564,26 +592,74 @@ function AnimCarte({ id }: { id: Onglet }) {
     );
   if (id === 'urgences')
     return (
-      <Calque largeur="100%" l={900} h={362}>
-        {/* L'écran SOS est dessiné dans l'image ; ici, l'onde d'appel autour du bouton. */}
-        {[0, 0.8].map((d) => (
-          <circle
-            key={d}
-            cx="660"
-            cy="262"
-            r="40"
+      <Calque largeur="53%" l={855} h={680}>
+        {/* Gyrophares de l'ambulance. */}
+        <circle
+          cx="705"
+          cy="88"
+          r="38"
+          fill="#3B82F6"
+          className="sc-gyro-b"
+          filter="url(#sc-flou)"
+        />
+        <circle
+          cx="775"
+          cy="88"
+          r="38"
+          fill="#EF4444"
+          className="sc-gyro-r"
+          filter="url(#sc-flou)"
+        />
+        <defs>
+          <filter id="sc-flou">
+            <feGaussianBlur stdDeviation="10" />
+          </filter>
+        </defs>
+        {/* Ondes radio du talkie-walkie. */}
+        {[40, 75, 110].map((r, i) => (
+          <path
+            key={r}
+            d={`M${655 + r * 0.26} ${160 - r * 0.97} A${r} ${r} 0 0 1 ${655 + r * 0.97} ${160 - r * 0.26}`}
             fill="none"
             stroke="#FFFFFF"
-            strokeWidth="6"
-            className="sc-sos-onde"
-            style={{ animationDelay: `${d}s` }}
+            strokeWidth="12"
+            strokeLinecap="round"
+            className="sc-radio"
+            style={{ animationDelay: `${i * 0.25}s` }}
           />
         ))}
       </Calque>
     );
   if (id === 'remontee')
     return (
-      <span className="sc-bande pointer-events-none absolute inset-x-0 bottom-0 h-2" aria-hidden />
+      <>
+        <Calque largeur="70%" l={1099} h={590}>
+          {/* Le panneau danger clignote et l'alerte rayonne. */}
+          <path
+            d="M915 20 L990 150 L840 150 Z"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="10"
+            strokeLinejoin="round"
+            className="sc-alerte"
+          />
+          {['M1005 45 l30 -22', 'M1012 82 l38 -4', 'M992 20 l12 -30'].map((d, i) => (
+            <path
+              key={d}
+              d={d}
+              stroke="#FF3B3B"
+              strokeWidth="12"
+              strokeLinecap="round"
+              className="sc-point"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            />
+          ))}
+        </Calque>
+        <span
+          className="sc-bande pointer-events-none absolute inset-x-0 bottom-0 h-2"
+          aria-hidden
+        />
+      </>
     );
   return (
     <span className="pointer-events-none absolute top-1/2 right-16 size-0" aria-hidden>
@@ -626,6 +702,13 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
                 style={{
                   objectPosition: f.position,
                   width: f.decale ? `calc(100% - ${f.decale})` : '100%',
+                  // Fondu à gauche : la scène se fond dans la couleur de la carte.
+                  maskImage: f.decale
+                    ? 'linear-gradient(90deg, transparent 0%, #000 38%)'
+                    : undefined,
+                  WebkitMaskImage: f.decale
+                    ? 'linear-gradient(90deg, transparent 0%, #000 38%)'
+                    : undefined,
                 }}
               />
             ) : (
