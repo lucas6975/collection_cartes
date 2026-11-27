@@ -17,7 +17,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import { ChargementUlysse } from '../components/ui/vivant';
 import { Button, cx } from '../components/ui/primitives';
@@ -73,8 +73,8 @@ function Bandeau({
   eyebrow: string;
   titre: string;
   texte?: string;
-  decor?: React.ReactNode;
-  children?: React.ReactNode;
+  decor?: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <section
@@ -391,9 +391,38 @@ const FOND: Partial<Record<Onglet, { image: string; position: string; decale?: s
   accident: { image: 'securite/fond-accident.webp', position: '70% 30%' },
   sst: { image: 'securite/fond-sst.webp', position: '75% 35%' },
   remontee: { image: 'securite/fond-risque.webp', position: '85% 60%' },
-  urgences: { image: 'securite/fond-urgences.webp', position: '70% 50%' },
+  urgences: { image: 'securite/fond-urgences.webp', position: '50% 50%' },
   evacuation: { image: 'securite/fond-evacuation.webp', position: '50% 35%', decale: '30%' },
+  visites: { image: 'securite/fond-visites.webp', position: '50% 50%', decale: '30%' },
 };
+
+/**
+ * Calque aligné sur l'illustration de fond (même cadrage qu'object-cover centré) : on dessine
+ * dans les coordonnées de l'image d'origine (l × h), au-dessus du dégradé de la carte.
+ */
+function Calque({
+  largeur,
+  l,
+  h,
+  children,
+}: {
+  largeur: string;
+  l: number;
+  h: number;
+  children: ReactNode;
+}) {
+  return (
+    <span
+      className="pointer-events-none absolute inset-y-0 right-0"
+      style={{ width: largeur }}
+      aria-hidden
+    >
+      <svg viewBox={`0 0 ${l} ${h}`} preserveAspectRatio="xMidYMid slice" className="size-full">
+        {children}
+      </svg>
+    </span>
+  );
+}
 
 /** Petite animation propre à chaque carte. */
 function AnimCarte({ id }: { id: Onglet }) {
@@ -470,53 +499,76 @@ function AnimCarte({ id }: { id: Onglet }) {
     );
   if (id === 'visites')
     return (
-      <svg
-        viewBox="0 0 110 110"
-        className="pointer-events-none absolute right-[96px] bottom-2 w-[96px]"
-        aria-hidden
-      >
-        <g transform="rotate(-8 50 58)">
-          <rect
-            x="18"
-            y="18"
-            width="64"
-            height="84"
-            rx="8"
-            fill="#FFFFFF"
-            stroke="#713F12"
-            strokeWidth="3"
-          />
-          <rect x="36" y="12" width="28" height="12" rx="4" fill="#0F172A" />
-          {[40, 60, 80].map((y, i) => (
-            <g key={y}>
-              <path
-                d={`M28 ${y} l5 5 l9 -10`}
-                fill="none"
-                stroke="#16A34A"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="sc-coche"
-                style={{ animationDelay: `${i * 0.6}s` }}
-              />
-              <rect x="48" y={y - 2} width="24" height="5" rx="2.5" fill="#CBD5E1" />
-            </g>
-          ))}
-        </g>
-        {/* Loupe qui inspecte la check-list. */}
-        <g className="sc-loupe">
+      <Calque largeur="70%" l={1672} h={941}>
+        {/* Les pictogrammes EPI du panneau s'allument l'un après l'autre. */}
+        {[
+          [1110, 160],
+          [1263, 160],
+          [1410, 160],
+          [1120, 345],
+        ].map(([x, y], i) => (
           <circle
-            cx="78"
-            cy="44"
-            r="13"
-            fill="#FEF9C3"
-            fillOpacity="0.55"
-            stroke="#0F172A"
-            strokeWidth="4"
+            key={x + y}
+            cx={x}
+            cy={y}
+            r="70"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="12"
+            className="sc-picto"
+            style={{ animationDelay: `${i * 0.7}s` }}
           />
-          <path d="M87 54 L100 68" stroke="#0F172A" strokeWidth="6" strokeLinecap="round" />
+        ))}
+        <path
+          d="M1265 395 L1335 275 L1405 395 Z"
+          fill="#FACC15"
+          className="sc-danger"
+          stroke="#FFFFFF"
+          strokeWidth="10"
+          strokeLinejoin="round"
+        />
+        {/* Ulysse coche la check-list de la visite. */}
+        {[0, 1].map((i) => (
+          <path
+            key={i}
+            d={`M790 ${585 + i * 70} l22 22 l40 -44`}
+            fill="none"
+            stroke="#4ADE80"
+            strokeWidth="16"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="sc-coche-l"
+            style={{ animationDelay: `${i * 0.6}s` }}
+          />
+        ))}
+      </Calque>
+    );
+  if (id === 'urgences')
+    return (
+      <Calque largeur="100%" l={900} h={362}>
+        {/* L'écran du téléphone devient un écran d'appel d'urgence. */}
+        <rect x="622" y="10" width="70" height="18" rx="9" fill="#0F172A" />
+        <text
+          x="712"
+          y="105"
+          textAnchor="middle"
+          fontSize="60"
+          fontWeight="900"
+          fill="#DC2626"
+          fontFamily="system-ui, sans-serif"
+        >
+          SOS
+        </text>
+        <circle cx="716" cy="250" r="40" fill="#DC2626" className="sc-sos-onde" />
+        <circle cx="716" cy="250" r="40" fill="#DC2626" />
+        <g transform="translate(2 -43)">
+          <path
+            d="M694 272c3-3 8-3 10 1l5 9c2 3 1 6-2 8l-4 3c3 7 9 13 16 16l3-4c2-3 5-4 8-2l9 5c4 2 4 7 1 10l-5 5c-4 4-10 5-15 3-17-7-30-20-37-37-2-5-1-11 3-15z"
+            fill="#FFFFFF"
+            className="sc-sonne"
+          />
         </g>
-      </svg>
+      </Calque>
     );
   if (id === 'remontee')
     return (

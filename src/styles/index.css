@@ -345,6 +345,86 @@
     opacity: 0;
   }
 }
+.sc-coche-l {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: sc-coche-l 2.4s ease-out infinite;
+}
+@keyframes sc-coche-l {
+  0%,
+  8% {
+    stroke-dashoffset: 100;
+  }
+  25%,
+  85% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 100;
+  }
+}
+.sc-picto {
+  opacity: 0;
+  animation: sc-picto 2.8s ease-out infinite;
+}
+@keyframes sc-picto {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  35%,
+  100% {
+    opacity: 0;
+  }
+}
+.sc-danger {
+  animation: sc-danger 1.4s ease-in-out infinite;
+}
+@keyframes sc-danger {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+.sc-sos-onde {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sc-sos 1.6s ease-out infinite;
+}
+@keyframes sc-sos {
+  from {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+.sc-sonne {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sc-sonne 1.6s ease-in-out infinite;
+}
+@keyframes sc-sonne {
+  0%,
+  40%,
+  100% {
+    transform: rotate(0);
+  }
+  10%,
+  30% {
+    transform: rotate(-14deg);
+  }
+  20% {
+    transform: rotate(14deg);
+  }
+}
 .sc-flotte {
   transform-origin: 50% 100%;
   animation: sc-flotte 2.6s ease-in-out infinite;
@@ -360,6 +440,11 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .sc-feu,
+  .sc-picto,
+  .sc-coche-l,
+  .sc-danger,
+  .sc-sos-onde,
+  .sc-sonne,
   .sc-lueur,
   .sc-etincelle,
   .sc-jet,
