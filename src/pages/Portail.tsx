@@ -18,9 +18,11 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { BanniereEvacuation } from '../components/BanniereEvacuation';
+import { CardFace } from '../components/cards/GameCard';
+import { CARDS } from '../content/cards';
 import { useIdentite } from '../data/identite';
 
 const BASE = import.meta.env.BASE_URL;
@@ -140,10 +142,99 @@ function Carte({
   );
 }
 
+/** Vraies cartes du jeu autour d'Ulysse : [id, centre x, centre y, largeur (px de l'image), rotation]. */
+const CARTES_SCENE: [string, number, number, number, number][] = [
+  ['sst', 760, 96, 118, -14],
+  ['chaussures', 888, 300, 128, 12],
+  ['extincteur-co2', 950, 585, 118, -8],
+  ['evacuation', 262, 452, 104, -12],
+];
+const L_IMG = 976;
+const H_IMG = 660;
+const LARGEUR_CARTE = 132; // largeur de rendu d'une carte « sm », ensuite réduite
+
+function CarteDuJeu({
+  id,
+  x,
+  y,
+  l,
+  rot,
+  echelle,
+  flotte,
+}: {
+  id: string;
+  x: number;
+  y: number;
+  l: number;
+  rot: number;
+  echelle: number;
+  flotte?: boolean;
+}) {
+  const carte = CARDS.find((c) => c.id === id);
+  if (!carte || !echelle) return null;
+  const k = (l * echelle) / LARGEUR_CARTE;
+  return (
+    <span
+      className={`absolute ${flotte ? 'pt-flotte' : ''}`}
+      style={{ left: `${(x / L_IMG) * 100}%`, top: `${(y / H_IMG) * 100}%` }}
+    >
+      <span
+        className="block"
+        style={{
+          width: LARGEUR_CARTE,
+          height: (LARGEUR_CARTE * 7) / 5,
+          transform: `translate(-50%, -50%) rotate(${rot}deg) scale(${k})`,
+          filter: flotte ? 'drop-shadow(0 0 10px rgba(90,162,255,.9)) blur(0.4px)' : undefined,
+          opacity: flotte ? 0.92 : 1,
+        }}
+      >
+        <CardFace card={carte} total={CARDS.length} size="sm" />
+      </span>
+    </span>
+  );
+}
+
+/** Ulysse tient la vraie carte « Ulysse, gardien de la Team », entouré de vraies cartes du jeu. */
+function SceneTeam() {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [echelle, setEchelle] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setEchelle(el.clientWidth / L_IMG));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <span
+      ref={ref}
+      className="absolute top-0 left-1/2 h-full -translate-x-1/2"
+      style={{ aspectRatio: `${L_IMG} / ${H_IMG}` }}
+    >
+      <img src={`${BASE}portail/team.webp`} alt="" className="absolute inset-0 size-full" />
+      {CARTES_SCENE.map(([id, x, y, l, rot]) => (
+        <CarteDuJeu key={id} id={id} x={x} y={y} l={l} rot={rot} echelle={echelle} flotte />
+      ))}
+      <CarteDuJeu id="ulysse" x={742} y={250} l={150} rot={13} echelle={echelle} />
+      {/* Les doigts d'Ulysse passent devant la carte : il la tient vraiment. */}
+      <img
+        src={`${BASE}portail/main.webp`}
+        alt=""
+        className="absolute"
+        style={{
+          left: `${(570 / L_IMG) * 100}%`,
+          top: `${(300 / H_IMG) * 100}%`,
+          width: `${(190 / L_IMG) * 100}%`,
+        }}
+      />
+    </span>
+  );
+}
+
 export function Portail() {
   const { identite } = useIdentite();
   return (
-    <div className="min-h-dvh bg-[#0E2A5C]">
+    <div className="min-h-dvh bg-[#F4F6FA]">
       <BanniereEvacuation />
       <div className="mx-auto max-w-md px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-8">
         <header className="mb-4 flex items-center gap-3">
@@ -153,10 +244,10 @@ export function Portail() {
             className="size-12 rounded-full bg-navy object-cover ring-2 ring-sun"
           />
           <div>
-            <h1 className="font-display text-[24px] leading-tight font-extrabold text-white">
+            <h1 className="font-display text-[24px] leading-tight font-extrabold text-navy-950">
               Bonjour {identite?.prenom ?? ''} 👋
             </h1>
-            <p className="text-sm text-white/70">Où veux-tu aller ?</p>
+            <p className="text-sm text-muted">Où veux-tu aller ?</p>
           </div>
         </header>
 
@@ -173,19 +264,7 @@ export function Portail() {
             </>
           }
           texte="Ta collection, tes packs, le calendrier et la coalition."
-          image={
-            <>
-              <img
-                src={`${BASE}portail/team.webp`}
-                alt=""
-                className="absolute inset-0 size-full object-cover"
-              />
-              {/* Reflet qui passe sur la carte tenue par Ulysse. */}
-              <span className="pt-reflet absolute top-[20%] left-[67%] h-[36%] w-[15%] rotate-[8deg] overflow-hidden rounded-md">
-                <span className="absolute inset-y-0 -left-full w-1/2 bg-gradient-to-r from-transparent via-white/60 to-transparent" />
-              </span>
-            </>
-          }
+          image={<SceneTeam />}
         >
           <Puces
             grille
