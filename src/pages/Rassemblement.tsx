@@ -2,7 +2,7 @@
 // l'appli (visiteurs, prestataires…). Pour un inscrit, le nom est déjà rempli : un seul bouton.
 import { Camera, CheckCircle2, MapPin, ShieldAlert } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ScannerQR } from '../components/ScannerQR';
 import { cx } from '../components/ui/primitives';
 import { useAccesSecurite } from '../data/accesSecurite';
@@ -56,7 +56,7 @@ export function Rassemblement() {
   };
   const complet = prenom.trim() && nom.trim() && statut;
 
-  const valider = async () => {
+  const valider = async (lieuScanne: string | null = lieu) => {
     if (!etat?.id || !complet) return;
     setEnvoi(true);
     setErreur(null);
@@ -68,7 +68,7 @@ export function Rassemblement() {
         societe: statut === 'Salarié IMECA' ? '' : societe.trim(),
         appareil: identifiantAppareil(),
         jeton: identite?.jeton ?? null,
-        lieu,
+        lieu: lieuScanne,
         code: codeAdmin,
       });
       const v = { evacuation: etat.id, heure: r.heure, nom: `${prenom.trim()} ${nom.trim()}` };
@@ -85,6 +85,15 @@ export function Rassemblement() {
       setEnvoi(false);
     }
   };
+
+  // Un inscrit qui a scanné le QR (appareil photo ou scanner de l'appli) est compté tout de
+  // suite : le scan suffit, pas de deuxième bouton à toucher.
+  const auto = useRef(false);
+  useEffect(() => {
+    if (auto.current || !inscrit || !lieu || !etat?.active || deja || envoi) return;
+    auto.current = true;
+    void valider(lieu);
+  });
 
   return (
     <div className="flex min-h-dvh flex-col bg-[#F4F6FA] px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-10">
@@ -182,8 +191,14 @@ export function Rassemblement() {
             onCode={(texte) => {
               const c = codeLieuDe(texte);
               setScanner(false);
-              if (c) setLieu(c);
-              else setMauvaisQr(true);
+              if (c) {
+                setLieu(c);
+                // Visiteur sans l'appli : il remplit ensuite son nom. Inscrit : compté tout de suite.
+                if (inscrit) {
+                  auto.current = true;
+                  void valider(c);
+                }
+              } else setMauvaisQr(true);
             }}
             onFermer={() => setScanner(false)}
           />
