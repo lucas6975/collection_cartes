@@ -496,6 +496,19 @@
     translate: 0 -3px;
   }
 }
+.podium-halo {
+  animation: podium-halo 1.8s ease-in-out infinite alternate;
+}
+@keyframes podium-halo {
+  from {
+    opacity: 0.4;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
 .podium-rayons {
   animation: podium-rayons 14s linear infinite;
 }
@@ -517,7 +530,7 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(240px) rotate(540deg);
+    transform: translateY(300px) rotate(540deg);
     opacity: 0;
   }
 }
@@ -659,6 +672,7 @@
   .sc-picto,
   .pt-flotte,
   .podium-rayons,
+  .podium-halo,
   .podium-confetti,
   .podium-reflet,
   .pt-etincelle,

@@ -1,5 +1,6 @@
-// Vrai podium animé du classement : les marches montent (3ᵉ, 2ᵉ puis 1ᵉʳ), chaque joueur atterrit
-// sur sa marche avec son avatar et son nom, le 1ᵉʳ reçoit une couronne, des rayons et des confettis.
+// Podium animé du classement : une petite scène avec un sol, trois marches (or, argent, bronze)
+// qui montent l'une après l'autre, chaque joueur qui atterrit sur sa marche avec son avatar, son
+// nom et son score ; le 1ᵉʳ reçoit une couronne, un halo et des confettis.
 import { Crown } from 'lucide-react';
 import { motion } from 'motion/react';
 import { avatarDe, type LigneClassement } from '../../data/classement';
@@ -8,42 +9,41 @@ import { Avatar, cx } from '../ui/primitives';
 const STYLE = [
   {
     // 1ᵉʳ : or
-    hauteur: 118,
-    dessus: 'linear-gradient(180deg,#FFE58A,#F5C542)',
-    face: 'linear-gradient(180deg,#F5C542 0%,#D69E16 60%,#B07D0B 100%)',
-    cote: '#9A6C06',
-    anneau: '#F5C542',
-    texte: '#5A3F00',
-    avatar: 64,
+    hauteur: 92,
+    marche: 'linear-gradient(180deg,#FFD84D 0%,#F5B90F 55%,#D99A06 100%)',
+    liseré: '#FFF1A8',
+    chiffre: '#7A5200',
+    anneau: 'linear-gradient(135deg,#FFF3B0,#F5C542 45%,#C98B05)',
+    pastille: 'bg-[#F5C542] text-[#4A3300]',
+    avatar: 62,
   },
   {
     // 2ᵉ : argent
-    hauteur: 86,
-    dessus: 'linear-gradient(180deg,#F4F7FB,#CBD5E1)',
-    face: 'linear-gradient(180deg,#D7DEE8 0%,#A9B6C8 60%,#8695AA 100%)',
-    cote: '#6E7D93',
-    anneau: '#CBD5E1',
-    texte: '#334155',
-    avatar: 52,
+    hauteur: 68,
+    marche: 'linear-gradient(180deg,#F1F5F9 0%,#CBD5E1 55%,#A3B1C4 100%)',
+    liseré: '#FFFFFF',
+    chiffre: '#475569',
+    anneau: 'linear-gradient(135deg,#FFFFFF,#CBD5E1 45%,#8A99AE)',
+    pastille: 'bg-[#E2E8F0] text-[#334155]',
+    avatar: 50,
   },
   {
     // 3ᵉ : bronze
-    hauteur: 64,
-    dessus: 'linear-gradient(180deg,#F6C9A0,#D98E52)',
-    face: 'linear-gradient(180deg,#DE9A62 0%,#B8692F 60%,#93501F 100%)',
-    cote: '#7A4117',
-    anneau: '#E0A06A',
-    texte: '#4A2509',
-    avatar: 48,
+    hauteur: 52,
+    marche: 'linear-gradient(180deg,#F2B27C 0%,#D7844A 55%,#B4632B 100%)',
+    liseré: '#FAD3B0',
+    chiffre: '#5C2E0E',
+    anneau: 'linear-gradient(135deg,#FBD5B0,#D98E52 45%,#9A5222)',
+    pastille: 'bg-[#E9A26C] text-[#4A2509]',
+    avatar: 50,
   },
 ];
 
-// Ordre d'apparition : la 3ᵉ marche, puis la 2ᵉ, puis la 1ʳᵉ (le suspense !).
-const DELAI_MARCHE = [0.55, 0.3, 0.05];
+// Les marches montent : la 3ᵉ, puis la 2ᵉ, puis la 1ʳᵉ (le suspense !).
+const DELAI = [0.6, 0.35, 0.1];
+const CONFETTIS = ['#F5C542', '#E5384A', '#60A5FA', '#34D399', '#A78BFA', '#FFFFFF'];
 
-const CONFETTIS = ['#F5C542', '#E5384A', '#2563A6', '#13896F', '#6A4FB3', '#FFFFFF'];
-
-function Marche({
+function Place({
   l,
   place,
   valeur,
@@ -55,100 +55,96 @@ function Marche({
   unite: string;
 }) {
   const s = STYLE[place];
-  const d = DELAI_MARCHE[place];
+  const d = DELAI[place];
   const premier = place === 0;
+  const nom = l.moi ? 'Toi' : `${l.prenom} ${l.nom}`.trim();
   return (
-    <div className="relative flex w-1/3 flex-col items-center">
-      {/* Le joueur atterrit sur sa marche. */}
+    <div className={cx('flex min-w-0 flex-col items-center', premier ? 'flex-[1.25]' : 'flex-1')}>
+      {/* Le joueur atterrit au-dessus de sa marche. */}
       <motion.div
-        className="relative z-10 flex w-full flex-col items-center px-1 pb-1.5 text-center"
-        initial={{ opacity: 0, y: -70, scale: 0.6 }}
+        className="flex w-full flex-col items-center px-1 pb-2"
+        initial={{ opacity: 0, y: -50, scale: 0.7 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ delay: d + 0.45, type: 'spring', stiffness: 380, damping: 14 }}
+        transition={{ delay: d + 0.4, type: 'spring', stiffness: 360, damping: 15 }}
       >
-        {premier && (
-          <motion.span
-            className="absolute -top-6 left-1/2 -translate-x-1/2 text-[#F5C542] drop-shadow-[0_2px_4px_rgba(154,108,6,.6)]"
-            initial={{ y: -20, opacity: 0, rotate: -25 }}
-            animate={{ y: 0, opacity: 1, rotate: [-8, 8, -8] }}
-            transition={{
-              y: { delay: d + 0.9, type: 'spring', stiffness: 400, damping: 12 },
-              opacity: { delay: d + 0.9 },
-              rotate: { delay: d + 1.1, duration: 2.4, repeat: Infinity, ease: 'easeInOut' },
-            }}
-          >
-            <Crown size={28} fill="#F5C542" strokeWidth={2.2} />
-          </motion.span>
-        )}
-        <div
-          className="rounded-full p-[3px]"
-          style={{
-            background: `conic-gradient(${s.anneau}, #FFFFFF, ${s.anneau}, ${s.cote}, ${s.anneau})`,
-            boxShadow: premier ? '0 0 18px 4px rgba(245,197,66,.55)' : '0 4px 10px rgba(0,0,0,.18)',
-          }}
-        >
-          <div className="rounded-full bg-white p-[2px]">
-            <Avatar user={avatarDe(l)} size={s.avatar} />
-          </div>
-        </div>
-        <p
-          className={cx(
-            'mt-1.5 w-full truncate font-display font-extrabold text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.6)]',
-            premier ? 'text-[14px]' : 'text-[12.5px]',
+        <div className="relative">
+          {premier && (
+            <motion.span
+              className="absolute -top-[22px] left-1/2 -ml-[13px] text-[#F5C542] drop-shadow-[0_2px_3px_rgba(0,0,0,.35)]"
+              initial={{ y: -14, opacity: 0 }}
+              animate={{ y: 0, opacity: 1, rotate: [-7, 7, -7] }}
+              transition={{
+                y: { delay: d + 0.85, type: 'spring', stiffness: 420, damping: 12 },
+                opacity: { delay: d + 0.85 },
+                rotate: { delay: d + 1, duration: 2.6, repeat: Infinity, ease: 'easeInOut' },
+              }}
+            >
+              <Crown size={26} fill="#F5C542" strokeWidth={2} />
+            </motion.span>
           )}
-        >
-          {l.moi ? 'Toi' : l.prenom}
-        </p>
-        {!l.moi && (
-          <p className="-mt-0.5 w-full truncate text-[10.5px] font-semibold text-white/75 drop-shadow-[0_1px_3px_rgba(0,0,0,.6)]">
-            {l.nom}
-          </p>
-        )}
-      </motion.div>
-
-      {/* La marche, en relief : dessus, face avant avec le numéro, ombre du côté. */}
-      <motion.div
-        className="relative w-full origin-bottom"
-        style={{ height: s.hauteur }}
-        initial={{ scaleY: 0 }}
-        animate={{ scaleY: 1 }}
-        transition={{ delay: d, type: 'spring', stiffness: 170, damping: 16 }}
-      >
-        <div
-          className="absolute inset-x-0 -top-2.5 h-3 rounded-t-[6px]"
-          style={{ background: s.dessus, transform: 'perspective(120px) rotateX(35deg)' }}
-        />
-        <div
-          className="relative flex size-full flex-col items-center overflow-hidden pt-2"
-          style={{
-            background: s.face,
-            boxShadow: `inset -6px 0 0 ${s.cote}55, inset 0 -8px 14px rgba(0,0,0,.18)`,
-          }}
-        >
+          {premier && (
+            <span className="podium-halo absolute -inset-3 rounded-full bg-[#F5C542]/35 blur-md" />
+          )}
+          <div className="relative rounded-full p-[3px]" style={{ background: s.anneau }}>
+            <div className="rounded-full bg-[#0E2A5C] p-[2px]">
+              <Avatar user={avatarDe(l)} size={s.avatar} />
+            </div>
+          </div>
+          {/* Médaille avec le rang. */}
           <span
-            className="font-display leading-none font-black"
-            style={{
-              color: s.texte,
-              fontSize: premier ? 46 : 36,
-              textShadow: '0 1px 0 rgba(255,255,255,.55)',
-            }}
+            className="absolute -right-1 -bottom-1 grid size-[22px] place-items-center rounded-full border-2 border-[#0E2A5C] font-display text-[11px] font-black"
+            style={{ background: s.marche, color: s.chiffre }}
           >
             {place + 1}
           </span>
-          <span className="mt-1 font-display text-[13px] font-extrabold" style={{ color: s.texte }}>
-            {valeur} <span className="font-sans text-[10px] font-bold opacity-80">{unite}</span>
-          </span>
-          {/* Reflet qui passe sur la marche. */}
-          <span className="podium-reflet absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/45 to-transparent" />
         </div>
+        <p
+          className={cx(
+            'mt-2 w-full truncate text-center font-display leading-tight font-extrabold text-white',
+            premier ? 'text-[14px]' : 'text-[12.5px]',
+          )}
+        >
+          {nom}
+        </p>
+        <span
+          className={cx(
+            'mt-1 rounded-full px-2 py-[2px] text-[11px] leading-none font-extrabold whitespace-nowrap',
+            s.pastille,
+          )}
+        >
+          {valeur} <span className="font-semibold opacity-75">{unite}</span>
+        </span>
+      </motion.div>
+
+      {/* La marche. */}
+      <motion.div
+        className="relative w-full origin-bottom overflow-hidden rounded-t-[12px]"
+        style={{
+          height: s.hauteur,
+          background: s.marche,
+          boxShadow: `inset 0 3px 0 ${s.liseré}, inset 0 -10px 16px rgba(0,0,0,.16)`,
+        }}
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ delay: d, type: 'spring', stiffness: 180, damping: 18 }}
+      >
+        <span
+          className="absolute inset-x-0 top-2 text-center font-display leading-none font-black"
+          style={{
+            color: s.chiffre,
+            fontSize: premier ? 40 : 32,
+            textShadow: '0 1px 0 rgba(255,255,255,.5)',
+          }}
+        >
+          {place + 1}
+        </span>
+        <span className="podium-reflet absolute inset-y-0 -left-1/2 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
       </motion.div>
     </div>
   );
 }
 
-/**
- * Podium des 3 premiers. `top` est déjà trié (1ᵉʳ, 2ᵉ, 3ᵉ) ; `valeur` donne le score affiché.
- */
+/** Podium des 3 premiers. `top` est déjà trié (1ᵉʳ, 2ᵉ, 3ᵉ). */
 export function PodiumAnime({
   top,
   valeur,
@@ -159,37 +155,44 @@ export function PodiumAnime({
   unite: string;
 }) {
   if (top.length < 3) return null;
-  const ordre = [1, 0, 2]; // 2ᵉ à gauche, 1ᵉʳ au centre, 3ᵉ à droite
   return (
-    <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-b from-[#0E2A5C] via-[#173A6B] to-[#2A5596] px-2 pt-10">
-      {/* Rayons de lumière qui tournent derrière le 1ᵉʳ. */}
+    <div
+      className="relative overflow-hidden rounded-[22px] px-3 pt-9"
+      style={{
+        background: 'radial-gradient(120% 90% at 50% 0%, #24508F 0%, #0E2A5C 55%, #0A1F45 100%)',
+      }}
+    >
+      {/* Rayons de lumière derrière le 1ᵉʳ. */}
       <div
-        className="podium-rayons pointer-events-none absolute top-[18%] left-1/2 size-[340px] -translate-x-1/2 -translate-y-1/2 opacity-40"
+        className="podium-rayons pointer-events-none absolute top-[30%] left-1/2 size-[360px] -translate-x-1/2 -translate-y-1/2 opacity-30"
         style={{
           background:
-            'repeating-conic-gradient(rgba(255,229,138,.55) 0deg 10deg, transparent 10deg 24deg)',
-          maskImage: 'radial-gradient(circle, #000 20%, transparent 68%)',
-          WebkitMaskImage: 'radial-gradient(circle, #000 20%, transparent 68%)',
+            'repeating-conic-gradient(rgba(255,229,138,.6) 0deg 8deg, transparent 8deg 22deg)',
+          maskImage: 'radial-gradient(circle, #000 15%, transparent 62%)',
+          WebkitMaskImage: 'radial-gradient(circle, #000 15%, transparent 62%)',
         }}
       />
-      {/* Confettis qui tombent. */}
-      {Array.from({ length: 16 }, (_, i) => (
+      {/* Confettis. */}
+      {Array.from({ length: 14 }, (_, i) => (
         <span
           key={i}
-          className="podium-confetti pointer-events-none absolute top-0 block h-2.5 w-1.5 rounded-[2px]"
+          className="podium-confetti pointer-events-none absolute -top-2 block h-2 w-1.5 rounded-[2px]"
           style={{
-            left: `${6 + ((i * 37) % 88)}%`,
+            left: `${5 + ((i * 41) % 90)}%`,
             background: CONFETTIS[i % CONFETTIS.length],
-            animationDelay: `${1.2 + (i % 8) * 0.35}s`,
-            animationDuration: `${2.6 + (i % 5) * 0.4}s`,
+            animationDelay: `${1.3 + (i % 7) * 0.4}s`,
+            animationDuration: `${2.8 + (i % 4) * 0.45}s`,
           }}
         />
       ))}
-      <div className="relative flex items-end">
-        {ordre.map((p) => (
-          <Marche key={top[p].cle} l={top[p]} place={p} valeur={valeur(top[p])} unite={unite} />
-        ))}
+
+      <div className="relative flex items-end gap-1.5">
+        <Place l={top[1]} place={1} valeur={valeur(top[1])} unite={unite} />
+        <Place l={top[0]} place={0} valeur={valeur(top[0])} unite={unite} />
+        <Place l={top[2]} place={2} valeur={valeur(top[2])} unite={unite} />
       </div>
+      {/* Le sol de la scène. */}
+      <div className="relative -mx-3 h-4 bg-gradient-to-b from-[#071733] to-[#0A1F45] shadow-[0_-6px_14px_rgba(0,0,0,.35)]" />
     </div>
   );
 }
