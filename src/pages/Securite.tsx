@@ -174,8 +174,8 @@ const CARTES: {
 }[] = [
   {
     id: 'accident',
-    titre: 'Accident',
-    sous: 'Quelqu’un est blessé',
+    titre: 'Accident & urgences',
+    sous: '15 · 18 · 112 · 114',
     icone: Siren,
   },
   {
@@ -191,12 +191,6 @@ const CARTES: {
     sous: 'Remontée de situation à risque',
     icone: AlertTriangle,
     image: 'securite-risque.webp',
-  },
-  {
-    id: 'urgences',
-    titre: 'Numéros d’urgence',
-    sous: '15 · 18 · 112 · 114',
-    icone: Phone,
   },
   {
     id: 'eps',
@@ -219,7 +213,7 @@ const CARTES: {
 ];
 
 const TITRES: Record<Onglet, string> = {
-  accident: 'Accident',
+  accident: 'Accident & urgences',
   sst: 'SST',
   remontee: 'Situation à risque',
   urgences: 'Numéros d’urgence',
@@ -248,6 +242,8 @@ export function Securite() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [vue]);
+  // « Numéros d'urgence » est regroupé avec « Accident » (même contenu).
+  if (param === 'urgences') return <Navigate to="/securite/accident" replace />;
   // Anciens liens (notifications) : #/securite?vue=eps → #/securite/eps.
   const ancien = params.get('vue');
   if (!param && ancien && ONGLETS.includes(ancien as Onglet))
