@@ -496,6 +496,23 @@
     translate: 0 -3px;
   }
 }
+.pt-etincelle {
+  opacity: 0;
+  animation: pt-etincelle 1.9s ease-out infinite;
+}
+@keyframes pt-etincelle {
+  0% {
+    opacity: 0;
+    transform: translate(0, 10px) scale(0.4);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, -40px) scale(1.2);
+  }
+}
 .pt-reflet > span {
   animation: pt-reflet 3.5s ease-in-out 1s infinite;
 }
@@ -604,6 +621,7 @@
   .sc-feu,
   .sc-picto,
   .pt-flotte,
+  .pt-etincelle,
   .pt-reflet > span,
   .pt-appui,
   .sc-gyro-fort-r,

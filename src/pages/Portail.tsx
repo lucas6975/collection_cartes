@@ -22,6 +22,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { BanniereEvacuation } from '../components/BanniereEvacuation';
 import { CardFace } from '../components/cards/GameCard';
+import { PackArt } from '../components/cards/Pack';
 import { CARDS } from '../content/cards';
 import { useIdentite } from '../data/identite';
 
@@ -31,18 +32,18 @@ const BASE = import.meta.env.BASE_URL;
 function Puces({
   puces,
   delai,
-  grille,
+  colonne,
 }: {
   puces: [LucideIcon, string, string][];
   delai: number;
-  /** Deux colonnes (comme sur la maquette Team Ulysse). */
-  grille?: boolean;
+  /** Une seule colonne à gauche (laisse la scène visible à droite). */
+  colonne?: boolean;
 }) {
   return (
     <motion.span
       className={
-        grille
-          ? 'absolute bottom-4 left-4 grid w-[64%] grid-cols-2 gap-1.5'
+        colonne
+          ? 'absolute bottom-4 left-4 flex flex-col items-start gap-1.5'
           : 'absolute inset-x-4 bottom-4 flex flex-wrap gap-1.5'
       }
       initial="cache"
@@ -85,6 +86,7 @@ function Carte({
   eyebrow,
   titre,
   texte,
+  degrade,
   children,
   index,
 }: {
@@ -94,7 +96,8 @@ function Carte({
   fond: string;
   eyebrow: string;
   titre: ReactNode;
-  texte: string;
+  texte?: string;
+  degrade?: string;
   children: ReactNode;
   index: number;
 }) {
@@ -106,7 +109,7 @@ function Carte({
     >
       <Link
         to={to}
-        className={`relative mb-4 block aspect-[976/760] overflow-hidden rounded-[26px] border border-[#5AA2FF]/40 text-white shadow-lift transition-transform active:scale-[0.99] ${imageClasse ?? ''}`}
+        className={`relative mb-4 block aspect-[976/840] overflow-hidden rounded-[26px] border border-[#5AA2FF]/40 text-white shadow-lift transition-transform active:scale-[0.99] ${imageClasse ?? ''}`}
         style={{ background: fond }}
       >
         {image}
@@ -115,6 +118,7 @@ function Carte({
           className="absolute inset-0"
           style={{
             background:
+              degrade ??
               'linear-gradient(90deg, rgba(7,18,40,.92) 0%, rgba(7,18,40,.7) 32%, rgba(7,18,40,.15) 58%, transparent 75%)',
           }}
         />
@@ -129,9 +133,11 @@ function Carte({
           <span className="mt-1 block font-display text-[30px] leading-[1.02] font-extrabold drop-shadow-[0_2px_8px_rgba(0,0,0,.5)]">
             {titre}
           </span>
-          <span className="mt-1.5 block max-w-[56%] text-[13px] leading-snug text-white/90">
-            {texte}
-          </span>
+          {texte && (
+            <span className="mt-1.5 block max-w-[56%] text-[13px] leading-snug text-white/90">
+              {texte}
+            </span>
+          )}
         </span>
         <span className="absolute top-3.5 right-3.5 grid size-11 place-items-center rounded-full bg-white text-navy-950 shadow-[0_4px_12px_rgba(0,0,0,.3)]">
           <ArrowRight size={20} />
@@ -142,16 +148,24 @@ function Carte({
   );
 }
 
-/** Vraies cartes du jeu autour d'Ulysse : [id, centre x, centre y, largeur (px de l'image), rotation]. */
-const CARTES_SCENE: [string, number, number, number, number][] = [
-  ['sst', 760, 96, 118, -14],
-  ['chaussures', 888, 300, 128, 12],
-  ['extincteur-co2', 950, 585, 118, -8],
-  ['evacuation', 262, 452, 104, -12],
-];
-const L_IMG = 976;
-const H_IMG = 660;
+// Scène « ouverture de pack » (image 800 × 1024) : Ulysse ouvre un vrai pack du jeu, les vraies
+// cartes en sortent et il brandit la carte légendaire « Ulysse, gardien de la Team ».
+const L_IMG = 800;
+const H_IMG = 1024;
 const LARGEUR_CARTE = 132; // largeur de rendu d'une carte « sm », ensuite réduite
+const LARGEUR_PACK = 300;
+const pc = (v: number, total: number) => `${(v / total) * 100}%`;
+
+/** Cartes qui jaillissent du pack (de l'arrière vers l'avant) : [id, x, y, largeur, rotation]. */
+const CARTES_PACK: [string, number, number, number, number][] = [
+  ['lsr-3-lototo', 575, 380, 92, 12],
+  ['extincteur-co2', 275, 425, 128, -12],
+  ['sst', 390, 398, 124, -2],
+  ['circulation', 495, 447, 132, 6],
+  ['pictogrammes-chimiques', 605, 474, 132, 16],
+  ['casque', 330, 525, 110, -6],
+  ['gants', 470, 548, 105, 4],
+];
 
 function CarteDuJeu({
   id,
@@ -160,7 +174,7 @@ function CarteDuJeu({
   l,
   rot,
   echelle,
-  flotte,
+  lueur,
 }: {
   id: string;
   x: number;
@@ -168,24 +182,20 @@ function CarteDuJeu({
   l: number;
   rot: number;
   echelle: number;
-  flotte?: boolean;
+  lueur?: boolean;
 }) {
   const carte = CARDS.find((c) => c.id === id);
   if (!carte || !echelle) return null;
   const k = (l * echelle) / LARGEUR_CARTE;
   return (
-    <span
-      className={`absolute ${flotte ? 'pt-flotte' : ''}`}
-      style={{ left: `${(x / L_IMG) * 100}%`, top: `${(y / H_IMG) * 100}%` }}
-    >
+    <span className="absolute" style={{ left: pc(x, L_IMG), top: pc(y, H_IMG) }}>
       <span
         className="block"
         style={{
           width: LARGEUR_CARTE,
           height: (LARGEUR_CARTE * 7) / 5,
           transform: `translate(-50%, -50%) rotate(${rot}deg) scale(${k})`,
-          filter: flotte ? 'drop-shadow(0 0 10px rgba(90,162,255,.9)) blur(0.4px)' : undefined,
-          opacity: flotte ? 0.92 : 1,
+          filter: lueur ? 'drop-shadow(0 0 12px rgba(255,214,90,.85))' : undefined,
         }}
       >
         <CardFace card={carte} total={CARDS.length} size="sm" />
@@ -194,7 +204,18 @@ function CarteDuJeu({
   );
 }
 
-/** Ulysse tient la vraie carte « Ulysse, gardien de la Team », entouré de vraies cartes du jeu. */
+/** Découpe d'une main d'Ulysse, posée devant le pack ou la carte : il les tient vraiment. */
+function Main({ src, x, y, l }: { src: string; x: number; y: number; l: number }) {
+  return (
+    <img
+      src={`${BASE}portail/${src}`}
+      alt=""
+      className="absolute"
+      style={{ left: pc(x, L_IMG), top: pc(y, H_IMG), width: pc(l, L_IMG) }}
+    />
+  );
+}
+
 function SceneTeam() {
   const ref = useRef<HTMLSpanElement>(null);
   const [echelle, setEchelle] = useState(0);
@@ -205,28 +226,54 @@ function SceneTeam() {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+  const kPack = (405 * echelle) / LARGEUR_PACK;
   return (
     <span
       ref={ref}
-      className="absolute top-0 left-1/2 h-full -translate-x-1/2"
-      style={{ aspectRatio: `${L_IMG} / ${H_IMG}` }}
+      className="absolute inset-y-0 right-0 overflow-hidden"
+      style={{
+        aspectRatio: `${L_IMG} / ${H_IMG}`,
+        maskImage: 'linear-gradient(90deg, transparent 0%, #000 12%)',
+        WebkitMaskImage: 'linear-gradient(90deg, transparent 0%, #000 12%)',
+      }}
     >
       <img src={`${BASE}portail/team.webp`} alt="" className="absolute inset-0 size-full" />
-      {CARTES_SCENE.map(([id, x, y, l, rot]) => (
-        <CarteDuJeu key={id} id={id} x={x} y={y} l={l} rot={rot} echelle={echelle} flotte />
+      {CARTES_PACK.map(([id, x, y, l, rot]) => (
+        <CarteDuJeu key={id} id={id} x={x} y={y} l={l} rot={rot} echelle={echelle} lueur />
       ))}
-      <CarteDuJeu id="ulysse" x={742} y={250} l={150} rot={13} echelle={echelle} />
-      {/* Les doigts d'Ulysse passent devant la carte : il la tient vraiment. */}
-      <img
-        src={`${BASE}portail/main.webp`}
-        alt=""
-        className="absolute"
-        style={{
-          left: `${(570 / L_IMG) * 100}%`,
-          top: `${(300 / H_IMG) * 100}%`,
-          width: `${(190 / L_IMG) * 100}%`,
-        }}
-      />
+      {/* Étincelles qui sortent du pack. */}
+      {[
+        [300, 330],
+        [450, 300],
+        [560, 330],
+        [380, 470],
+        [640, 420],
+      ].map(([x, y], i) => (
+        <span
+          key={x}
+          className="pt-etincelle absolute size-2 rounded-full bg-[#FFE7A0] shadow-[0_0_8px_3px_rgba(255,214,90,.8)]"
+          style={{ left: pc(x, L_IMG), top: pc(y, H_IMG), animationDelay: `${i * 0.37}s` }}
+        />
+      ))}
+      {/* Le vrai pack du jeu, ouvert (bord déchiré en haut). */}
+      {echelle > 0 && (
+        <span className="absolute" style={{ left: pc(410, L_IMG), top: pc(790, H_IMG) }}>
+          <span
+            className="block"
+            style={{
+              width: LARGEUR_PACK,
+              transform: `translate(-50%, -50%) rotate(4deg) scale(${kPack})`,
+              clipPath:
+                'polygon(0% 4%, 6% 1%, 12% 4.5%, 19% 0.5%, 26% 4%, 33% 1.5%, 40% 5%, 47% 1%, 54% 4%, 61% 0.5%, 68% 4.5%, 75% 1%, 82% 4%, 89% 0.5%, 95% 4%, 100% 2%, 100% 100%, 0% 100%)',
+            }}
+          >
+            <PackArt />
+          </span>
+        </span>
+      )}
+      <Main src="main-gauche.webp" x={40} y={640} l={290} />
+      <CarteDuJeu id="ulysse" x={565} y={195} l={245} rot={6} echelle={echelle} lueur />
+      <Main src="main-droite.webp" x={630} y={100} l={170} />
     </span>
   );
 }
@@ -263,11 +310,11 @@ export function Portail() {
               &amp; défis
             </>
           }
-          texte="Ta collection, tes packs, le calendrier et la coalition."
           image={<SceneTeam />}
+          degrade="linear-gradient(90deg, rgba(7,18,40,.95) 0%, rgba(7,18,40,.8) 25%, rgba(7,18,40,.1) 40%, transparent 50%)"
         >
           <Puces
-            grille
+            colonne
             delai={0.35}
             puces={[
               [PackageOpen, 'Packs', '#1F5AA6'],
