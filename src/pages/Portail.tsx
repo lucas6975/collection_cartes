@@ -211,14 +211,14 @@ function SceneTeam() {
       className="absolute top-0 left-1/2 h-full -translate-x-1/2"
       style={{ aspectRatio: `${L_IMG} / ${H_IMG}` }}
     >
-      <img src={`${BASE}portail/team.webp`} alt="" className="absolute inset-0 size-full" />
+      <img src={`${BASE}portail/team-carte.webp`} alt="" className="absolute inset-0 size-full" />
       {CARTES_SCENE.map(([id, x, y, l, rot]) => (
         <CarteDuJeu key={id} id={id} x={x} y={y} l={l} rot={rot} echelle={echelle} flotte />
       ))}
       <CarteDuJeu id="ulysse" x={742} y={250} l={150} rot={13} echelle={echelle} />
       {/* Les doigts d'Ulysse passent devant la carte : il la tient vraiment. */}
       <img
-        src={`${BASE}portail/main.webp`}
+        src={`${BASE}portail/main-carte.webp`}
         alt=""
         className="absolute"
         style={{

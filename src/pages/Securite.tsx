@@ -689,7 +689,7 @@ function Accueil({ onChoisir }: { onChoisir: (v: Onglet) => void }) {
           >
             {f ? (
               <img
-                src={`${BASE}${f.image}`}
+                src={`${BASE}${f.image}?v=4`}
                 alt=""
                 className="absolute inset-y-0 right-0 h-full object-cover"
                 style={{
