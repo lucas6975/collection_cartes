@@ -96,3 +96,53 @@ export function useClassement() {
   }, [charger]);
   return { lignes, erreur, recharger: charger };
 }
+
+// ── Montées et descentes (comme un classement de foot) ──
+// Le téléphone garde les places de la veille : on compare la place du jour à celle du dernier jour
+// où le classement a été vu. Une flèche verte si on a gagné des places, rouge si on en a perdu.
+
+export interface Photo {
+  jour: string;
+  rangs: Record<string, number>;
+}
+export interface StockRangs {
+  /** Places de référence (un jour précédent). */
+  ref: Photo | null;
+  /** Dernières places vues aujourd'hui. */
+  dernier: Photo | null;
+}
+
+/** Met à jour le stock : au premier passage d'un nouveau jour, les places d'hier deviennent la référence. */
+export function majRangs(
+  stock: StockRangs,
+  jour: string,
+  rangs: Record<string, number>,
+): StockRangs {
+  if (!stock.dernier) return { ref: stock.ref, dernier: { jour, rangs } };
+  if (stock.dernier.jour < jour) return { ref: stock.dernier, dernier: { jour, rangs } };
+  return { ref: stock.ref, dernier: { jour, rangs } };
+}
+
+/** Places gagnées (positif) ou perdues (négatif) depuis la référence ; null si nouveau ou inconnu. */
+export function evolution(ref: Photo | null, cle: string, rang: number): number | null {
+  if (!ref) return 0;
+  const avant = ref.rangs[cle];
+  return avant === undefined ? null : avant - rang;
+}
+
+const cleRangs = (tri: Tri) => `team-ulysse-classement-rangs-${tri}`;
+export function lireRangs(tri: Tri): StockRangs {
+  try {
+    const v = JSON.parse(localStorage.getItem(cleRangs(tri)) ?? 'null') as StockRangs | null;
+    return v && typeof v === 'object' ? v : { ref: null, dernier: null };
+  } catch {
+    return { ref: null, dernier: null };
+  }
+}
+export function ecrireRangs(tri: Tri, stock: StockRangs) {
+  try {
+    localStorage.setItem(cleRangs(tri), JSON.stringify(stock));
+  } catch {
+    /* rien */
+  }
+}

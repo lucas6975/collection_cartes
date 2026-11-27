@@ -1,12 +1,44 @@
 import { ChargementUlysse, UlysseAttend } from '../components/ui/vivant';
 import { ArrowLeft, Repeat } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { Avatar, cx } from '../components/ui/primitives';
 import { CARDS } from '../content/cards';
-import { avatarDe, trier, useClassement, type Tri } from '../data/classement';
+import {
+  avatarDe,
+  ecrireRangs,
+  evolution,
+  lireRangs,
+  majRangs,
+  trier,
+  useClassement,
+  type Tri,
+} from '../data/classement';
+import { aujourdhui } from '../domain/visitesSecurite';
 import { useGame } from '../data/store';
 import { PodiumAnime } from '../components/classement/PodiumAnime';
+
+/** Flèche verte (montée), rouge (descente), tiret (stable), « new » (nouveau venu). */
+function Evolution({ n }: { n: number | null }) {
+  if (n === null)
+    return <span className="mt-0.5 text-[8.5px] font-extrabold text-[#2563A6] uppercase">new</span>;
+  if (n === 0) return <span className="mt-0.5 text-[10px] leading-none text-[#c3ccd8]">–</span>;
+  const monte = n > 0;
+  return (
+    <span
+      className={cx(
+        'mt-0.5 flex items-center text-[10px] leading-none font-extrabold',
+        monte ? 'text-[#16A34A]' : 'text-[#DC2626]',
+      )}
+      aria-label={monte ? `monte de ${n} place(s)` : `descend de ${-n} place(s)`}
+    >
+      <svg width="9" height="7" viewBox="0 0 10 8" aria-hidden>
+        <path d={monte ? 'M5 0 L10 8 L0 8 Z' : 'M0 0 L10 0 L5 8 Z'} fill="currentColor" />
+      </svg>
+      {Math.abs(n)}
+    </span>
+  );
+}
 
 export function Classement() {
   const { lignes, erreur } = useClassement();
@@ -15,6 +47,17 @@ export function Classement() {
   const t = lignes ? trier(lignes, tri) : [];
   const max = Math.max(1, ...t.map((x) => (tri === 'cartes' ? x.cartes : x.echanges)));
   const manque = CARDS.length - progress.cards.length;
+  // Montées / descentes depuis la veille (comme un classement de foot).
+  const rangs = Object.fromEntries(t.map((x) => [x.cle, x.rang]));
+  const vide = !t.length;
+  // Lecture simple (peu de joueurs) ; la référence de la veille ne bouge pas dans la journée.
+  const stock = vide ? null : majRangs(lireRangs(tri), aujourdhui(), rangs);
+  const cleRangs = JSON.stringify(rangs);
+  useEffect(() => {
+    if (cleRangs === '{}') return;
+    const r = JSON.parse(cleRangs) as Record<string, number>;
+    ecrireRangs(tri, majRangs(lireRangs(tri), aujourdhui(), r));
+  }, [tri, cleRangs]);
 
   return (
     <div className="mx-auto max-w-md pb-40">
@@ -88,13 +131,16 @@ export function Classement() {
                     l.moi && 'my-1 rounded-2xl border-0 bg-[#fffaf0]',
                   )}
                 >
-                  <span
-                    className={cx(
-                      'w-6 text-center font-display text-sm font-extrabold',
-                      l.rang === 1 ? 'text-[#d4a017]' : 'text-[#8a97ab]',
-                    )}
-                  >
-                    {l.rang}
+                  <span className="flex w-7 flex-col items-center">
+                    <span
+                      className={cx(
+                        'font-display text-sm leading-none font-extrabold',
+                        l.rang === 1 ? 'text-[#d4a017]' : 'text-[#8a97ab]',
+                      )}
+                    >
+                      {l.rang}
+                    </span>
+                    <Evolution n={stock ? evolution(stock.ref, l.cle, l.rang) : 0} />
                   </span>
                   <Avatar user={avatarDe(l)} size={34} />
                   <div className="min-w-0 flex-1">
