@@ -108,12 +108,16 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
     return () => clearInterval(t);
   }, [charger, enCours]);
 
-  const lancer = async () => {
-    if (!confirm('Lancer une évacuation ? Tout le monde pourra se déclarer présent.')) return;
+  const lancer = async (test: boolean) => {
+    const question = test
+      ? 'Lancer une évacuation TEST ? Seuls Lucas et Vincent reçoivent l’alerte.'
+      : `Lancer une VRAIE évacuation incendie ? L’alerte part sur tous les téléphones abonnés${suivi?.abonnes ? ` (${suivi.abonnes})` : ''}.`;
+    if (!confirm(question)) return;
     setOccupe(true);
     try {
       await api.evacuationDemarrer(
         identite ? `${identite.prenom} ${identite.nom}` : 'Administrateur',
+        test,
         jeton,
         code,
       );
@@ -156,10 +160,25 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
           <button
             type="button"
             disabled={occupe}
-            onClick={() => void lancer()}
-            className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-white text-lg font-extrabold text-[#B91C1C] disabled:opacity-60"
+            onClick={() => void lancer(false)}
+            className="mt-4 flex min-h-14 w-full flex-col items-center justify-center rounded-2xl bg-white px-3 py-2.5 text-[#B91C1C] disabled:opacity-60"
           >
-            <ShieldAlert size={22} /> Lancer une évacuation
+            <span className="flex items-center gap-2 text-lg font-extrabold">
+              <ShieldAlert size={22} /> Vraie évacuation incendie
+            </span>
+            <span className="text-xs font-semibold text-[#7F1D1D]">
+              Alerte sur tous les téléphones
+              {suivi.abonnes ? ` abonnés (${suivi.abonnes})` : ''}
+            </span>
+          </button>
+          <button
+            type="button"
+            disabled={occupe}
+            onClick={() => void lancer(true)}
+            className="mt-2.5 flex min-h-12 w-full flex-col items-center justify-center rounded-2xl border-2 border-white/70 px-3 py-2 text-white disabled:opacity-60"
+          >
+            <span className="font-extrabold">🧪 Évacuation test</span>
+            <span className="text-xs text-white/85">Alerte seulement pour Lucas et Vincent</span>
           </button>
         </section>
 
@@ -183,7 +202,10 @@ export function OngletEvacuation({ code, jeton }: { code: string | null; jeton: 
                     onClick={() => setVue(h.id)}
                     className="flex w-full items-center justify-between gap-2 py-2.5 text-left text-sm"
                   >
-                    <span className="font-semibold text-navy-950">{dateHeure(h.debut)}</span>
+                    <span className="font-semibold text-navy-950">
+                      {h.test ? '🧪 ' : '🚨 '}
+                      {dateHeure(h.debut)}
+                    </span>
                     <span className="text-muted">
                       {h.total} présent{h.total > 1 ? 's' : ''}
                       {h.fin ? ` · ⏱ ${duree(h.debut, h.fin)}` : ' · en cours'} ›
@@ -311,6 +333,7 @@ function Suivi({
         style={{ background: enCours ? COULEUR_EVACUATION.fond : '#334155' }}
       >
         <p className="eyebrow text-white/80">
+          {ev.test ? '🧪 Test · ' : ''}
           {enCours ? '🚨 Évacuation en cours' : '✅ Évacuation terminée'}
         </p>
         <p className="mt-1 text-sm text-white/90">

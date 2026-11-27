@@ -294,8 +294,8 @@ export const api = {
       p_appareil: p.appareil,
       p_jeton: p.jeton ?? null,
     }),
-  evacuationDemarrer: (par: string, jeton: string | null, code: string | null) =>
-    rpc<string>('evacuation_demarrer', { p_par: par, p_jeton: jeton, p_code: code }),
+  evacuationDemarrer: (par: string, test: boolean, jeton: string | null, code: string | null) =>
+    rpc<string>('evacuation_demarrer', { p_par: par, p_test: test, p_jeton: jeton, p_code: code }),
   evacuationTerminer: (id: string, jeton: string | null, code: string | null) =>
     rpc<null>('evacuation_terminer', { p_id: id, p_jeton: jeton, p_code: code }),
   evacuationSuivi: (id: string | null, jeton: string | null, code: string | null) =>
@@ -506,6 +506,8 @@ export interface EtatRassemblement {
   active: boolean;
   id: string | null;
   debut: string | null;
+  /** Évacuation test : seuls Lucas, Vincent et l'administrateur sont alertés. */
+  test?: boolean;
 }
 
 export interface PresentEvacuation {
@@ -528,7 +530,10 @@ export interface SuiviEvacuation {
     fin: string | null;
     lance_par: string | null;
     effectif_liste: number | null;
+    test?: boolean;
   } | null;
+  /** Téléphones abonnés aux notifications (prévenus lors d'une vraie évacuation). */
+  abonnes?: number;
   presents: PresentEvacuation[];
-  historique: { id: string; debut: string; fin: string | null; total: number }[];
+  historique: { id: string; debut: string; fin: string | null; total: number; test?: boolean }[];
 }

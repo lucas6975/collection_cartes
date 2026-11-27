@@ -63,7 +63,7 @@ interface Abonne {
 type Base = SupabaseClient<any, 'public', any>;
 
 /** Envoie un message à des téléphones ; oublie ceux qui n'existent plus. */
-async function envoyerA(db: Base, abonnes: Abonne[], message: string) {
+async function envoyerA(db: Base, abonnes: Abonne[], message: string, ttl = 4 * 3600) {
   let envoyes = 0;
   const expires: string[] = [];
   for (let i = 0; i < abonnes.length; i += 50) {
@@ -73,7 +73,7 @@ async function envoyerA(db: Base, abonnes: Abonne[], message: string) {
         webpush.sendNotification(
           { endpoint: a.endpoint, keys: { p256dh: a.p256dh, auth: a.auth } },
           message,
-          { TTL: 4 * 3600, urgency: 'normal' },
+          { TTL: ttl, urgency: ttl < 3600 ? 'high' : 'normal' },
         ),
       ),
     );
@@ -220,6 +220,60 @@ async function prevenirRemontees(db: Base) {
   return total;
 }
 
+/** Tous les téléphones abonnés aux rappels (vraie évacuation). */
+async function tousLesTelephones(db: Base): Promise<Abonne[]> {
+  const tous: Abonne[] = [];
+  for (let de = 0; ; de += 1000) {
+    const { data } = await db
+      .from('rappels_abonnes')
+      .select('endpoint, p256dh, auth')
+      .range(de, de + 999);
+    tous.push(...((data ?? []) as Abonne[]));
+    if (!data || data.length < 1000) break;
+  }
+  return tous;
+}
+
+/**
+ * Alerte évacuation (table evacuations, supabase/maj-evacuation-alerte.sql), envoyée une seule
+ * fois au lancement : à tous les abonnés pour une vraie évacuation, seulement à Lucas, Vincent et
+ * à l'administrateur pour une évacuation test.
+ */
+async function prevenirEvacuation(db: Base) {
+  const { data: dues, error } = await db
+    .from('evacuations')
+    .select('id, test, debut')
+    .is('notif_envoyee_le', null)
+    .is('fin', null);
+  if (error || !dues?.length) return 0;
+  let total = 0;
+  for (const e of dues as { id: string; test: boolean; debut: string }[]) {
+    // Marquée d'abord : l'alerte ne part jamais deux fois.
+    await db
+      .from('evacuations')
+      .update({ notif_envoyee_le: new Date().toISOString() })
+      .eq('id', e.id);
+    if (Date.now() - Date.parse(e.debut) > 3600_000) continue;
+    const destinataires = await telephonesDestinataires(db);
+    const vus = new Set<string>();
+    const telephones = (
+      e.test ? destinataires : [...destinataires, ...(await tousLesTelephones(db))]
+    ).filter((a) => !vus.has(a.endpoint) && vus.add(a.endpoint));
+    const msg = {
+      title: e.test ? '🧪 TEST · Évacuation incendie' : '🚨 ÉVACUATION EN COURS',
+      body: e.test
+        ? 'Exercice (Lucas et Vincent seulement) : touche ici pour te déclarer présent(e).'
+        : 'Rejoins le point de rassemblement et déclare-toi présent(e). Touche ici.',
+      url: './#/rassemblement',
+      tag: `evacuation-${e.id}`,
+      urgent: true,
+    };
+    // Valable 15 min : un téléphone rallumé des heures après ne reçoit pas une alerte périmée.
+    total += (await envoyerA(db, telephones, JSON.stringify(msg), 15 * 60)).envoyes;
+  }
+  return total;
+}
+
 const NIVEAUX_EPS = ['', 'Réactif', 'Dépendant', 'Indépendant', 'Interdépendant'];
 
 /**
@@ -339,6 +393,10 @@ Deno.serve(async (req) => {
     );
     return repondre({ test: 'nouvel inscrit', envoyes });
   }
+
+  // Évacuation lancée : l'alerte part en priorité (appel dédié juste après le lancement).
+  const evacuation = await prevenirEvacuation(db);
+  if (corps?.evacuation) return repondre({ evacuation });
 
   // Nouvelles inscriptions à annoncer à l'administrateur (appel dédié juste après chacune).
   const inscrits = await prevenirInscrits(db);

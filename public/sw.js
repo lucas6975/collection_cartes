@@ -25,6 +25,14 @@ self.addEventListener('push', (event) => {
       badge: `${base}favicon.png`,
       tag: data.tag || 'team-ulysse',
       data: { url: new URL(data.url || './', base).href },
+      // Évacuation : reste affichée jusqu'à ce qu'on la touche, vibration longue (Android).
+      ...(data.urgent
+        ? {
+            requireInteraction: true,
+            renotify: true,
+            vibrate: [600, 200, 600, 200, 600, 200, 1000],
+          }
+        : {}),
     }),
   );
 });
